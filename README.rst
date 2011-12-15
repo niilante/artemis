@@ -15,7 +15,7 @@ Install
 
 2. Get the source::
 
-    git clone https://github.com/okfn/bibserver
+    git clone https://github.com/cottagelabs/artemis
 
 3. Install the app::
 
@@ -41,13 +41,13 @@ Install commands on a clean installation of Ubuntu_11.10::
     tar -xzvf elasticsearch-0.18.2.tar.gz
     ./elasticsearch-0.18.2/bin/elasticsearch start
 
-    git clone http://bitbucket.org/markmacgillivray/artemis
+    git clone http://github.com/cottagelabs/artemis
     cd artemis
     pip install -e .
     
     python artemis/web.py
     
-You will now find your service running at localhost:5000.
+You will now find your service running at localhost:5004.
 
 
 Running as a service
