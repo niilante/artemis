@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+      <div class="hero-unit clearfix">
+        <div class="span14">
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#navigation">Navigation</a></li>
+<li><a href="#search">Search</a></li>
+<li><a href="#newpart">Add new part</a></li>
+<li><a href="#newassembly">Add new assembly</a></li>
+<li><a href="#parttoassembly">Add part to assembly</a></li>
+</ul>
+
+<h2>Navigation<a name="navigation"></a></h2>
+<p>The navigation bar that appears at the top of each page can be used to navigate the database and select common functions. Alternatively return to the home page at any time by clicking ‘Artemis’ at the top left of the screen.</p>
+
+<h2>Search<a name="search"></a></h2>
+<p>The search function can be accessed from the search bar that appears at the top of all pages or from the search button on the home page. To find a record simply enter search terms in the box. The search function works best with unique identiffiers for example  part or assembly ID. It is possible however to search based on any facet.</p>
+
+<h3>Example</h3>
+<p>Type ‘c8m’ in the search box to return all parts whose name contains ‘c8m’</p>
+
+<h3>Filtering - Faceted Search</h3>
+<p>Once you have completed a search you may wish to refine your results. In order to filter your search results and exclude unwanted results you can use the ‘add facet filters’ function.</p>
+
+<p>In the search view the column to the left of the search results contains a box titled ‘add facet filters’ - simply select the terms that you want to include. Once selected the relevant terms will appear at the top of left column. The relevant term in the ‘add facet filters’ box should also become highlighted.</p>
+
+<p>If any of the terms you chose contain multiple options then select the small ‘+’ symbol next to the filter, this will present the various options available. By clicking on the relevant value you can limit search results to that category.</p>
+
+<p>If there are a large quantity of options you can use the alphanumeric pad that will appear directly below the filter to find the term you are looking for. Additionally you can sort the results to find the term you are looking for using the functions in the bottom row of the box.</p>
+
+<p>To remove a search filter simply click the ‘x’ symbol next to relevant category.</p>
+
+<h3>Example</h3>
+<p>To filter for items that have a specific batch ID select ‘BATCH_ID’ in the ‘add facet filters’ box. You should see that ‘BATCH_ID’ is now highlighted. At the top of the column a menu item ‘+ batch_id’ will appear. Click on the ‘+’ symbol and the available options will expand below. You can filter these options using the alphanumeric pad.</p>
+
+<p>Click on the batch ID number that you are looking for</p>
+
+<p>However, note that facet filtering is only valuable on particular fields. For example, if you facet on a field that is unique across all records, such as the record ID, you will get little benefit - as there will be only 1 result for every value. In this case, you would be better searching for the ID directly, or if you do not know it, searching for other bits of information you have about the record you are looking for.</p>
+
+<h2>Add New Part<a name="newpart"></a></h2>
+<p>To add a new part select the ‘New part’ option in the navigation bar that appears at the top of each page. Alternatively select  ‘New Part’ button on the homepage.</p>
+
+<p>You will be presented with a blank parts record including basic fields common to most parts. Where there is information available corresponding to a field enter the details. For those fields without information leave blank.</p>
+
+<p>Once the fields are updated click ‘save’ to ensure changes are stored.</p>
+
+<p>Default fields include:</p>
+<ul>
+<li>type - This is the type of record either part or assembly</li>
+<li>in_assembly - This is the ID of the assembly which this part is currently assembled</li>
+<li>name - This is the text description of the part. Include any alternative names</li>
+<li>drawing - This is an attachment</li>
+<li>assembled_by - This is the name of the Artemis employee that assembled the assembly</li>
+<li>assembled_date - This is the date that assembly was created. Please enter in the format yyyy-mm-dd hh:mm:ss</li>
+<li>inspected_by - This is the name of the Artemis employee that inspected the part</li>
+<li>inspected_date - This is the date that the part was inspected. Please enter in the format yyyy-mm-dd hh:mm:ss</li>
+<li>assembly_history - This is a list of the assembly IDs of assemblies the part used to belong to.</li>
+<li>location - This is the current location of the part.</li>
+<li>location_history - This is a list of the locations the part has been.</li>
+</ul>
+
+<p>To add a new field select the ‘+’ symbol at the bottom of the table. A new row will appear with two fields. In the left box enter the field name. In the right box enter the field value.</p>
+
+<h2>Add New Assembly<a name="newassembly"></a></h2>
+<p>To add a new assembly select the ‘New assembly’ option in the navigation bar that appears at the top of each page. Alternatively select the  ‘New assembly’ button on the homepage.</p>
+
+<p>You will be presented with a blank assembly record including basic fields common to most parts. Where there is information available corresponding to a field enter the details. For those fields without information leave blank.</p>
+
+<p>Once the fields are updated click ‘save’ to ensure changes are stored.</p>
+
+<p>Default fields include:</p>
+
+<ul>
+<li>type - This is the type of record either part or assembly</li>
+<li>in_assembly - This is the ID of the assembly which this part is currently assembled</li>
+<li>name - This is the text description of the part. Include any alternative names</li>
+<li>drawing - This is an attachment</li>
+<li>assembled_by - This is the name of the Artemis employee that assembled the assembly</li>
+<li>assembled_date - This is the date that assembly was created. Please enter in the format yyyy-mm-dd hh:mm:ss</li>
+<li>inspected_by - This is the name of the Artemis employee that inspected the part</li>
+<li>inspected_date - This is the date that the part was inspected. Please enter in the format yyyy-mm-dd hh:mm:ss</li>
+<li>assembly_history - This is a list of the assembly IDs of assemblies the part used to belong to.</li>
+<li>location - This is the current location of the part.</li>
+<li>location_history - This is a list of the locations the part has been.</li>
+</ul>
+
+<h2>Add part to Assembly<a name="parttoassembly"></a></h2>
+
+<p>In the Assembly record page enter the part IDs for the relevant part(s) in the box in the right hand column. Enter the IDs of parts you want to add to this assembly, separated by commas. If you do not know the ID, try searching based on other information about the part.</p>
+
+        </div>
+      </div>
+
+{% endblock %}

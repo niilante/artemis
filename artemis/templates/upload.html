@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="bibsoup_box">
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+    
+        <h2>Upload your collection</h2>
+
+        <div id="frompc">
+        
+        <p>Browse for the file you want to upload.<br />
+        Finally, give your collection a name, so we can give it a URL.</p>
+        <span class="upload_label">your file:</span> <input class="sourcefile" type="file" name="upfile" /><br /><br />
+        </div>
+
+        <div id="fromurl">
+        
+        <p>Provide the location where your file is available online, and optionally a name for your new collection.
+        <br />The name will become part of the URL of your collection, so choose one you like.
+        <br />(if you don't provide a name, we will make one up from the web address)</p>
+
+        <span class="upload_label">web address:</span> <input class="sourcefile" type="text" name="source" />
+
+        </div>
+
+        <br /><span class="upload_label">name your collection:</span> <input id="collection" type="text" name="collection" />
+
+        <p>
+        (or <a class="frompc" href="">upload from your PC</a>)
+        </p>
+
+        
+        <div id="fileformat">
+        <p>We could not identify the file format, please specify:</p>
+        <input name="format" type="radio" value="bibtex" /> bibtex <br />
+        <input name="format" type="radio" value="bibjson" /> BibJSON <br />
+        <input name="format" type="radio" value="json" /> JSON <br />
+        <input name="format" type="radio" value="json-ld" /> JSON-LD <br />
+        <input name="format" type="radio" value="csv" /> csv <br />
+<!--        <input name="format" type="radio" value="google" /> google spreadsheet <br />-->
+        <p></p>
+        </div>
+
+        <input class="btn primary large" type="submit" name="submit" value="upload" />
+
+    </form>
+</div>
+{% endblock %}
+

@@ -1,0 +1,55 @@
+{% extends "/base.html" %}
+
+{% block content %}
+<div class="row">
+<a href="" id="savenew" class="btn span2">save</a>
+</div>
+<div id="therecord" class="record_box clearfix">
+    {% if rectype == "assembly" %}
+        <h3>New assembly</h3>
+    {% else %}
+        <h3>New part</h3>
+    {% endif %}
+</div>
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    jQuery('#therecord').jtedit({"data":{
+            "type":"{{rectype}}",
+            {% if rectype == "part" %}
+            "assembly":"",
+            {% elif rectype == "assembly" %}
+            "assembled_by":"",
+            "assembled_date":"",
+            {% endif %}
+            "name":"",
+            "drawing":"",
+            "inspected_by":"",
+            "inspected_date":"",
+            "location":"",
+        }
+    });
+    var saveit = function(event) {
+        event.preventDefault();
+        var thedata = $.parseJSON(jQuery('#jtedit_json').val());
+        $.ajax({
+            url: '/record/create'
+            , type: 'POST'
+            , data: JSON.stringify(thedata)
+            , contentType: "application/json; charset=utf-8" 
+            , dataType: 'json'
+            , processData: false
+            , success: function(data, statusText, xhr) {
+                alert("New record saved. Redirecting to new record page.");
+                window.location = '/record/' + data.id;
+            }
+            , error: function(xhr, message, error) {
+                alert("failed! " + error);
+            }
+        });
+    }
+    jQuery('#savenew').bind('click',saveit);
+});
+</script>
+
+{% endblock %}
+
