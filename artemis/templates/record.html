@@ -74,7 +74,7 @@
                 , success: function(data, statusText, xhr) {
                     var oldparent = data['assembly']
                     data.assembly = parentid
-                    if (data.hasOwnProperty('assembly_history')) {
+                    /*if (data.hasOwnProperty('assembly_history')) {
                         if (typeof(data['assembly_history']) == 'object') {
                             data['assembly_history'].append(oldparent)
                         } else {
@@ -82,7 +82,7 @@
                         }
                     } else {
                         data['assembly_history'] = [oldparent]
-                    }
+                    }*/
                     $.ajax({
                         url: '/record/' + child
                         , type: 'POST'
