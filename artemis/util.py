@@ -31,16 +31,19 @@ def slugify(text, delim=u'_'):
 
 
 def idgen():
-    if not os.path.exists('lastusedid'):
-        idstore = open('lastusedid','w')
-        idstore.write('0')
-        idstore.close()
+    if not os.path.exists('lastintid'):
+        storedlastint = open('lastintid','w')
+        storedlastint.write('0')
+        storedlastint.close()
     while True:
-        storedlastid = open('lastusedid','r')
-        lastusedid = storedlastid.read()
-        storedlastid.close()
-        storedlastid = open('lastusedid','w')
-        nextid = lastusedid + '1'
-        storedlastid.write(nextid)
-        storedlastid.close()
+        storedlastint = open('lastintid','r+')
+        lastint = int(storedlastint.read())
+        storedlastint.seek(0)
+        storedlastint.truncate()
+        thisint = lastint + 1
+        storedlastint.write(str(thisint))
+        storedlastint.close()
+        nextid = str(hex(thisint))[2:]
+        while len(nextid) < 5:
+            nextid = '0' + nextid
         yield nextid

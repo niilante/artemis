@@ -6,5 +6,5 @@ sandbox/*
 src*
 .DS_Store
 .Python
-lastusedid
+lastintid
 extra/*
