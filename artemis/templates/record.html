@@ -141,7 +141,7 @@
                     , success: function(data, statusText, xhr) {
                         var pdata = $.parseJSON(jQuery('#jtedit_json').val());
                         if ('assembly' in pdata) {
-                            if ('assembly_history' in pdata) {
+                            if ('assembly_history' in pdata && typeof pdata['assembly_history'] == 'object') {
                                 pdata['assembly_history'].push(pdata['assembly']) 
                             } else {
                                 pdata['assembly_history'] = [pdata['assembly']]
@@ -160,7 +160,7 @@
         var removefromassembly = function(event) {
             event.preventDefault()
             var pdata = $.parseJSON(jQuery('#jtedit_json').val());
-            if ('assembly_history' in pdata) {
+            if ('assembly_history' in pdata && typeof pdata['assembly_history'] == 'object') {
                 pdata['assembly_history'].push(pdata['assembly']) 
             } else {
                 pdata['assembly_history'] = [pdata['assembly']]
