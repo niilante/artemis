@@ -251,12 +251,14 @@ class IOManager(object):
             return False
     
     def get_parent_history(self):
-        if 'assembly_history' in self.set()[0] and self.set()[0]['assembly']:
+        if 'assembly_history' in self.set()[0] and self.set()[0]['assembly_history']:
             oldparents = []
             for parent in self.set()[0]['assembly_history']:
-                par = artemis.dao.Record.get(parent)
-                if par:
-                    oldparents.append(par)
+                if parent:
+                    try:
+                        oldparents.append(artemis.dao.Record.get(parent))
+                    except:
+                        oldparents.append({'id':parent,'NOTE':"no longer exists"})
             if oldparents:
                 return oldparents
             else:

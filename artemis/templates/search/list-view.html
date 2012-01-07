@@ -12,7 +12,7 @@
                 <p>{{io.set()[i]['notes']}}</p>
                 {% if 'assembly' in io.set()[i] %}
                 {% if io.set()[i]['assembly'] %}
-                <p>In assembly {{io.set()[i]['assembly']}}</p>
+                <p>In assembly <a href="/record/{{io.set()[i]['assembly']}}">{{io.set()[i]['assembly']}}</a></p>
                 {% endif %}
                 {% endif %}
             </div>
