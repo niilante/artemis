@@ -10,19 +10,6 @@
  *
 */
 
-// include css
-//<![CDATA[
-/*if(document.createStyleSheet) {
-    document.createStyleSheet('http://test.cottagelabs.com/jtedit/jtedit.css');
-} else {
-    var styles = "@import url('http://test.cottagelabs.com/jtedit/jtedit.css');";
-    var newSS = document.createElement('link');
-    newSS.rel = 'stylesheet';
-    newSS.href = 'data:text/css,'+escape(styles);
-    document.getElementsByTagName("head")[0].appendChild(newSS);    
-}
-//]]>*/
-
 
 (function($){
     $.fn.jtedit = function(options) {
@@ -33,6 +20,7 @@
             "source":undefined,             // a source from which to GET the JSON data object
             "target":undefined,             // a target to which updated JSON should be POSTed
             "noedit":[],                    // a list of keys that should not be editable, when edit is enabled
+            "hide":[],                      // a list of keys that should be hidden from view
             "data":undefined,               // a JSON object to render for editing
             "tags": [
                 "type",
@@ -96,7 +84,11 @@
                     if ($.inArray(key,options.noedit) != -1) {
                         loopedit = false;
                     }
-                    s += '<tr><td>';
+                    s += '<tr';
+                    if ($.inArray(key,options.hide) != -1) {
+                        s += ' class="jtedit_hidden"';
+                    }                    
+                    s += '><td>';
                     if (data.constructor.toString().indexOf("Array") == -1) {
                         s += '<input type="text" class="jtedit jtedit_key" value="' + key + '" ';
                         if (!loopedit) {
@@ -253,6 +245,13 @@
             $('.jtedit_field').bind('mouseup',selectallg);
             $('.jtedit_addrow').bind('click',jtedit_addrow);
             $('.jtedit_key').autocomplete({source:options.tags});
+            $('.jtedit_field').each(function() {
+                if ( $(this).prev('input').hasClass('jtedit_key') ) {
+                    if ( $(this).prev('input').val().search("_date") != -1 ) {
+                        $(this).datetimepicker({ dateFormat: 'yy-mm-dd' })
+                    }
+                }
+            })
         }
 
 

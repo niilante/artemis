@@ -1,4 +1,5 @@
 import re
+import os
 from unicodedata import normalize
 from functools import wraps
 
@@ -28,3 +29,18 @@ def slugify(text, delim=u'_'):
             result.append(word)
     return unicode(delim.join(result))
 
+
+def idgen():
+    if not os.path.exists('lastusedid'):
+        idstore = open('lastusedid','w')
+        idstore.write('0')
+        idstore.close()
+    while True:
+        storedlastid = open('lastusedid','r')
+        lastusedid = storedlastid.read()
+        storedlastid.close()
+        storedlastid = open('lastusedid','w')
+        nextid = lastusedid + '1'
+        storedlastid.write(nextid)
+        storedlastid.close()
+        yield nextid

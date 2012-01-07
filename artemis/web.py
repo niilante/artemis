@@ -95,18 +95,35 @@ def record(path,rectype=''):
             return resp
         
         # if not deleting, do the create / update    
-        newrecord = request.json
-        action = "updated"
+        received = request.json
+        action = "update"
         if path == "create":
-            if 'id' in newrecord:
-                if artemis.dao.Record.get(newrecord['id']):
-                    flash('Sorry. That record ID already exists.')
-                    return redirect('/record/create')
-            action = "new"
-        recobj = artemis.dao.Record(**newrecord)
-        recobj.save()
+            action = "create"
+            if rectype == "batch":
+                create = int(received['create'])
+                record = received['data']
+            else:
+                create = 1
+                record = received
+
+            count = 0
+            recids = []
+            while count < create:
+                count = count + 1
+                if 'id' in record:
+                    if artemis.dao.Record.get(record['id']):
+                        flash('Sorry. A record with ID ' + record['id'] + ' already exists.')
+                        return redirect('/record/create')
+                recobj = artemis.dao.Record(**record)
+                recobj.save()
+                recids.append(recobj.id)
+        else:
+            recobj = artemis.dao.Record(**received)
+            recobj.save()
+            recids = [recobj.id]
+
         # TODO: should pass a better success / failure output
-        resp = make_response( '{"id":"' + recobj.id + '","action":"' + action + '"}' )
+        resp = make_response( json.dumps({"record":recids,"action":action}) )
         resp.mimetype = "application/json"
         return resp
 

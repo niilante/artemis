@@ -7,43 +7,71 @@
 <div id="therecord" class="record_box clearfix">
     {% if rectype == "assembly" %}
         <h3>New assembly</h3>
+    {% elif rectype == "batch" %}
+        <h3>Create multiple identical parts</h3>
+        <p>How many parts do you want to create? <input class="span1" type="text" id="howmany" name="howmany" value="1" /></p>
+        <p>Enter the generic part details below.<br />Upon saving, the desired number of parts will be created, each with 
+        the same details.</p>
     {% else %}
         <h3>New part</h3>
     {% endif %}
 </div>
 <script type="text/javascript">
 jQuery(document).ready(function() {
-    jQuery('#therecord').jtedit({"data":{
-            "type":"{{rectype}}",
+    jQuery('#therecord').jtedit({
+        "data":{
             {% if rectype == "part" %}
+            "type":"part",
             "assembly":"",
             {% elif rectype == "assembly" %}
+            "type":"assembly",
             "assembled_by":"",
             "assembled_date":"",
+            {% elif rectype == "batch" %}
+            "type":"part",
+            //"batch":"",
+            "assembly":"",
             {% endif %}
             "name":"",
-            "drawing":"",
             "inspected_by":"",
             "inspected_date":"",
             "location":"",
-        }
+        },
+        "noedit":[
+            'type'
+        ]
     });
     var saveit = function(event) {
         event.preventDefault();
         var thedata = $.parseJSON(jQuery('#jtedit_json').val());
         $.ajax({
+            {% if rectype == 'batch' %}
+            url: '/record/create/batch'
+            , data: JSON.stringify({"create":$('#howmany').val(),"data":thedata})
+            {% else %}
             url: '/record/create'
-            , type: 'POST'
             , data: JSON.stringify(thedata)
+            {% endif %}
+            , type: 'POST'
             , contentType: "application/json; charset=utf-8" 
             , dataType: 'json'
             , processData: false
             , success: function(data, statusText, xhr) {
+                {% if rectype == 'batch' %}
+                var msg = 'Your new records were created. The IDs of your new records are: \n\n'
+                for ( counter in data.record ) {
+                    msg += data.record[counter] + '\n'
+                }
+                msg += '\nRedirecting to front page.'
+                alert(msg)
+                window.location = '/';
+                {% else %}
                 alert("New record saved. Redirecting to new record page.");
-                window.location = '/record/' + data.id;
+                window.location = '/record/' + data.record[0];
+                {% endif %}
             }
             , error: function(xhr, message, error) {
-                alert("failed! " + error);
+                alert("Error: " + error + '. Please try again.');
             }
         });
     }

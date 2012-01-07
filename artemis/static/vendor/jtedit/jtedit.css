@@ -86,6 +86,9 @@
 #jtedit table textarea[disabled='disabled']{
     color:#ccc;
 }
+.jtedit_hidden{
+    display:none;
+}
 #jtedit table{
     width:auto;
     margin:5px;

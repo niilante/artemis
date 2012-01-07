@@ -4,6 +4,8 @@ import uuid
 import UserDict
 import httplib
 
+from util import idgen
+
 import pyes
 from werkzeug import generate_password_hash, check_password_hash
 from flaskext.login import UserMixin
@@ -93,9 +95,12 @@ class DomainObject(UserDict.IterableUserDict):
         if 'id' in data:
             id_ = data['id']
         else:
-            id_ = uuid.uuid4().hex[0:5]
+            #id_ = uuid.uuid4().hex[0:5]
+            idgenerator = idgen()
+            id_ = idgenerator.next()
             while Record.get(id_):
-                id_ = uuid.uuid4().hex[0:5]
+                #id_ = uuid.uuid4().hex[0:5]
+                id_ = idgenerator.next()
             data['id'] = id_
         conn.index(data, db, cls.__type__, id_)
         # TODO: ES >= 0.17 automatically re-indexes on GET so this not needed

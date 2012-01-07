@@ -1,0 +1,9 @@
+*.pyc
+store/*
+*.egg-info/*
+.*.swp
+sandbox/*
+src*
+.DS_Store
+.Python
+lastusedid

@@ -171,6 +171,21 @@ class IOManager(object):
         '''Return list of search result items'''
         return [rec['_source'] for rec in self.results['hits']['hits']]
 
+    def stringify(self,obj):
+        return json.dumps(obj)
+        
+    def listify(self,obj):
+        hlist = '<ul>'
+        for key,val in obj.items():
+            if val:
+                hlist += '<li>' + key + ' - '
+                if key == 'id':
+                    hlist += '<a href="/record/' + val + '">' +val + '</a></li>'
+                else:
+                    hlist += val + '</li>'
+        hlist += '</ul>'
+        return hlist
+            
 
     def get_str(self, result, field, raw=False):
         res = result.get(field,"")
@@ -225,6 +240,29 @@ class IOManager(object):
         else:
             return None
 
+    def get_parent(self):
+        if 'assembly' in self.set()[0] and self.set()[0]['assembly']:
+            parent = artemis.dao.Record.get(self.set()[0]['assembly'])
+            if parent:
+                return parent
+            else:
+                return False
+        else:
+            return False
+    
+    def get_parent_history(self):
+        if 'assembly_history' in self.set()[0] and self.set()[0]['assembly']:
+            oldparents = []
+            for parent in self.set()[0]['assembly_history']:
+                par = artemis.dao.Record.get(parent)
+                if par:
+                    oldparents.append(par)
+            if oldparents:
+                return oldparents
+            else:
+                return False
+        else:
+            return False
 
     def get_record_version(self,recordid):
         record = artemis.dao.Record.get(recordid)
