@@ -19,7 +19,7 @@ jQuery(document).ready(function() {
     jQuery(".facet_heading").bind('click',showfacets);
 
     // add in-page sorting to the facet selections
-/*    var sorts = '<div class="facet_alpha">';
+    var sorts = '<div class="facet_alpha">';
     var alphabet = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
     for (item in alphabet) {
         sorts += '<a class="facet_restrict" href="' + alphabet[item] + '">' + alphabet[item] + '</a>';
@@ -35,7 +35,7 @@ jQuery(document).ready(function() {
     sorts += '<a id="term" class=" facet_type" href="">by term</a> <a id="count" class="facet_type" href="">by count</a>';
     sorts += '</div>';
     jQuery('div.facet_selected').after(sorts);
-    jQuery('.facet_alpha').hide();*/
+    jQuery('.facet_alpha').hide();
 
     // redesign facet headers if they have no further options
     jQuery('.facet').each(function() {
