@@ -1,6 +1,19 @@
 
 jQuery(document).ready(function() {    
     
+    // show the loading page on ajax call
+    $.ajaxSetup({
+        beforeSend:function(){
+            $("#loadcover").show();
+            $("#loading").show();
+        },
+        complete:function(){
+            $("#loadcover").hide();
+            $("#loading").hide();
+        }
+    });
+
+    
     // show search options
     if ( jQuery('input[name="showopts"]').val() != undefined && jQuery('input[name="showopts"]').val() != "" ) {
         jQuery('#search_options').addClass('shown').show();
