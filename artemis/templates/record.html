@@ -42,6 +42,7 @@
             }
             if (jQuery(this).attr('id') == "savenew" ) {
                 var saveurl = '/record/create';
+                delete thedata['id']
             } else {
                 var saveurl = '/record/' + thedata['id'] + '?version={{io.get_record_version(io.set()[0]['id'])}}';
             }
@@ -53,7 +54,7 @@
                 , dataType: 'json'
                 , processData: false
                 , success: function(data, statusText, xhr) {
-                    if (jQuery(this).attr('id') == "savenew" ) {
+                    if ( data.action == "create" ) {
                         alert("New record saved. Redirecting to new record page.");
                         window.location = '/record/' + data.record[0];
                     } else {
@@ -200,15 +201,15 @@
         {% if io.get_parent() %}
         <div class="record_box span5">
             <h3>This part is in assembly <a href="/record/{{io.get_parent()['id']}}">{{io.get_parent()['id']}}</a></h3>
-            {{io.listify(io.get_parent())|safe}}
+            {{io.tablify(io.get_parent(),True)|safe}}
             <a href="" id="removefromassembly" class="btn span3">remove part from this assembly</a>            
         </div>
         {% endif %}
         {% if io.get_parent_history() %}
-        <div class="record_box span5">
+        <div class="record_box span10">
             <h3>Part used to be in assemblies</h3>
             {% for each in io.get_parent_history() %}
-                {{io.listify(each)|safe}}
+                {{io.tablify(each,True)|safe}}
             {% endfor %}
         </div>
         {% endif %}

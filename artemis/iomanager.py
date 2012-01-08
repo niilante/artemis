@@ -275,19 +275,22 @@ class IOManager(object):
     def get_record_as_table(self,which=0):
         return self.tablify(self.set()[which])
         
-    def tablify(self,thing):
+    def tablify(self,thing,ignoreblank=False):
         if not thing:
             return ""
         try:
             s = '<table>'
             for key,val in thing.iteritems():
-                s += '<tr><td><strong>' + key + '</strong></td><td>' + self.tablify(val) + '</td></tr>'
+                if ignoreblank and not val:
+                    pass
+                else:
+                    s += '<tr><td><strong>' + key + '</strong></td><td>' + self.tablify(val,ignoreblank) + '</td></tr>'
             s += '</table>'
         except:
             if isinstance(thing,list):
                 s = '<table>'
                 for item in thing:
-                    s += '<tr><td>' + self.tablify(item) + '</tr></td>'
+                    s += '<tr><td>' + self.tablify(item,ignoreblank) + '</tr></td>'
                 s += '</table>'
             else:
                 s = thing

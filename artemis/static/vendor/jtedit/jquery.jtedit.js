@@ -181,13 +181,14 @@
             var inputcount = $(this).parent().parent().prev().find('input').length
             var tablecount = $(this).parent().parent().prev().find('table').length
             if (inputcount == 2 || inputcount + tablecount == 2) {
-                $(this).before('<tr><td><input type="text" class="jtedit jtedit_key text_empty" /><input type="text" class="jtedit jtedit_field text_empty" /></td></tr>');
+                $(this).parent().parent().before('<tr><td><input type="text" class="jtedit jtedit_key text_empty" /><input type="text" class="jtedit jtedit_field text_empty" /></td></tr>');
             } else {
-                $(this).before('<tr><td><input type="text" class="jtedit jtedit_field text_empty" /></td></tr>');
+                $(this).parent().parent().before('<tr><td><input type="text" class="jtedit jtedit_field text_empty" /></td></tr>');
             }
-            $(this).prev().find('input').autoResize({"minWidth": 150,"maxWidth": 500,"minHeight": 20,"maxHeight": 200,"extraSpace": 10});
-            $(this).prev().find('input').bind('blur',updates).bind('mouseup',selectallg);
-            $(this).prev().find('.jtedit_key').autocomplete({source:options.tags});
+            $(this).parent().parent().prev().find('input').autoResize({"minWidth": 150,"maxWidth": 500,"minHeight": 20,"maxHeight": 200,"extraSpace": 10});
+            $(this).parent().parent().prev().find('input').bind('blur',updates);
+            $(this).parent().parent().prev().find('input').bind('mouseup',selectallg);
+            $(this).parent().parent().prev().find('.jtedit_key').autocomplete({source:options.tags});
         }
 
 
