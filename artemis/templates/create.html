@@ -6,14 +6,14 @@
 </div>
 <div id="therecord" class="record_box clearfix">
     {% if rectype == "assembly" %}
-        <h3>New assembly</h3>
+        <h3>New assembly <small><a href="/help#newassembly">(help)</a></small></h3>
     {% elif rectype == "batch" %}
-        <h3>Create multiple identical parts</h3>
+        <h3>Create multiple identical parts <small><a href="/help#multinewpart">(help)</a></small></h3>
         <p>How many parts do you want to create? <input class="span1" type="text" id="howmany" name="howmany" value="1" /></p>
         <p>Enter the generic part details below.<br />Upon saving, the desired number of parts will be created, each with 
         the same details.</p>
     {% else %}
-        <h3>New part</h3>
+        <h3>New part <small><a href="/help#newpart">(help)</a></small></h3>
     {% endif %}
 </div>
 <script type="text/javascript">

@@ -9,14 +9,20 @@
 <li><a href="#navigation">Navigation</a></li>
 <li><a href="#search">Search</a></li>
 <li><a href="#newpart">Add new part</a></li>
+<li><a href="#multinewpart">Add multiple new parts</a></li>
+<li><a href="#groupofids">Create a group of IDs</a></li>
 <li><a href="#newassembly">Add new assembly</a></li>
 <li><a href="#parttoassembly">Add part to assembly</a></li>
 </ul>
+
+
 
 <p><a name="navigation"></a><br /><br /></p>
 
 <h2>Navigation</h2>
 <p>The navigation bar that appears at the top of each page can be used to navigate the database and select common functions. Alternatively return to the home page at any time by clicking ‘Artemis’ at the top left of the screen.</p>
+
+
 
 <p><a name="search"></a><br /><br /></p>
 
@@ -44,9 +50,12 @@
 
 <p>However, note that facet filtering is only valuable on particular fields. For example, if you facet on a field that is unique across all records, such as the record ID, you will get little benefit - as there will be only 1 result for every value. In this case, you would be better searching for the ID directly, or if you do not know it, searching for other bits of information you have about the record you are looking for.</p>
 
+
+
 <p><a name="newpart"></a><br /><br /></p>
 
 <h2>Add New Part</h2>
+
 <p>To add a new part select the ‘New part’ option in the navigation bar that appears at the top of each page. Alternatively select  ‘New Part’ button on the homepage.</p>
 
 <p>You will be presented with a blank parts record including basic fields common to most parts. Where there is information available corresponding to a field enter the details. For those fields without information leave blank.</p>
@@ -56,7 +65,7 @@
 <p>Default fields include:</p>
 <ul>
 <li>type - This is the type of record either part or assembly</li>
-<li>in_assembly - This is the ID of the assembly which this part is currently assembled</li>
+<li>assembly - This is the ID of the assembly which this part is currently assembled</li>
 <li>name - This is the text description of the part. Include any alternative names</li>
 <li>drawing - This is an attachment</li>
 <li>assembled_by - This is the name of the Artemis employee that assembled the assembly</li>
@@ -70,10 +79,31 @@
 
 <p>To add a new field select the ‘+’ symbol at the bottom of the table. A new row will appear with two fields. In the left box enter the field name. In the right box enter the field value.</p>
 
+
+
+<p><a name="multinewpart"></a><br /><br /></p>
+
+<h2>Add Multiple New Parts</h2>
+
+<p>If you wish to create multiple new parts at the same time, this can be done via the <a href="/record/create/batch">Multiple New Parts</a> option.</p>
+
+<p>This works as per the "Add New Part" option, except that you can specify you many parts to create. Note, of course, that all the new parts being created must have identical information provided for them. Once saved, you will be provided with a list of the IDs for the parts that were created.</p>
+
+
+
+<p><a name="groupofids"></a><br /><br /></p>
+
+<h2>Create a group of IDs</h2>
+
+<p>This is the same as adding multiple new parts - if, for example you wish to give a group of IDs to a particular manufacturer, just choose to Add Multiple New Parts. Then, on the new part form, specify the number of parts to create but provide no further information. Alternatively, add some information to identify the reason the records were created - e.g. a note such as "issued to manufacturer X" or perhaps a "manufacturer" field.</p>
+
+
+
 <p><a name="newassembly"></a><br /><br /></p>
 
 <h2>Add New Assembly</h2>
-<p>To add a new assembly select the ‘New assembly’ option in the navigation bar that appears at the top of each page. Alternatively select the  ‘New assembly’ button on the homepage.</p>
+
+<p>To add a new assembly select the <a href="/record/create/assembly">New assembly</a> option in the navigation bar that appears at the top of each page. Alternatively select the  ‘New assembly’ button on the homepage.</p>
 
 <p>You will be presented with a blank assembly record including basic fields common to most parts. Where there is information available corresponding to a field enter the details. For those fields without information leave blank.</p>
 
@@ -83,7 +113,7 @@
 
 <ul>
 <li>type - This is the type of record either part or assembly</li>
-<li>in_assembly - This is the ID of the assembly which this part is currently assembled</li>
+<li>assembly - This is the ID of the assembly which this part is currently assembled</li>
 <li>name - This is the text description of the part. Include any alternative names</li>
 <li>drawing - This is an attachment</li>
 <li>assembled_by - This is the name of the Artemis employee that assembled the assembly</li>
@@ -95,11 +125,15 @@
 <li>location_history - This is a list of the locations the part has been.</li>
 </ul>
 
+
+
 <p><a name="parttoassembly"></a><br /><br /></p>
 
 <h2>Add part to Assembly</h2>
 
 <p>In the Assembly record page enter the part IDs for the relevant part(s) in the box in the right hand column. Enter the IDs of parts you want to add to this assembly, separated by commas. If you do not know the ID, try searching based on other information about the part.</p>
+
+<p>Alternatively, when viewing a particular part, click the "add part to assembly" button and type in the ID of the assembly to which you wish to add the current part. The page will be refreshed once you submit, and you will see the assembly information on the right hand side.</p>
 
         </div>
       </div>

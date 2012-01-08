@@ -19,23 +19,23 @@ jQuery(document).ready(function() {
     jQuery(".facet_heading").bind('click',showfacets);
 
     // add in-page sorting to the facet selections
-    var sorts = '<div class="facet_alpha">';
+/*    var sorts = '<div class="facet_alpha">';
     var alphabet = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
     for (item in alphabet) {
-        sorts += '<a class="facet_restrict label" href="' + alphabet[item] + '">' + alphabet[item] + '</a>';
+        sorts += '<a class="facet_restrict" href="' + alphabet[item] + '">' + alphabet[item] + '</a>';
         if (item == 12) {
             sorts += '<br>';
         }
     }
     sorts += '<br>';
     for (var i = 0; i < 10; i++) {
-        sorts += '<a class="facet_restrict label" href="' + i + '">' + i + '</a>';
+        sorts += '<a class="facet_restrict" href="' + i + '">' + i + '</a>';
     }
-    sorts += '<br>sort: <a id="asc" class="facet_sort label" href="">A &raquo;</a> <a id="desc" class="facet_sort label" href="">Z &raquo;</a> ';
-    sorts += '<a id="term" class=" facet_type label" href="">by term</a> <a id="count" class="facet_type label" href="">by count</a>';
+    sorts += '<br>sort: <a id="asc" class="facet_sort" href="">A &raquo;</a> <a id="desc" class="facet_sort" href="">Z &raquo;</a> ';
+    sorts += '<a id="term" class=" facet_type" href="">by term</a> <a id="count" class="facet_type" href="">by count</a>';
     sorts += '</div>';
     jQuery('div.facet_selected').after(sorts);
-    jQuery('.facet_alpha').hide();
+    jQuery('.facet_alpha').hide();*/
 
     // redesign facet headers if they have no further options
     jQuery('.facet').each(function() {
