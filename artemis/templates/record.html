@@ -2,227 +2,255 @@
 
 {% block content %}
 
-{% if multiple %}
-    <div id="record_box" class="clearfix">
-        <p>There appear to be multiple records with this ID:</p>
-        <ul>
-        {% for item in io.set() %}
-            <li>{{item['citekey']}} - 
-                <a href="/record/{{item['id']}}">{{item['id']}}</a>
-            </li>
+<div class="row-fluid">
+
+    <div class="hero-unit span6" style="min-height:180px;">
+        <!-- record info -->
+        <h2>{{ record['type'] }} {{ record['id'] }} - {{ record['name'] }}</h2>
+        <h3>Current location: {{ record['location'] }}</h3>
+        <p>Inspected on {{ record['inspected_date'] }} by {{ record['inspected_by'] }}.</p>
+        <p>Record created on {{ record['created_date'] }}. Last updated {{ record['updated_date'] }}.</p>
+        {% if record['batch'] %}
+        <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a>.</p>
+        {% endif %}
+    </div>
+    <div class="hero-unit span3" style="min-height:180px;">
+        <!-- save / delete -->
+        {% if edit %}
+            <p><br /><a href="" class="savethis btn btn-info span2">save changes</a></p>
+            <p><br /><br /><a href="" id="deletethis" class="btn btn-danger span2">delete record</a></p>
+        {% endif %}
+    </div>
+    
+</div>
+
+<hr style="embossed" />
+
+<div class="row-fluid">
+
+    <div class="span8">
+        <h3>Assembly information</h3>
+<!-- if an assembly, link the parts it contains; offer option to add / remove parts -->
+{% if record['type'] == 'assembly' %}
+    {% if record.children %}
+        <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var removefromassembly = function(event) {
+                event.preventDefault()
+                $.ajax({
+                    url: '/record/' + jQuery(this).attr('href') + '/parent'
+                    , type: 'DELETE'
+                    , success: function(data, statusText, xhr) {
+                        alert('Part removed from assembly. Reloading page.')
+                        window.location = ''
+                    }
+                    , error: function(xhr, message, error) {
+                        alert("Error: " + error + '. Please try again.');
+                    }
+                })
+            }
+            jQuery('.removefromassembly').bind('click',removefromassembly)
+        })
+        </script>
+        <p>Assembly contains:</p>
+        {% for item in record.children %}
+            <p><a href="/record/{{item['id']}}">{{item['id']}}</a> - {{item['name']}} - 
+                <a href="{{item['id']}}" class="removefromassembly label label-important">remove</a></p>
         {% endfor %}
-        </ul>
-    </div>
-{% elif edit %}
-    <div class="row">
-    <a href="" class="savethis btn span3">save changes</a>
-    <a href="" id="deletethis" class="btn danger span3">delete record</a>
-    <a href="" id="savenew" class="btn span3">save as new record</a>
-    {% if io.set()[0]['type'] != "assembly" %}
-    <a href="" id="addtoassembly" class="btn span3">add part to an assembly</a>
-    {% endif %}
-    </div>
-    <div class="row">
-    <div id="therecord" class="record_box span8">
-    {% if io.set()[0]['type'] == "assembly" %}
-        <h3>Assembly {{io.set()[0]['id']}} - {{io.set()[0]['name']}}</h3>
     {% else %}
-        <h3>Part {{io.set()[0]['id']}}</h3>
+        <p>No parts listed in this assembly.</p>
     {% endif %}
+    <p><a href="" id="addparts" class="btn">Add parts to this assembly</a></p>
     <script type="text/javascript">
     jQuery(document).ready(function() {
-        jQuery('#therecord').jtedit({"data":{{io.stringify(io.set()[0])|safe}},"noedit":["id"],"hide":["assembly","assembly_history"]});
-
-        var saveit = function(event,datain) {
-            event.preventDefault();
-            if (datain) {
-                var thedata = datain
-            } else {
-                var thedata = $.parseJSON(jQuery('#jtedit_json').val());
-            }
-            if (jQuery(this).attr('id') == "savenew" ) {
-                var saveurl = '/record/create';
-                delete thedata['id']
-            } else {
-                var saveurl = '/record/' + thedata['id'] + '?version={{io.get_record_version(io.set()[0]['id'])}}';
-            }
-            $.ajax({
-                url: saveurl
-                , type: 'POST'
-                , data: JSON.stringify(thedata)
-                , contentType: "application/json; charset=utf-8" 
-                , dataType: 'json'
-                , processData: false
-                , success: function(data, statusText, xhr) {
-                    if ( data.action == "create" ) {
-                        alert("New record saved. Redirecting to new record page.");
-                        window.location = '/record/' + data.record[0];
-                    } else {
-                        alert("Record updated. Refreshing page.");
-                    }
-                    window.location = '/record/' + data.record[0];
-                }
-                , error: function(xhr, message, error) {
-                    alert("failed! " + error);
-                }
-            });
-            if ( jQuery('#newchildren').length ) {
-                var children = jQuery('#newchildren').val().split(',')
-                for (var child in children) {
-                    children[child].replace(' ','')
-                    if (children[child].length > 0) {
-                        savechildren(children[child],'{{io.set()[0]['id']}}')
-                    }
-                }
-            }
-        }
-
-        var savechildren = function(child,parentid) {
-            $.ajax({
-                url: '/record/' + child + '.json'
-                , type: 'GET'
-                , success: function(data, statusText, xhr) {
-                    var oldparent = data['assembly']
-                    data.assembly = parentid
-                    /*if (data.hasOwnProperty('assembly_history')) {
-                        if (typeof(data['assembly_history']) == 'object') {
-                            data['assembly_history'].push(oldparent)
-                        } else {
-                            data['assembly_history'] = [data['assembly_history'],oldparent]
-                        }
-                    } else {
-                        data['assembly_history'] = [oldparent]
-                    }*/
-                    $.ajax({
-                        url: '/record/' + child
-                        , type: 'POST'
-                        , data: JSON.stringify(data)
-                        , contentType: "application/json; charset=utf-8" 
-                        , dataType: 'json'
-                        , processData: false
-                        , success: function(data, statusText, xhr) {
-                            alert("parts added.");
-                        }
-                        , error: function(xhr, message, error) {
-                            alert("failed! " + error);
-                        }
-                    })
-                }
-                , error: function(xhr, message, error) {
-                    alert("failed! " + error);
-                }
-            })
-        }
-
-        var deleteit = function(event) {
-            event.preventDefault();
-            var confirmed = confirm("You are about to irrevocably delete this from the database. Are you sure you want to do so?")
-            if (confirmed) {
-                $.ajax({
-                    url: '/record/{{io.set()[0]['id']}}?delete=true'
-                    , type: 'POST'
-                    , success: function(data, statusText, xhr) {
-                        alert("Record deleted. Redirecting to homepage.");
-                        window.location = '/';
-                    }
-                    , error: function(xhr, message, error) {
-                        alert("failed! " + error);
-                    }
-                });
-            }
-        }
-        
-        var addtoassembly = function(event) {
+        var showpartsearch = function(event) {
             event.preventDefault()
-            var assy = prompt("Please provide the ID of the assembly to which you wish to add this part")
-            if (assy) {
-                $.ajax({
-                    url: '/record/' + assy
-                    , type: 'GET'
-                    , success: function(data, statusText, xhr) {
-                        var pdata = $.parseJSON(jQuery('#jtedit_json').val());
-                        if ('assembly' in pdata) {
-                            if ('assembly_history' in pdata && typeof pdata['assembly_history'] == 'object') {
-                                pdata['assembly_history'].push(pdata['assembly']) 
-                            } else {
-                                pdata['assembly_history'] = [pdata['assembly']]
-                            }
-                        }
-                        pdata['assembly'] = assy
-                        saveit(event,pdata)
-                    }
-                    , error: function(xhr, message, error) {
-                        alert("There is no assembly with ID " + assy + ". Please search for the correct assembly ID, then try again.");
-                    }
-                });
-            }
+            jQuery('#partsearch').toggle()
         }
-
-        var removefromassembly = function(event) {
-            event.preventDefault()
-            var pdata = $.parseJSON(jQuery('#jtedit_json').val());
-            if ('assembly_history' in pdata && typeof pdata['assembly_history'] == 'object') {
-                pdata['assembly_history'].push(pdata['assembly']) 
-            } else {
-                pdata['assembly_history'] = [pdata['assembly']]
+        jQuery('#addparts').bind('click',showpartsearch)
+        jQuery('#partsearch').facetview( {{ search_options | safe }} )
+        jQuery('#partsearch').hide()
+    })
+    var doupdate = function(theid) {
+        jQuery.ajax({
+            url: '/record/{{record.id}}/children/' + theid
+            , type: 'POST'
+            , success: function(data, statusText, xhr) {
+                alert('Assembly updated. Reloading page.')
+                window.location = ""
             }
-            delete pdata['assembly']
-            saveit(event,pdata)
-        }
-        
-        jQuery('.savethis').bind('click',saveit);
-        jQuery('#savenew').bind('click',saveit);
-        jQuery('#deletethis').bind('click',deleteit);
-        jQuery('#addtoassembly').bind('click',addtoassembly);
-        jQuery('#removefromassembly').bind('click',removefromassembly);
-    });
+            , error: function(xhr, message, error) {
+                alert("Error: " + error + '. Please try again.');
+            }
+        })
+    }
     </script>
-    </div>
-
-    {% if io.set()[0]['type'] == "assembly" %}
-        <div class="record_box span5">
-        {% if io.get_children() %}
-            <h3>Contains parts</h3>
-            <ul>
-            {% for item in io.get_children() %}
-                <li><a href="/record/{{item['id']}}">{{item['id']}}</a> - {{item['name']}}</li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <h3>No parts listed in this assembly</h3>
-        {% endif %}
-        <p>Add parts:<br /><br />
-        <textarea id="newchildren"></textarea><br />
-        <a href="" class="savethis btn span3">save parts</a><br /><br />
-        (enter the IDs of parts you want to add to this assembly, separated by commas. 
-        If you do not know the ID, <a target="_blank" href="/search">try searching</a> based on other information about the part.)</p>
-        </div>
-    {% else %}
-        {% if io.get_parent() %}
-        <div class="record_box span5">
-            <h3>This part is in assembly <a href="/record/{{io.get_parent()['id']}}">{{io.get_parent()['id']}}</a></h3>
-            {{io.tablify(io.get_parent(),True)|safe}}
-            <a href="" id="removefromassembly" class="btn span3">remove part from this assembly</a>            
-        </div>
-        {% endif %}
-        {% if io.get_parent_history() %}
-        <div class="record_box span10">
-            <h3>Part used to be in assemblies</h3>
-            {% for each in io.get_parent_history() %}
-                {{io.tablify(each,True)|safe}}
-            {% endfor %}
-        </div>
-        {% endif %}
-    {% endif %}
-
-
+    <div style="border:1px solid #ccc;padding:5px;" id="partsearch">
+    <h4>Search for a part and click it to add to this assembly.</h4>
     </div>
 
 {% else %}
-    <div class="row">
-    {{io.get_record_as_table()|safe}}
+<!-- if a part, offer add to assembly; if in one, link it, and offer to remove -->
+    {% if record.parent %}
+    <div class="span4">
+        <h4><br />This part is in assembly <a href="/record/{{record.parent.id}}">{{record.parent.id}}</a></h4>
+        <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var removefromassembly = function(event) {
+                event.preventDefault()
+                $.ajax({
+                    url: '/record/{{record.id}}/parent'
+                    , type: 'DELETE'
+                    , success: function(data, statusText, xhr) {
+                        alert('Removed from assembly. Reloading page.')
+                        window.location = ''
+                    }
+                    , error: function(xhr, message, error) {
+                        alert("Error: " + error + '. Please try again.');
+                    }
+                })
+            }
+            jQuery('#removefromassembly').bind('click',removefromassembly)
+        })
+        </script>
+        <p><br /><a href="" id="removefromassembly" class="btn btn-danger">remove from assembly</a></p>
     </div>
+    {% else %}
+        <p>This part is not in an assembly.</p>
+        <p><a href="" id="addtoassembly" class="btn">add to an assembly</a></p>
+        <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var showassemblysearch = function(event) {
+                event.preventDefault()
+                jQuery('#assemblysearch').toggle()
+            }
+            jQuery('#addtoassembly').bind('click',showassemblysearch)
+            jQuery('#assemblysearch').facetview( {{ search_options | safe }} )
+            jQuery('#assemblysearch').hide()
+        })
+        var doupdate = function(theid) {
+            jQuery.ajax({
+                url: '/record/{{record.id}}/parent/' + theid
+                , type: 'POST'
+                , success: function(data, statusText, xhr) {
+                    alert('Assembly updated. Reloading page.')
+                    window.location = ""
+                }
+                , error: function(xhr, message, error) {
+                    alert("Error: " + error + '. Please try again.');
+                }
+            })
+        }
+        </script>
+        <div style="border:1px solid #ccc;padding:5px;" id="assemblysearch">
+        <h4>Search for an assembly and click it to add this part to it.</h4>
+        </div>
+    {% endif %}
+
 {% endif %}
+
+    </div>
+
+    <div class="span4">
+        <h3>Tests / Attachments</h3>
+<!-- show any attachments, offer to upload new -->
+{% if record['attachments'] %}
+    {% for item in record['attachments'] %}
+        <p><a href="/record/{{record.id}}/attachments/{{item['filename']}}">{{item['filename']}}</a> - {{item['description']}}</p>
+    {% endfor %}
+{% else %}
+    <p>No attachments yet</p>
+{% endif %}
+    <form action="/record/{{record.id}}/attachments" method="POST" enctype="multipart/form-data">
+        <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var showaddattachment = function(event) {
+                event.preventDefault()
+                jQuery('#addattachment').toggle()
+            }
+            jQuery('#showaddattachment').bind('click',showaddattachment)
+            jQuery('#addattachment').hide()
+        })
+        </script>
+        <p><a id="showaddattachment" class="btn" href="">Add new test / attachment</a></p>
+        <div style="border:1px solid #ccc;padding:5px;" id="addattachment">
+        <p>Choose an attachment: <input type="file" name="upfile" /></p>
+        <p><textarea class="span3" name="description" placeholder="provide a short description"></textarea></p>
+        <p><input type="submit" class="btn btn-info" value="upload new attachment" /></p>
+        {% if record['type'] == 'assembly' %}
+            <p>(Note: this is an assembly. If you upload an attachment to it, it 
+            will also be attached to each individual part in this assembly.)</p>
+        {% else %}
+            {% if record.parent %}
+                <p>(Note: this part is in assembly 
+                    <a href="/record/{{record.parent.id}}">{{record.parent.id}}</a>. 
+                    If you wish to upload an attachment to every record in the assembly, 
+                    you should go to the assembly record instead.)
+                </p>
+            {% endif %}
+        {% endif %}
+        </div>
+    </form>
+
+    </div>
+    
+</div>
+
+<hr style="embossed" />
+
+<div class="row-fluid">
+
+    <div class="span8">
+        <h3>Change history</h3>
+
+<!-- show history in sortable table -->
+<table class="table-striped table-bordered">
+<thead>
+    <tr>
+        <th>on date</th>
+        <th>user</th>
+        <th>changed</th>
+        <th>from</th>
+        <th>to</th>
+    </tr>
+</thead>
+<tbody>
+{% for item in record['history'] %}
+    <tr>
+        <td style="padding:5px;">{{ item['date'] }}</td>
+        <td style="padding:5px;">{{ item['user'] }}</td>
+        <td style="padding:5px;">{{ item['field'] }}</td>
+        <td style="padding:5px;">{{ item['previous'] }}</td>
+        <td style="padding:5px;">{{ item['current'] }}</td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
+    </div>
+
+    <div class="span4">
+        <h3>Access history</h3>
+        <p><a id="showaccess" class="btn" href="">show access history</a></p>
+        <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var showaccess = function(event) {
+                event.preventDefault()
+                jQuery('#accesshistory').toggle()
+            }
+            jQuery('#showaccess').bind('click',showaccess)
+            jQuery('#accesshistory').hide()
+        })
+        </script>
+        <div id="accesshistory">
+<!-- show access history -->
+{% for item in record['access'] %}
+    <p>Viewed by {{ item['user'] }} at {{ item['date'] }}</p>
+{% endfor %}
+        </div>
+    </div>
+
+</div>
 
 {% endblock %}
 

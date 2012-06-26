@@ -1,6 +1,7 @@
-{% extends "/base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
+
 <div class="row">
 <a href="" id="savenew" class="btn span2">save</a>
 </div>
@@ -29,7 +30,7 @@ jQuery(document).ready(function() {
             "assembled_date":"",
             {% elif rectype == "batch" %}
             "type":"part",
-            //"batch":"",
+            "batch":"{{batchid}}",
             "assembly":"",
             {% endif %}
             "name":"",
@@ -58,15 +59,19 @@ jQuery(document).ready(function() {
             , processData: false
             , success: function(data, statusText, xhr) {
                 {% if rectype == 'batch' %}
-                var msg = 'Your new records were created. The IDs of your new records are: \n\n'
+                var msg = 'Your new records were created. \n\nThe batch ID is {{batchid}}. \n\nThe IDs of your new records are: \n\n'
                 for ( counter in data.record ) {
                     msg += data.record[counter] + '\n'
                 }
-                msg += '\nRedirecting to front page.'
+                msg += '\nRedirecting to the batcn part list.'
                 alert(msg)
-                window.location = '/';
+                window.location = '/batch/{{batchid}}';
                 {% else %}
-                alert("New record saved. Redirecting to new record page.");
+                    {% if rectype == "record" %}
+                    alert("New record saved. Redirecting to new record page.")
+                    {% else %}
+                    alert("New assembly saved. Redirecting to new assembly page.")
+                    {% endif %}
                 window.location = '/record/' + data.record[0];
                 {% endif %}
             }

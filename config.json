@@ -1,56 +1,79 @@
 {
-    # service
-    "service_name" : "Artemis parts tracking system",
-
-    # base URL of search service
-    "base_url" : "/search",
+    # service and super user account
+    "service_name" : "Artemis",
+    "super_user" : ["test"],
+    "host" : "0.0.0.0",
+    "debug" : true,
+    "port" : 5004,
 
     # elasticsearch settings
     "ELASTIC_SEARCH_HOST" : "127.0.0.1:9200",
     "ELASTIC_SEARCH_DB" : "artemis",
-
-    # bibserver functionality settings
-    # allow_upload - set to "NO" if you dont want frontend upload to your bibserver install
-    # allow_edit - Yes / No for edit of individual records in bibsoup
-    # allow upload user to override display config
-    "allow_upload" : "YES",
-    "allow_edit" : "YES",
-    "allow_display_config" : "YES",
-
-    # set some display template configs
-    "facet_topbar":false,
-    "facet_sidebar":true,
-
-    # default results and paging options
-    "results_per_page" : 10,
-    "results_per_page_options" : [10, 20, 50, 100],    
     
-    # The fields for which faceting should be made available on, and their default settings
+    # The default fields and settings for which faceting should be made available on
     # these can be nested fields, e.g. links.url
-    "facet_fields" : [
+    "search_facet_fields" : [
         {
-            "key":"type",
-            "order":"count",
-            "size":200
+            "field":"type.exact",
+            "order":"term",
+            "size":10,
+            "display":"type"
         },
         {
-            "key":"assembly",
-            "order":"term",
-            "size":200
+            "field":"batch.exact",
+            "display":"batch"
+        },
+        {
+            "field":"assembly.exact",
+            "display":"assembly"
+        },
+        {
+            "field":"created_date.exact",
+            "size":10,
+            "order":"reverse_term",
+            "display":"created"
+        },
+        {
+            "field":"updated_date.exact",
+            "size":10,
+            "order":"reverse_term",
+            "display":"last updated"
         }
     ],
 
-    # functions to perform on particular result fields on display - these are defined in iomanager
-    "display_value_functions" : {
-        "author":{"authorify":{}},
-        "collection": {"collectionify":{}},
-        "links": {"bibsoup_links":{}}
-    },
-
+    # search result display layout
+    # a list of lists. each list represents a line on the display.
+    # in each line, there are objects for each key to include on the line.
+    # must specify the key, and optional "pre" and "post" params for displaying round it
+    "search_result_display" : [
+        [
+            {
+                "field":"type",
+                "post":" "
+            },
+            {
+                "pre":"<a title=\"view record\" href=\"/record/",
+                "field":"id",
+                "post":"\">"
+            },
+            {
+                "field":"id",
+                "post":"</a>"
+            },
+            {
+                "pre":" - ",
+                "field":"name"
+            }
+        ]
+    ],
+    
     # a dict of the ES mappings. identify by name, and include name as first object name
+    # and identifier for how non-analyzed fields for faceting are differentiated in the mappings
+    "facet_field" : ".exact",
     "mappings" : {
         "record" : {
             "record" : {
+                "date_detection" : false,
                 "dynamic_templates" : [
                     {
                         "default" : {
@@ -70,21 +93,24 @@
         },
         "collection" : {
             "collection" : {
+                "date_detection" : false,
                 "dynamic_templates" : [
                     {
                         "default" : {
                             "match" : "*",
+                            "match_mapping_type": "string",
                             "mapping" : {
-                                "index" : "not_analyzed"
+                                "type" : "multi_field",
+                                "fields" : {
+                                    "{name}" : {"type" : "{dynamic_type}", "index" : "analyzed", "store" : "no"},
+                                    "exact" : {"type" : "{dynamic_type}", "index" : "not_analyzed", "store" : "yes"}
+                                }
                             }
                         }
                     }
                 ]
             }
         }
-    },
-
-    # identifier for how non-analyzed fields for faceting are differenetiated in the mappings
-    "facet_field" : ".exact"
-        
+    }
+       
 }

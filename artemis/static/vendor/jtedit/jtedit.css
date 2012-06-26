@@ -1,146 +1,115 @@
 #jtedit{
-    padding:5px;
-    margin:5px;
-    border:none;
-}
-#jtedit_help{
-    background:#ffeeee;
+    font-size:16px;
     border:2px solid #ccc;
-    -webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;
-    margin:0;
-    padding:5px;
     float:left;
-    width:400px;
+    clear:both;
+    margin:20px;
+   -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
 }
 #jtedit_json{
-    float:left;
-    width:300px;
-    height:600px;
-    border:none;
-    margin:5px;
+    margin:10px;
+   -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    min-width:400px;
+    min-height:400px;
 }
-#jtedit_menu{
-    margin:5px;
-    background:#ffeeee;
-    position:absolute;
-    padding:0;
-    border:1px solid #ccc;
-}
-.jtedit_buttons{
-    padding:5px;
-}
-.jtedit_nomenu{
-    display:block;
+.jtedit_actions{
     width:100%;
-    background-color:#ccc;
-    margin:0;
-    padding:0;
-    text-align:right;
+    float:left;
+    clear:both;
+    background:#eee;
+    padding:4px 0 4px 0;
+   -moz-border-radius: 0 0 10px 10px;
+    -webkit-border-radius: 0 0 10px 10px;
+    border-radius: 0 0 10px 10px;
 }
-.jtedit_nomenu a{
-    color:black;
+.jtedit_actions:first-child{
     margin:0 0 5px 0;
+   -moz-border-radius: 10px 10px 0 0;
+    -webkit-border-radius: 10px 10px 0 0;
+    border-radius: 10px 10px 0 0;
 }
-.jtedit_nomenu a:hover{
-    color:red;
+.jtedit_opts{
+    display:block;
+    clear:both;
+   -moz-border-radius: 0 0 10px 0;
+    -webkit-border-radius: 0 0 10px 0;
+    border-radius: 0 0 10px 0;
+    border:none;
+    border-top:1px solid #ccc;
 }
-.text_empty{
-    /*outline:1px dotted red;*/
+
+div.jtedit_actions > div.btn-group{
+    margin:0 5px 0 5px;
+    float:left;
+    display:inline;
+}
+.jtedit_optionsgroup{
+    margin:7px 0 0 -10px;
+    padding:0;
+    float:left;
+    display:inline;
+    border:none;
+}
+.jtedit_optionswarn{
+    border-color: rgba(255, 0, 0, 0.8);
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6);
+    outline: 0;
+    outline: thin dotted \9;
+    /* IE6-9 */
 }
 .jtedit_key{
     font-weight:bold;
-    color:#f5f5f5;
+    color:#000;
+   -moz-border-radius: 10px 0 0 10px;
+    -webkit-border-radius: 10px 0 0 10px;
+    border-radius: 10px 0 0 10px;
     float:left;
-}
-.jtedit_field{
-    color:#f5f5f5;
-}
-.jtedit_noedit{
-    margin:0 20px 0 5px;
-    color:#ccc;
-}
-.jtedit_focus{
-    background:#ffeeee;
-}
-
-#jtedit table input{
     border:none;
-    /*-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;*/
-    background:#555;
-    margin:2px;
-    width:10px;
-    cursor:pointer;
-}
-#jtedit table input[disabled='disabled']{
-    color:#999;
-}
-#jtedit table textarea{
-    border:none;
-    -webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;
+    padding:5px 30px 5px 10px;
+    width:150px;
+    height:20px;
+    margin:0 -20px 0 -5px;
+    font-size:16px;
     background:none;
-    margin:3px 0 0 0;
-    padding:0 0 4px 0;
-    height:10px;
-    cursor:pointer;
 }
-#jtedit table textarea[disabled='disabled']{
-    color:#ccc;
+.jtedit_value{
+   -moz-border-radius: 0 10px 10px 0;
+    -webkit-border-radius: 0 10px 10px 0;
+    border-radius: 0 10px 10px 0;
+    border:none;
+    padding:5px 10px 5px 10px;
+    margin:0;
+    font-size:16px;
+    background:none;
 }
 .jtedit_hidden{
     display:none;
 }
-#jtedit table{
-    width:auto;
-    margin:5px;
-    padding:0 0 0 2px;
-    border-collapse:separate;
-    float:left;
-    -webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;
-    border:none;
-    /*border-left:1px dotted #666;*/
-}
-#jtedit .jtedit_listtable{
-    clear:none;
-    margin:0;
-    border:none;
-    border-left:1px dotted #666666;
-    border-right:1px dotted #666666;
-}
-#jtedit table tr{
-    margin:0;
-    padding:0;
-}
-#jtedit table tr td{
-    margin:0;
-    padding:0;
-    vertical-align:top;
-}
-#jtedit table th+th,table td+td{border:none;}
-#jtedit table tr+tr td{border:none;}
 
-/*
-#jtedit table table{
+.jtedit_kvcontainer{
+    float:left;
     clear:both;
-    margin:0 0 0 40px;
+    margin:5px;
+    background:#eee;
+    border:1px solid #ccc;
+   -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    padding-left:5px;
 }
-*/
-.clearfix:after {
-	content: ".";
-	display: block;
-	clear: both;
-	visibility: hidden;
-	line-height: 0;
-	height: 0;
-}
- 
-.clearfix {
-	display: inline-block;
-}
- 
-html[xmlns] .clearfix {
-	display: block;
-}
- 
-* html .clearfix {
-	height: 1%;
+
+.jtedit_vals{
+   -moz-border-radius: 0 10px 10px 0;
+    -webkit-border-radius: 0 10px 10px 0;
+    border-radius: 0 10px 10px 0;
+    border-left:2px solid #ccc;
+    float:left;
+    height:100%;
+    background:#fff;
 }

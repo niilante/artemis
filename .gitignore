@@ -7,4 +7,6 @@ src*
 .DS_Store
 .Python
 lastintid
+lastintbatch
+artemis/lastidid
 extra/*

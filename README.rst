@@ -8,10 +8,11 @@ Install
 1. Install pre-requisites::
    
    * Python and pip
+   * Git
    * Java
-   * ElasticSearch (> 0.17 series)
-   * (see http://www.elasticsearch.org/download/ 
-     and http://www.elasticsearch.org/guide/reference/setup/installation.html)
+   * Elasticsearch (> 0.17 series)
+   * (see http://www.elasticsearch.org/download/ and http://www.elasticsearch.org/guide/reference/setup/installation.html)
+   * Elasticsearch mapper pluging (https://github.com/elasticsearch/elasticsearch-mapper-attachments)
 
 2. Get the source::
 
@@ -22,10 +23,27 @@ Install
     cd artemis
     pip install -e .
 
-4. Run the webserver::
+4. Make sure lastintid and lastintbatch can be created/written::
+
+    # either check that the privileges for the user that will run the artemis 
+    # software allow it to create files in the artemis directory, or create 
+    # the following files and change their owner to the same user that will 
+    # run the artemis software
+    
+    touch lastintid
+    cat '0' > lastintid
+    touch lastintbatch
+    cat '0' > lastintbatch
+    chown USER:USER lastintid
+    chown USER:USER lastintbatch
+
+5. Run the webserver::
 
     python artemis/web.py
 
+6. If you want to pre-load with legacy data::
+
+    python extra/import.py
 
 Install example
 ===============
@@ -39,6 +57,7 @@ Install commands on a clean installation of Ubuntu_11.10::
 
     wget https://github.com/downloads/elasticsearch/elasticsearch/elasticsearch-0.18.2.tar.gz
     tar -xzvf elasticsearch-0.18.2.tar.gz
+    ./elasticsearch-0.18.2/bin/plugin -install elasticsearch/elasticsearch-mapper-attachments/1.0.0
     ./elasticsearch-0.18.2/bin/elasticsearch start
 
     git clone http://github.com/cottagelabs/artemis
