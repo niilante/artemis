@@ -4,24 +4,45 @@
 
 <div class="row-fluid">
 
-    <div class="hero-unit span6" style="min-height:180px;">
+    <div class="hero-unit span6" style="min-height:210px;">
         <!-- record info -->
         <h2>{{ record['type'] }} {{ record['id'] }} - {{ record['name'] }}</h2>
-        <h3>Current location: {{ record['location'] }}</h3>
-        <p>Inspected on {{ record['inspected_date'] }} by {{ record['inspected_by'] }}.</p>
-        <p>Record created on {{ record['created_date'] }}. Last updated {{ record['updated_date'] }}.</p>
+        <h3>Current location: <select class="updatelocation">
+        <option></option>
+        {% for item in values['location'] %}
+            <option value="item['id']"{% if item['id'] == record['location'] %} selected{% endif %}>{{item['id']}}</option>
+        {% endfor %}
+        </select>
+        </h3>
+        {% if record['supplier'] %}<p>Supplier: {{record['supplier']}}</p>{% endif %}
+        <p>Inspected on {{ record['inspecteddate'] }} by {{ record['inspectedby'] }}.</p>
+        <p>Record created on {{ record['createddate'] }}. {% if record['updateddate'] %}Last updated {{ record['updateddate'] }}.{% endif %}</p>
         {% if record['batch'] %}
-        <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a>.</p>
+        <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a>. <a href="#" class="batchremove label">remove from batch</a></p>
         {% endif %}
     </div>
-    <div class="hero-unit span3" style="min-height:180px;">
+    <div class="hero-unit span3" style="min-height:210px;">
         <!-- save / delete -->
         {% if edit %}
             <p><br /><a href="" class="savethis btn btn-info span2">save changes</a></p>
             <p><br /><br /><a href="" id="deletethis" class="btn btn-danger span2">delete record</a></p>
         {% endif %}
     </div>
-    
+
+    <script type="text/javascript">
+    jQuery(document).ready(function() {
+        var updatelocation = function(event) {
+            event.preventDefault()
+            alert("update record location")
+        }
+        jQuery('.updatelocation').bind('change',updatelocation)
+        var batchremove = function(event) {
+            event.preventDefault()
+            alert("remove from batch")
+        }
+        jQuery('.batchremove').bind('click',batchremove)
+    })
+    </script>    
 </div>
 
 <hr style="embossed" />
@@ -176,6 +197,7 @@
         <div style="border:1px solid #ccc;padding:5px;" id="addattachment">
         <p>Choose an attachment: <input type="file" name="upfile" /></p>
         <p><textarea class="span3" name="description" placeholder="provide a short description"></textarea></p>
+        <!-- TODO: add test date and tested by and test type and drawing number -->
         <p><input type="submit" class="btn btn-info" value="upload new attachment" /></p>
         {% if record['type'] == 'assembly' %}
             <p>(Note: this is an assembly. If you upload an attachment to it, it 

@@ -27,6 +27,12 @@ class Search(object):
 
         self.parts = self.path.strip('/').split('/')
 
+        self.values = {}
+        self.values['location'] = [{'id':'location1'},{'id':'location2'}]
+        self.values['supplier'] = [{'id':'supplier1'},{'id':'supplier2'}]
+        self.values['assembly'] = [i['_source'] for i in artemis.dao.Record.query(terms={'type':'assembly'},size=100000).get('hits',{}).get('hits',{})]
+        self.values['user'] = [i['_source'] for i in artemis.dao.Account.query().get('hits',{}).get('hits',{})]
+
 
     def find(self):
         if artemis.dao.Account.get(self.parts[0]):
@@ -129,7 +135,8 @@ class Search(object):
                     record=res, 
                     search_options=json.dumps(self.search_options), 
                     recordstring=res.json, 
-                    edit=True
+                    edit=True,
+                    values=self.values
                 )
 
     
@@ -140,7 +147,7 @@ class Search(object):
                 batchid = idgenerator.next()
             else:
                 batchid = None
-            return render_template('create.html', rectype=self.rectype, batchid=batchid)
+            return render_template('create.html', rectype=self.rectype, batchid=batchid, values=self.values)
 
         elif request.method == "POST":
             received = request.json

@@ -160,21 +160,21 @@ class DomainObject(UserDict.IterableUserDict):
                 data['id'] = id_
             
             if not state:
-                data['last_updated'] = datetime.now().strftime("%Y-%m-%d %H%M")
+                data['lastupdated'] = datetime.now().strftime("%Y-%m-%d %H%M")
 
-            if 'created_date' not in data:
-                data['created_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
-                data['history'] = [{'date':data['created_date'],'user': get_user()}]
+            if 'createddate' not in data:
+                data['createddate'] = datetime.now().strftime("%Y-%m-%d %H%M")
+                data['history'] = [{'date':data['createddate'],'user': get_user()}]
             elif not state:
                 if 'history' not in data:
                     data['history'] = []
                 previous = Record.get(data['id'])
                 if previous:
                     for key,val in previous.items():
-                        if key not in ['history','access','last_updated','attachments']:
+                        if key not in ['history','access','lastupdated','attachments']:
                             if val != data[key]:
                                 data['history'].insert(0, {
-                                    'date': data['last_updated'],
+                                    'date': data['lastupdated'],
                                     'field': key,
                                     'previous': val,
                                     'current': data[key],
@@ -289,6 +289,10 @@ class Record(DomainObject):
         else:
             return False
             
+
+class Admin(DomainObject):
+    __type__ = 'admin'
+
 
 class Note(DomainObject):
     __type__ = 'note'

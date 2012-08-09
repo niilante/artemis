@@ -14,33 +14,85 @@
         <p>Enter the generic part details below.<br />Upon saving, the desired number of parts will be created, each with 
         the same details.</p>
     {% else %}
-        <h3>New part <small><a href="/help#newpart">(help)</a></small></h3>
+        <h3>New part <small><a target="_blank" href="/help#newpart">(help)</a></small></h3>
     {% endif %}
+    <table>
+        {% if rectype == "part" %}
+        <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
+        <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" /></td></tr>
+        <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
+        <option></option>
+        {% for item in values['assembly'] %}
+            <option value="{{ item['id'] }}">{{ item['id'] }} - {{ item['name'] }}</option>
+        {% endfor %}
+        </select></td></tr>
+        {% elif rectype == "assembly" %}
+        <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">assembly</td></tr>
+        <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" /></td></tr>
+        <tr><td>Assembled by:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembledby">
+        <option></option>
+        {% for item in values['user'] %}
+            <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+        {% endfor %}
+        </select></td></tr>
+        <tr><td>Assembled date:</td><td><input type="text" class="datepicker jtedit_value jtedit_assembleddate" /></td></tr>
+        {% elif rectype == "batch" %}
+        <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
+        <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" /></td></tr>
+        <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
+        <option></option>
+        {% for item in values['assembly'] %}
+            <option value="{{ item['id'] }}">{{ item['id'] }} - {{ item['name'] }}</option>
+        {% endfor %}
+        </select></td></tr>
+        <tr><td>In batch:</td><td style="padding:5px;font-size:120%;">{{ batchid }}</td></tr>
+        {% endif %}
+        <tr><td>Supplier:</td><td><select style="height:33px;" class="jtedit_value jtedit_supplier">
+        <option></option>
+        {% for item in values['supplier'] %}
+            <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+        {% endfor %}
+        </select></td></td></tr>
+        <tr><td>Inspected by:</td><td><select style="height:30px;" class="jtedit_value jtedit_inspectedby">
+        <option></option>
+        {% for item in values['user'] %}
+            <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+        {% endfor %}
+        </select></td></td></tr>
+        <tr><td>Inspected date:</td><td><input type="text" class="datepicker jtedit_value jtedit_inspecteddate" /></td></tr>
+        <tr><td>In location:</td><td><select style="height:30px;" class="jtedit_value jtedit_location">
+        <option></option>
+        {% for item in values['location'] %}
+            <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+        {% endfor %}
+        </select></td></td></tr>
+    </table>
 </div>
 <script type="text/javascript">
 jQuery(document).ready(function() {
     jQuery('#therecord').jtedit({
+        "makeform":false,
+        "actionbuttons":false,
+        "jsonbutton":false,
         "data":{
             {% if rectype == "part" %}
             "type":"part",
             "assembly":"",
             {% elif rectype == "assembly" %}
             "type":"assembly",
-            "assembled_by":"",
-            "assembled_date":"",
+            "assembledby":"",
+            "assembleddate":"",
             {% elif rectype == "batch" %}
             "type":"part",
             "batch":"{{batchid}}",
             "assembly":"",
             {% endif %}
             "name":"",
-            "inspected_by":"",
-            "inspected_date":"",
+            "supplier":"",
+            "inspectedby":"",
+            "inspecteddate":"",
             "location":"",
-        },
-        "noedit":[
-            'type'
-        ]
+        }
     });
     var saveit = function(event) {
         event.preventDefault();
@@ -81,6 +133,7 @@ jQuery(document).ready(function() {
         });
     }
     jQuery('#savenew').bind('click',saveit);
+    jQuery('.datepicker').datepicker()
 });
 </script>
 
