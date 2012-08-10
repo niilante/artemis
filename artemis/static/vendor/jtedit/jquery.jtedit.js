@@ -216,9 +216,6 @@
                     options.reloadonsave ? window.location = options.reloadonsave : ""
                     refresh ? window.location = "" : ""
                 }
-                , error: function(xhr, message, error) {
-                    alert("Error... " + error)
-                }
             })
         } else {
             alert('No suitable URL to save to was provided')
@@ -239,9 +236,6 @@
                     , success: function(data, statusText, xhr) {
                         options.delmsg ? alert(options.delmsg) : ""
                         options.reloadondelete ? window.location = options.reloadondelete : ""
-                    }
-                    , error: function(xhr, message, error) {
-                        alert("Error... " + error)
                     }
                 })
             }

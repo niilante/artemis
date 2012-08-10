@@ -2,72 +2,87 @@
 
 {% block content %}
 
-<div class="row">
-<a href="" id="savenew" class="btn span2">save</a>
+<div class="row-fluid">
+    <div class="span6">
+        <div id="therecord" class="hero-unit" style="min-height:500px;">
+            {% if rectype == "assembly" %}
+                <h3>New assembly</h3>
+            {% elif rectype == "batch" %}
+                <h3>Create multiple identical parts</h3>
+                <p>How many parts do you want to create? <input type="text" id="howmany" name="howmany" value="1" style="width:30px;" /></p>
+                <p>Enter the generic part details below.<br />Upon saving, the desired number of parts will be created, each with 
+                the same details.</p>
+            {% else %}
+                <h3>New part</h3>
+            {% endif %}
+            <table>
+                {% if rectype == "part" %}
+                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
+                <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
+                <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
+                <option></option>
+                {% for item in values['assembly'] %}
+                    <option value="{{ item['id'] }}">{{ item['id'] }} - {{ item['name'] }}</option>
+                {% endfor %}
+                </select></td></tr>
+                {% elif rectype == "assembly" %}
+                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">assembly</td></tr>
+                <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
+                <tr><td>Assembled by:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembledby">
+                <option></option>
+                {% for item in values['user'] %}
+                    <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+                {% endfor %}
+                </select></td></tr>
+                <tr><td>Assembled date:</td><td><input type="text" class="datepicker jtedit_value jtedit_assembleddate" /></td></tr>
+                {% elif rectype == "batch" %}
+                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
+                <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
+                <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
+                <option></option>
+                {% for item in values['assembly'] %}
+                    <option value="{{ item['id'] }}">{{ item['id'] }} - {{ item['name'] }}</option>
+                {% endfor %}
+                </select></td></tr>
+                <tr><td>In batch:</td><td style="padding:5px;font-size:120%;">{{ batchid }}</td></tr>
+                {% endif %}
+                <tr><td>Manufacturer:</td><td><input type="text" class="jtedit_value jtedit_manufacturer" /></td></td></tr>
+                <tr><td>Supplier:</td><td><select style="height:33px;" class="jtedit_value jtedit_supplier">
+                <option></option>
+                {% for item in values['supplier'] %}
+                    <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+                {% endfor %}
+                </select></td></td></tr>
+                <tr><td>Inspected by:</td><td><select style="height:33px;" class="jtedit_value jtedit_inspectedby">
+                <option></option>
+                {% for item in values['user'] %}
+                    <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+                {% endfor %}
+                </select></td></td></tr>
+                <tr><td>Inspected date:</td><td><input type="text" class="datepicker jtedit_value jtedit_inspecteddate" /></td></tr>
+                <tr><td>In location:</td><td><select style="height:33px;" class="jtedit_value jtedit_location">
+                <option></option>
+                {% for item in values['location'] %}
+                    <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+                {% endfor %}
+                </select></td></td></tr>
+                <tr><td></td><td><br /><a href="" id="savenew" class="btn btn-info">save this {{ rectype }}</a></td></tr>
+            </table>
+        </div>
+    </div>
+    
+    <div class="span6">
+            {% if rectype == "assembly" %}
+            <iframe src="/help#newassembly" style="border:none; width:100%; height:620px;"></iframe>
+            {% elif rectype == "batch" %}
+            <iframe src="/help#multinewpart" style="border:none; width:100%; height:620px;"></iframe>
+            {% else %}
+            <iframe src="/help#newpart" style="border:none; width:100%; height:620px;"></iframe>
+            {% endif %}
+    </div>
+
 </div>
-<div id="therecord" class="record_box clearfix">
-    {% if rectype == "assembly" %}
-        <h3>New assembly <small><a href="/help#newassembly">(help)</a></small></h3>
-    {% elif rectype == "batch" %}
-        <h3>Create multiple identical parts <small><a href="/help#multinewpart">(help)</a></small></h3>
-        <p>How many parts do you want to create? <input class="span1" type="text" id="howmany" name="howmany" value="1" /></p>
-        <p>Enter the generic part details below.<br />Upon saving, the desired number of parts will be created, each with 
-        the same details.</p>
-    {% else %}
-        <h3>New part <small><a target="_blank" href="/help#newpart">(help)</a></small></h3>
-    {% endif %}
-    <table>
-        {% if rectype == "part" %}
-        <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
-        <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" /></td></tr>
-        <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
-        <option></option>
-        {% for item in values['assembly'] %}
-            <option value="{{ item['id'] }}">{{ item['id'] }} - {{ item['name'] }}</option>
-        {% endfor %}
-        </select></td></tr>
-        {% elif rectype == "assembly" %}
-        <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">assembly</td></tr>
-        <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" /></td></tr>
-        <tr><td>Assembled by:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembledby">
-        <option></option>
-        {% for item in values['user'] %}
-            <option value="{{ item['id'] }}">{{ item['id'] }}</option>
-        {% endfor %}
-        </select></td></tr>
-        <tr><td>Assembled date:</td><td><input type="text" class="datepicker jtedit_value jtedit_assembleddate" /></td></tr>
-        {% elif rectype == "batch" %}
-        <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
-        <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" /></td></tr>
-        <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
-        <option></option>
-        {% for item in values['assembly'] %}
-            <option value="{{ item['id'] }}">{{ item['id'] }} - {{ item['name'] }}</option>
-        {% endfor %}
-        </select></td></tr>
-        <tr><td>In batch:</td><td style="padding:5px;font-size:120%;">{{ batchid }}</td></tr>
-        {% endif %}
-        <tr><td>Supplier:</td><td><select style="height:33px;" class="jtedit_value jtedit_supplier">
-        <option></option>
-        {% for item in values['supplier'] %}
-            <option value="{{ item['id'] }}">{{ item['id'] }}</option>
-        {% endfor %}
-        </select></td></td></tr>
-        <tr><td>Inspected by:</td><td><select style="height:30px;" class="jtedit_value jtedit_inspectedby">
-        <option></option>
-        {% for item in values['user'] %}
-            <option value="{{ item['id'] }}">{{ item['id'] }}</option>
-        {% endfor %}
-        </select></td></td></tr>
-        <tr><td>Inspected date:</td><td><input type="text" class="datepicker jtedit_value jtedit_inspecteddate" /></td></tr>
-        <tr><td>In location:</td><td><select style="height:30px;" class="jtedit_value jtedit_location">
-        <option></option>
-        {% for item in values['location'] %}
-            <option value="{{ item['id'] }}">{{ item['id'] }}</option>
-        {% endfor %}
-        </select></td></td></tr>
-    </table>
-</div>
+    
 <script type="text/javascript">
 jQuery(document).ready(function() {
     jQuery('#therecord').jtedit({
@@ -88,6 +103,7 @@ jQuery(document).ready(function() {
             "assembly":"",
             {% endif %}
             "name":"",
+            "manufacturer":"",
             "supplier":"",
             "inspectedby":"",
             "inspecteddate":"",
@@ -97,6 +113,9 @@ jQuery(document).ready(function() {
     var saveit = function(event) {
         event.preventDefault();
         var thedata = $.parseJSON(jQuery('#jtedit_json').val());
+        {% if rectype == 'batch' %}
+        alert("Please click OK then please wait for your batch of parts to be created, then the part IDs will be displayed.")
+        {% endif %}
         $.ajax({
             {% if rectype == 'batch' %}
             url: '/record/create/batch'
@@ -111,7 +130,7 @@ jQuery(document).ready(function() {
             , processData: false
             , success: function(data, statusText, xhr) {
                 {% if rectype == 'batch' %}
-                var msg = 'Your new records were created. \n\nThe batch ID is {{batchid}}. \n\nThe IDs of your new records are: \n\n'
+                var msg = 'Your new parts were created. \n\nThe batch ID is {{batchid}}. \n\nThe IDs of your new parts are: \n\n'
                 for ( counter in data.record ) {
                     msg += data.record[counter] + '\n'
                 }
@@ -119,8 +138,8 @@ jQuery(document).ready(function() {
                 alert(msg)
                 window.location = '/batch/{{batchid}}';
                 {% else %}
-                    {% if rectype == "record" %}
-                    alert("New record saved. Redirecting to new record page.")
+                    {% if rectype == "part" %}
+                    alert("New part saved. Redirecting to new part page.")
                     {% else %}
                     alert("New assembly saved. Redirecting to new assembly page.")
                     {% endif %}

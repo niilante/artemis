@@ -4,6 +4,7 @@ from flask import render_template, flash, send_file
 import artemis.dao
 from artemis import auth
 from datetime import datetime
+from copy import deepcopy
 import json, httplib, StringIO
 from artemis.config import config
 import artemis.util as util
@@ -114,26 +115,30 @@ class Search(object):
             return resp
         
         elif request.method == "DELETE":
-            # if an assembly, check for children and remove them from this
-            # delete this record. 
-            pass
-
+            res = artemis.dao.Record.get(self.path)
+            res.delete()
+            return ''
+            
         else:
             res = artemis.dao.Record.get(self.path)
             if not res:
                 abort(404)
             else:
                 res.update_access_record()
-                self.search_options['result_display'][0][1]['pre'] = '<a onclick="doupdate(\''
-                self.search_options['result_display'][0][1]['post'] = '\')" href="javascript: return null;">'
+                opts = deepcopy(self.search_options)
+                notes = artemis.dao.Note.about(res.id)
+                print res.id, notes
+                opts['result_display'][0][1]['pre'] = '<a onclick="doupdate(\''
+                opts['result_display'][0][1]['post'] = '\')" href="javascript: return null;">'
                 if res.data['type'] == "assembly":
-                    self.search_options['predefined_filters'] = {'type':'part'}
+                    opts['predefined_filters'] = {'type':'part'}
                 else:
-                    self.search_options['predefined_filters'] = {'type':'assembly'}
+                    opts['predefined_filters'] = {'type':'assembly'}
                 return render_template(
                     'record.html', 
                     record=res, 
-                    search_options=json.dumps(self.search_options), 
+                    search_options=json.dumps(opts), 
+                    notes=notes,
                     recordstring=res.json, 
                     edit=True,
                     values=self.values

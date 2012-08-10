@@ -16,6 +16,7 @@
 
     <!-- get bootstrap js and css -->
     <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap-responsive.min.css">
     <script type="text/javascript" src="/static/vendor/bootstrap/js/bootstrap.min.js"></script>
 
     <!-- get tablesorter js and css -->
@@ -50,6 +51,12 @@
       <div class="navbar-inner">
         <div class="container">
           <a class="brand" href="/">Artemis</a>
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </a>
+        <div class="nav-collapse">
           <ul class="nav">
             <li><a href="/record/create/part">New part</a></li>
             <li><a href="/record/create/batch">Batch of new parts</a></li>
@@ -78,6 +85,7 @@
             </li>
             {% endif %}
           </ul>
+        </div>
         </div>
       </div>
     </div>
