@@ -9,5 +9,6 @@ src*
 lastintid
 lastidid
 lastintbatch
+lastidbatch
 artemis/lastidid
 extra/*
