@@ -39,15 +39,17 @@
             <p><a href="" class="jtedit_saveit btn btn-info">save changes</a> &nbsp;<a href="" class="jtedit_deleteit btn btn-danger">delete record</a></p>
         {% endif %}
     </div>
+    {% if not current_user.is_anonymous() %}
     <h3>Notes <small><a id="addnote" class="btn" href="">add a note</a></small></h3>
     {% if notes|length != 0 %}
-        <table class="table table-striped">
         {% for item in notes %}
-            <tr><td>on {{ item['createddate'] }}{% if item['by'] %} by {{ item['by'] }}{% else %} anonymously{% endif %}<br />{{ item['content'] }}</td></tr>
+            <p>on {{ item['createddate'] }}{% if item['by'] %} by {{ item['by'] }}{% else %} anonymously{% endif %}
+            <a class="deletenote" href="#" data-id="{{ item.id }}" alt="delete this note" title="delete this note"> X </a><br />
+            {{ item['content'] }}</p>
         {% endfor %}
-        </table>
     {% endif %}
     </div>
+    {% endif %}
 
     <script type="text/javascript">
     jQuery(document).ready(function() {
@@ -92,6 +94,15 @@
             }
         }
         jQuery('#addnote').bind('click',addnote)
+        var deletenote = function(event) {
+            event.preventDefault()
+            $.ajax({
+                type: "DELETE",
+                url: '/note/'+jQuery(this).attr('data-id')
+            })
+            jQuery(this).parent().hide();
+        }
+        jQuery('.deletenote').bind('click',deletenote)
     })
     </script>    
         

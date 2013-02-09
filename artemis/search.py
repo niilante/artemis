@@ -185,12 +185,14 @@ class Search(object):
             return resp
         elif request.method == 'POST':
             if self.pcid:
+                # TODO: update the assembly change history with addition of this part
                 res.data['assembly'] = self.pcid
                 res.save()
                 return ""
             else:
                 abort(404)
         elif request.method == 'DELETE':
+            # TODO: update the assembly change history with removal of this part
             res.data['assembly'] = ''
             res.save()
             return ""
@@ -233,6 +235,7 @@ class Search(object):
 
 
     def attachments(self):
+        # TODO: move artemis to the test machine then enable attachments on the test index
         if request.method == 'GET':
             if self.pcid:
                 res = artemis.dao.Record.get(self.path)

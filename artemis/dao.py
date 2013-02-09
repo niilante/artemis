@@ -288,7 +288,15 @@ class Record(DomainObject):
                 return False
         else:
             return False
-            
+
+    @property
+    def notes(self):
+        res = Note.query(terms={
+            'owner': [self.id]
+        })
+        allnotes = [ Note(**item['_source']) for item in res['hits']['hits'] ]
+        return allnotes
+                    
 
 class Admin(DomainObject):
     __type__ = 'admin'
@@ -311,7 +319,7 @@ class Note(DomainObject):
         if id_ is None:
             return None
         conn, db = get_conn()
-        res = Note.query(terms={"about":id_})
+        res = Note.query(q="about:"+id_)
         return [i['_source'] for i in res['hits']['hits']]
 
     
@@ -328,14 +336,6 @@ class Account(DomainObject, UserMixin):
     def is_super(self):
         return artemis.auth.user.is_super(self)
     
-    @property
-    def notes(self):
-        res = Note.query(terms={
-            'owner': [self.id]
-        })
-        allnotes = [ Note(**item['_source']) for item in res['hits']['hits'] ]
-        return allnotes
-        
     def delete(self):
         url = str(config['ELASTIC_SEARCH_HOST'])
         loc = config['ELASTIC_SEARCH_DB'] + "/" + self.__type__ + "/" + self.id

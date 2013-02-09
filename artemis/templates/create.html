@@ -16,18 +16,26 @@
                 <h3>New part</h3>
             {% endif %}
             <table>
+
                 {% if rectype == "part" %}
                 <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
                 <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
+                <tr><td>Date delivered:</td><td><input type="text" class="datepicker jtedit_value jtedit_datedelivered" /></td></tr>
+                <tr><td>Bill of materials:</td><td><input type="text" class="jtedit_value jtedit_billofmaterials" /></td></tr>
+                <tr><td>Drawing number:</td><td><input type="text" class="jtedit_value jtedit_drawingnumber" /></td></tr>
                 <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
                 <option></option>
                 {% for item in values['assembly'] %}
                     <option value="{{ item['id'] }}">{{ item['id'] }} - {{ item['name'] }}</option>
                 {% endfor %}
                 </select></td></tr>
+
                 {% elif rectype == "assembly" %}
                 <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">assembly</td></tr>
                 <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
+                <tr><td>Date delivered:</td><td><input type="text" class="datepicker jtedit_value jtedit_datedelivered" /></td></tr>
+                <tr><td>Bill of materials:</td><td><input type="text" class="jtedit_value jtedit_billofmaterials" /></td></tr>
+                <tr><td>Drawing number:</td><td><input type="text" class="jtedit_value jtedit_drawingnumber" /></td></tr>
                 <tr><td>Assembled by:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembledby">
                 <option></option>
                 {% for item in values['user'] %}
@@ -35,9 +43,13 @@
                 {% endfor %}
                 </select></td></tr>
                 <tr><td>Assembled date:</td><td><input type="text" class="datepicker jtedit_value jtedit_assembleddate" /></td></tr>
+
                 {% elif rectype == "batch" %}
                 <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
                 <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
+                <tr><td>Date delivered:</td><td><input type="text" class="datepicker jtedit_value jtedit_datedelivered" /></td></tr>
+                <tr><td>Bill of materials:</td><td><input type="text" class="jtedit_value jtedit_billofmaterials" /></td></tr>
+                <tr><td>Drawing number:</td><td><input type="text" class="jtedit_value jtedit_drawingnumber" /></td></tr>
                 <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
                 <option></option>
                 {% for item in values['assembly'] %}
@@ -46,6 +58,7 @@
                 </select></td></tr>
                 <tr><td>In batch:</td><td style="padding:5px;font-size:120%;">{{ batchid }}</td></tr>
                 {% endif %}
+
                 <tr><td>Manufacturer:</td><td><input type="text" class="jtedit_value jtedit_manufacturer" /></td></td></tr>
                 <tr><td>Supplier:</td><td><select style="height:33px;" class="jtedit_value jtedit_supplier">
                 <option></option>
@@ -66,6 +79,7 @@
                     <option value="{{ item['id'] }}">{{ item['id'] }}</option>
                 {% endfor %}
                 </select></td></td></tr>
+                <tr><td>Notes:</td><td><textarea class="jtedit_value jtedit_notes"></textarea></td></tr>
                 <tr><td></td><td><br /><a href="" id="savenew" class="btn btn-info">save this {{ rectype }}</a></td></tr>
             </table>
         </div>

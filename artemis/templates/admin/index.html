@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+      <div class="row-fluid">
+        <div class="span12">
+            <p>Add values to controlled fields</p>
+            {% for item in fields %}
+                <p>item: {{ item['id'] }}</p>
+            {% endfor %}
+            
+            <p>Add new controlled field</p>
+            
+            <p>Manage users</p>
+        </div>
+      </div>
+{% endblock %}

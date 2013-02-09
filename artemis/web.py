@@ -90,10 +90,11 @@ def home():
         recent = [i['_source'] for i in res['hits']['hits']]
     )
 
+
 @app.route('/users')
 @app.route('/users.json')
 def users():
-    if current_user.is_anonymous():
+    if current_user.is_anonymous() or not current_user.is_super:
         abort(401)
     users = artemis.dao.Account.query(sort={'id':{'order':'asc'}},size=1000000)
     if users['hits']['total'] != 0:
@@ -101,12 +102,7 @@ def users():
         # explicitly mapped to ensure no leakage of sensitive data. augment as necessary
         users = []
         for acc in accs:
-            user = {"collections":len(acc.collections),"id":acc["id"]}
-            try:
-                user['created_date'] = acc['created_date']
-                user['description'] = acc['description']
-            except:
-                pass
+            user = {"id":acc["id"]}
             users.append(user)
     if util.request_wants_json():
         resp = make_response( json.dumps(users, sort_keys=True, indent=4) )
@@ -114,6 +110,7 @@ def users():
         return resp
     else:
         return render_template('account/users.html',users=users)
+
     
 # set the route for receiving new notes
 @app.route('/note', methods=['GET','POST'])
@@ -131,7 +128,7 @@ def note(nid=''):
     elif request.method == 'DELETE':
         note = artemis.dao.Note.get(nid)
         note.delete()
-        return redirect('/note')
+        return ""
 
     else:
         thenote = artemis.dao.Note.get(nid)
@@ -141,6 +138,20 @@ def note(nid=''):
             return resp
         else:
             abort(404)
+
+
+# set th route for admin functions
+@app.route('/admin', methods=['GET','POST'])
+@app.route('/admin/', methods=['GET','POST'])
+def admin():
+    if current_user.is_anonymous() or not current_user.is_super:
+        abort(401)
+
+    if request.method == 'GET':
+        fields = [i['_source'] for i in artemis.dao.Admin().query(size=10000).get('hits',{}).get('hits',{})]
+        return render_template('admin/index.html',fields=fields)
+    elif request.method == 'POST':
+        pass
 
 
 # this is a catch-all that allows us to present everything as a search
