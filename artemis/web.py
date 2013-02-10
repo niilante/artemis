@@ -23,7 +23,11 @@ def load_account_for_login_manager(userid):
 @app.context_processor
 def set_current_user():
     """ Set some template context globals. """
-    return dict(current_user=current_user)
+    fields = {}
+    f = [i['_source'] for i in artemis.dao.Curated().query(size=10000).get('hits',{}).get('hits',{})]
+    for rec in f:
+        fields[rec['id']] = ",".join(rec['values'])
+    return dict(current_user=current_user, curatedfields=fields)
 
 @app.before_request
 def standard_authentication():
@@ -116,10 +120,7 @@ def users():
 @app.route('/note', methods=['GET','POST'])
 @app.route('/note/<nid>', methods=['GET','POST','DELETE'])
 def note(nid=''):
-    if current_user.is_anonymous():
-        abort(401)
-
-    elif request.method == 'POST':
+    if request.method == 'POST':
         newnote = artemis.dao.Note()
         newnote.data = request.json
         newnote.save()
@@ -148,10 +149,14 @@ def admin():
         abort(401)
 
     if request.method == 'GET':
-        fields = [i['_source'] for i in artemis.dao.Admin().query(size=10000).get('hits',{}).get('hits',{})]
-        return render_template('admin/index.html',fields=fields)
+        return render_template('admin/index.html')
     elif request.method == 'POST':
-        pass
+        key = request.json['key']
+        values = request.json['values']
+        curlist = artemis.dao.Curated.get(key)
+        curlist.data['values'] = values
+        curlist.save()
+        return ""
 
 
 # this is a catch-all that allows us to present everything as a search

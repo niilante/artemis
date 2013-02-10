@@ -18,7 +18,7 @@
             <table>
 
                 {% if rectype == "part" %}
-                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
+                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;"><input class="jtedit_value jtedit_type" type="hidden" value="part">part</td></tr>
                 <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
                 <tr><td>Date delivered:</td><td><input type="text" class="datepicker jtedit_value jtedit_datedelivered" /></td></tr>
                 <tr><td>Bill of materials:</td><td><input type="text" class="jtedit_value jtedit_billofmaterials" /></td></tr>
@@ -31,7 +31,7 @@
                 </select></td></tr>
 
                 {% elif rectype == "assembly" %}
-                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">assembly</td></tr>
+                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;"><input class="jtedit_value jtedit_type" type="hidden" value="assembly">assembly</td></tr>
                 <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
                 <tr><td>Date delivered:</td><td><input type="text" class="datepicker jtedit_value jtedit_datedelivered" /></td></tr>
                 <tr><td>Bill of materials:</td><td><input type="text" class="jtedit_value jtedit_billofmaterials" /></td></tr>
@@ -45,7 +45,7 @@
                 <tr><td>Assembled date:</td><td><input type="text" class="datepicker jtedit_value jtedit_assembleddate" /></td></tr>
 
                 {% elif rectype == "batch" %}
-                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;">part</td></tr>
+                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;"><input class="jtedit_value jtedit_type" type="hidden" value="part">part</td></tr>
                 <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
                 <tr><td>Date delivered:</td><td><input type="text" class="datepicker jtedit_value jtedit_datedelivered" /></td></tr>
                 <tr><td>Bill of materials:</td><td><input type="text" class="jtedit_value jtedit_billofmaterials" /></td></tr>
@@ -62,8 +62,8 @@
                 <tr><td>Manufacturer:</td><td><input type="text" class="jtedit_value jtedit_manufacturer" /></td></td></tr>
                 <tr><td>Supplier:</td><td><select style="height:33px;" class="jtedit_value jtedit_supplier">
                 <option></option>
-                {% for item in values['supplier'] %}
-                    <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+                {% for item in curatedfields['supplier'].split(',') %}
+                    <option value="{{ item }}">{{ item }}</option>
                 {% endfor %}
                 </select></td></td></tr>
                 <tr><td>Inspected by:</td><td><select style="height:33px;" class="jtedit_value jtedit_inspectedby">
@@ -75,11 +75,12 @@
                 <tr><td>Inspected date:</td><td><input type="text" class="datepicker jtedit_value jtedit_inspecteddate" /></td></tr>
                 <tr><td>In location:</td><td><select style="height:33px;" class="jtedit_value jtedit_location">
                 <option></option>
-                {% for item in values['location'] %}
-                    <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+                {% for item in curatedfields['location'].split(',') %}
+                    <option value="{{ item }}">{{ item }}</option>
                 {% endfor %}
                 </select></td></td></tr>
                 <tr><td>Notes:</td><td><textarea class="jtedit_value jtedit_notes"></textarea></td></tr>
+                <tr id="newfieldrow"><td></td><td><a id="newfield" href="#">+ add another field</a></td></tr>
                 <tr><td></td><td><br /><a href="" id="savenew" class="btn btn-info">save this {{ rectype }}</a></td></tr>
             </table>
         </div>
@@ -103,33 +104,29 @@ jQuery(document).ready(function() {
         "makeform":false,
         "actionbuttons":false,
         "jsonbutton":false,
-        "data":{
-            {% if rectype == "part" %}
-            "type":"part",
-            "assembly":"",
-            {% elif rectype == "assembly" %}
-            "type":"assembly",
-            "assembledby":"",
-            "assembleddate":"",
-            {% elif rectype == "batch" %}
-            "type":"part",
-            "batch":"{{batchid}}",
-            "assembly":"",
-            {% endif %}
-            "name":"",
-            "manufacturer":"",
-            "supplier":"",
-            "inspectedby":"",
-            "inspecteddate":"",
-            "location":"",
-        }
+        "data":{}
     });
+    var newfield = function(event) {
+        event.preventDefault();
+        var newrow = '<tr><td><input class="newfieldkey" type="text" placeholder="Give your field a name"></td><td class="valueholder"><input class="newfieldvalue" type="text" placeholder="Give your field a value"></td></tr>';
+        $('#newfieldrow').before(newrow);
+    }
+    $('#newfield').bind('click',newfield);
     var saveit = function(event) {
         event.preventDefault();
         var thedata = $.parseJSON(jQuery('#jtedit_json').val());
+        $('.newfieldkey').each(function() {
+            var key = $(this).val();
+            var value = $(this).parent().siblings('.valueholder').children('.newfieldvalue').val();
+            if ( key.length && !(key in thedata) ) {
+                thedata[key] = value;
+            }
+        });
+        alert( JSON.stringify(thedata,"","    ") );
         {% if rectype == 'batch' %}
         alert("Please click OK then please wait for your batch of parts to be created, then the part IDs will be displayed.")
         {% endif %}
+        // TODO: add a grab of any new field keys and values
         $.ajax({
             {% if rectype == 'batch' %}
             url: '/record/create/batch'

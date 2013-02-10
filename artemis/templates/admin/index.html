@@ -2,16 +2,39 @@
 
 {% block content %}
 
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    var savecurvals = function(event) {
+        event.preventDefault();
+        var key = $(this).attr('id');
+        var vals = $('#curvals_'+key).val().split(',');
+        var data = {'key':key,'values':vals};
+        $.ajax({
+            url: '/admin/'
+            , type: 'POST'
+            , data: JSON.stringify(data)
+            , contentType: "application/json; charset=utf-8" 
+            , processData: false
+            , success: function(data, statusText, xhr) {
+                alert('Changes saved.');
+            }
+            , error: function(xhr, message, error) {
+                alert("Error: " + error + '. Please try again.');
+            }
+        });
+    };
+    $('.savecurvals').bind('click',savecurvals);
+});
+</script>
+
       <div class="row-fluid">
         <div class="span12">
-            <p>Add values to controlled fields</p>
-            {% for item in fields %}
-                <p>item: {{ item['id'] }}</p>
+            <p>Change values of controlled fields - write values separated by commas</p>
+            {% for k,v in curatedfields.items() %}
+                <p><div class="curkey" style="width:100px;float:left;">{{ k.replace('_',' ') }}</div><input style="width:500px;" id="curvals_{{k}}" type="text" value="{{ v }}"> <a id="{{ k }}" class="savecurvals btn" href="#" style="margin-top:-10px;">save</a></p>
             {% endfor %}
-            
-            <p>Add new controlled field</p>
-            
-            <p>Manage users</p>
+                        
+            <p><a class="btn" href="http://localhost:5004/account/register">Create a new user account</a></p>
         </div>
       </div>
 {% endblock %}

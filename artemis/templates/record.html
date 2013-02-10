@@ -31,15 +31,12 @@
         {% if record['batch'] %}
         <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a><br /><a href="#" class="batchremove label label-important">remove from batch</a></p>
         {% endif %}
-    </div>
-    </div>
-    <div class="span4">
-    <div class="actionbox hero-unit">
         {% if edit %}
             <p><a href="" class="jtedit_saveit btn btn-info">save changes</a> &nbsp;<a href="" class="jtedit_deleteit btn btn-danger">delete record</a></p>
         {% endif %}
     </div>
-    {% if not current_user.is_anonymous() %}
+    </div>
+    <div class="span4">
     <h3>Notes <small><a id="addnote" class="btn" href="">add a note</a></small></h3>
     {% if notes|length != 0 %}
         {% for item in notes %}
@@ -49,7 +46,6 @@
         {% endfor %}
     {% endif %}
     </div>
-    {% endif %}
 
     <script type="text/javascript">
     jQuery(document).ready(function() {

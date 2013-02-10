@@ -1,0 +1,6 @@
+[submodule "artemis/static/vendor/facetview"]
+	path = artemis/static/vendor/facetview
+	url = https://github.com/okfn/facetview.git
+[submodule "artemis/static/vendor/jtedit"]
+	path = artemis/static/vendor/jtedit
+	url = https://github.com/CottageLabs/jtedit.git

@@ -45,6 +45,12 @@ def init_db():
             c.request('PUT', fullpath, json.dumps(mappings[mapping]))
             res = c.getresponse()
             print res.read()
+    curated = config['CURATED_FIELDS']
+    for cur in curated:
+        check = Curated.get(cur)
+        if check is None:
+            c = Curated(**{'id':cur,'values':['placeholder']})
+            c.save()
 
 
 def get_conn():
@@ -180,6 +186,15 @@ class DomainObject(UserDict.IterableUserDict):
                                     'current': data[key],
                                     'user': get_user()
                                 })
+                    for key in data.keys():
+                        if key not in previous.keys():
+                            data['history'].insert(0, {
+                                'date': data['lastupdated'],
+                                'field': key,
+                                'previous': '',
+                                'current': data[key],
+                                'user': get_user()
+                            })
             
             conn.index(data, db, cls.__type__, urllib.quote_plus(id_), bulk=True)
 
@@ -265,7 +280,7 @@ class Record(DomainObject):
     def children(self):
         kids = []
         if self.data['type'] == "assembly":
-            res = Record.query(terms={"assembly":self.id})
+            res = Record.query(terms={"assembly.exact":self.id})
             if res['hits']['total'] != 0:
                 kids = [i['_source'] for i in res['hits']['hits']]            
         return kids
@@ -298,8 +313,8 @@ class Record(DomainObject):
         return allnotes
                     
 
-class Admin(DomainObject):
-    __type__ = 'admin'
+class Curated(DomainObject):
+    __type__ = 'curated'
 
 
 class Note(DomainObject):

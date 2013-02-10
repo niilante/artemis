@@ -22,15 +22,12 @@ class Search(object):
             'paging': { 'from': 0, 'size': 10 },
             'predefined_filters': {},
             'facets': config['search_facet_fields'],
-            'result_display': config['search_result_display']#,
-            #'addremovefacets': []      # (full list could also be pulled from DAO)
+            'result_display': config['search_result_display']
         }
 
         self.parts = self.path.strip('/').split('/')
 
         self.values = {}
-        self.values['location'] = [{'id':'location1'},{'id':'location2'}]
-        self.values['supplier'] = [{'id':'supplier1'},{'id':'supplier2'}]
         self.values['assembly'] = [i['_source'] for i in artemis.dao.Record.query(terms={'type':'assembly'},size=100000).get('hits',{}).get('hits',{})]
         self.values['user'] = [i['_source'] for i in artemis.dao.Account.query().get('hits',{}).get('hits',{})]
 
@@ -84,7 +81,7 @@ class Search(object):
         
 
     def implicit_facet(self):
-        self.search_options['predefined_filters'][self.parts[0]+config['facet_field']] = self.parts[1]
+        self.search_options['predefined_filters'][self.parts[0]+config['facet_field']] = {'term':{self.parts[0]+config['facet_field']:self.parts[1]}}
         # remove the implicit facet from facets
         for count,facet in enumerate(self.search_options['facets']):
             if facet['field'] == self.parts[0]+config['facet_field']:
@@ -127,13 +124,12 @@ class Search(object):
                 res.update_access_record()
                 opts = deepcopy(self.search_options)
                 notes = artemis.dao.Note.about(res.id)
-                print res.id, notes
                 opts['result_display'][0][1]['pre'] = '<a onclick="doupdate(\''
                 opts['result_display'][0][1]['post'] = '\')" href="javascript: return null;">'
                 if res.data['type'] == "assembly":
-                    opts['predefined_filters'] = {'type':'part'}
+                    opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'part'}}}
                 else:
-                    opts['predefined_filters'] = {'type':'assembly'}
+                    opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'assembly'}}}
                 return render_template(
                     'record.html', 
                     record=res, 
@@ -185,14 +181,23 @@ class Search(object):
             return resp
         elif request.method == 'POST':
             if self.pcid:
-                # TODO: update the assembly change history with addition of this part
                 res.data['assembly'] = self.pcid
                 res.save()
+                # update the parent assembly too
+                ass = artemis.dao.Record.get(self.pcid)
+                if 'children' not in ass.data: ass.data['children'] = []
+                ass.data['children'].append(self.path)
+                ass.save()
                 return ""
             else:
                 abort(404)
         elif request.method == 'DELETE':
-            # TODO: update the assembly change history with removal of this part
+            # update the parent assembly too
+            ass = artemis.dao.Record.get(res.data['assembly'])
+            if 'children' not in ass.data: ass.data['children'] = []
+            if self.path in ass.data['children']:
+                ass.data['children'].remove(self.path)
+            ass.save()
             res.data['assembly'] = ''
             res.save()
             return ""
@@ -211,6 +216,11 @@ class Search(object):
                 c = artemis.dao.Record.get(self.pcid)
                 c.data['assembly'] = self.path
                 c.save()
+                # update the parent assembly too
+                ass = artemis.dao.Record.get(self.path)
+                if 'children' not in ass.data: ass.data['children'] = []
+                ass.data['children'].append(self.pcid)
+                ass.save()
                 return ""
             else:
                 abort(404)
@@ -218,9 +228,16 @@ class Search(object):
             try:
                 if self.pcid:
                     children_ids = [self.pcid]
+                    # update the parent assembly too
+                    if 'children' not in res.data: res.data['children'] = []
+                    if self.pcid in res.data['children']:
+                        res.data['children'].remove(self.pcid)
+                    res.save()
                 else:
                     res = artemis.dao.Record.get(self.path)
                     children_ids = [i['id'] for i in res.children]
+                    res.data['children'] = []
+                    res.save()
                 for kid in children_ids:
                     c = artemis.dao.Record.get(kid)
                     c.data['assembly'] = ''

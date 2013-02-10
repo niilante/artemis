@@ -9,6 +9,8 @@
     # elasticsearch settings
     "ELASTIC_SEARCH_HOST" : "127.0.0.1:9200",
     "ELASTIC_SEARCH_DB" : "artemis",
+
+    "CURATED_FIELDS": ["supplier", "location", "test_type"],
     
     # The default fields and settings for which faceting should be made available on
     # these can be nested fields, e.g. links.url
