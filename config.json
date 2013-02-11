@@ -1,14 +1,15 @@
 {
     # service and super user account
     "service_name" : "Artemis",
-    "super_user" : ["test"],
+    "SUPER_USER" : ["test"],
     "host" : "0.0.0.0",
     "debug" : true,
-    "port" : 5004,
+    "port" : 5002,
 
     # elasticsearch settings
     "ELASTIC_SEARCH_HOST" : "127.0.0.1:9200",
     "ELASTIC_SEARCH_DB" : "artemis",
+    "NO_QUERY_VIA_API": ["account"],
 
     "CURATED_FIELDS": ["supplier", "location", "test_type"],
     
@@ -71,8 +72,8 @@
     
     # a dict of the ES mappings. identify by name, and include name as first object name
     # and identifier for how non-analyzed fields for faceting are differentiated in the mappings
-    "facet_field" : ".exact",
-    "mappings" : {
+    "FACET_FIELD" : ".exact",
+    "MAPPINGS" : {
         "record" : {
             "record" : {
                 "date_detection" : false,
@@ -90,7 +91,12 @@
                             }
                         }
                     }
-                ]
+                ],
+                "properties":{
+                    "attachments.attachment":{
+                        "type": "attachment"
+                    }
+                }
             }
         },
         "collection" : {

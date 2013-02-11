@@ -17,6 +17,7 @@ class Search(object):
         self.current_user = current_user
 
         self.search_options = {
+            'sharesave_link': False,
             'search_url': '/query?',
             'search_index': 'elasticsearch',
             'paging': { 'from': 0, 'size': 10 },
@@ -81,10 +82,10 @@ class Search(object):
         
 
     def implicit_facet(self):
-        self.search_options['predefined_filters'][self.parts[0]+config['facet_field']] = {'term':{self.parts[0]+config['facet_field']:self.parts[1]}}
+        self.search_options['predefined_filters'][self.parts[0]+config['FACET_FIELD']] = {'term':{self.parts[0]+config['FACET_FIELD']:self.parts[1]}}
         # remove the implicit facet from facets
         for count,facet in enumerate(self.search_options['facets']):
-            if facet['field'] == self.parts[0]+config['facet_field']:
+            if facet['field'] == self.parts[0]+config['FACET_FIELD']:
                 del self.search_options['facets'][count]
         if util.request_wants_json():
             res = artemis.dao.Record.query(terms=self.search_options['predefined_filters'])
@@ -101,23 +102,18 @@ class Search(object):
 
 
     def record(self):
-        if request.method == "POST":
-            received = request.json
-            recobj = artemis.dao.Record(**received)
-            recobj.save()
-            recids = [recobj.id]
+        res = artemis.dao.Record.get(self.path)
 
-            resp = make_response( json.dumps({"record":recids}) )
-            resp.mimetype = "application/json"
-            return resp
+        if request.method == "POST":
+            res.data.update(request.json)
+            res.save()
+            return ""
         
         elif request.method == "DELETE":
-            res = artemis.dao.Record.get(self.path)
             res.delete()
             return ''
             
         else:
-            res = artemis.dao.Record.get(self.path)
             if not res:
                 abort(404)
             else:
@@ -130,12 +126,14 @@ class Search(object):
                     opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'part'}}}
                 else:
                     opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'assembly'}}}
+                for att in res.data.get('attachments',[]):
+                    att['attachment'] = ''
                 return render_template(
                     'record.html', 
                     record=res, 
                     search_options=json.dumps(opts), 
                     notes=notes,
-                    recordstring=res.json, 
+                    recordstring=json.dumps(res.data,indent=4), 
                     edit=True,
                     values=self.values
                 )
@@ -280,6 +278,8 @@ class Search(object):
                 "attachment": encoded,
                 "filename": upfile.filename,
                 "description": request.values.get('description',""),
+                "test_type": request.values.get('test_type',""),
+                "tested_by": request.values.get("tested_by",""),
                 "user": self.current_user.id,
                 "date": datetime.now().strftime("%Y-%m-%d %H%M")
             }
@@ -314,7 +314,7 @@ class Search(object):
 
 
     def account(self):
-        self.search_options['predefined_filters']['owner'+config['facet_field']] = self.parts[0]
+        self.search_options['predefined_filters']['owner'+config['FACET_FIELD']] = self.parts[0]
         acc = artemis.dao.Account.get(self.parts[0])
 
         if request.method == 'DELETE':

@@ -1,4 +1,4 @@
-import json
+import json, urllib2
 
 from flask import Flask, jsonify, json, request, redirect, abort, make_response
 from flask import render_template, flash
@@ -54,7 +54,7 @@ def page_not_found(e):
 def page_not_found(e):
     return render_template('401.html'), 401
 
-
+'''
 @app.route('/query/<path:path>', methods=['GET','POST'])
 @app.route('/query/', methods=['GET','POST'])
 @app.route('/query', methods=['GET','POST'])
@@ -72,6 +72,49 @@ def query(path='Record'):
     else:
         resp = make_response( klass().raw_query(qs) )
     resp.mimetype = "application/json"
+    return resp'''
+
+
+# pass queries direct to index. POST only for receipt of complex query objects
+@app.route('/query/<path:path>', methods=['GET','POST'])
+@app.route('/query/', methods=['GET','POST'])
+@app.route('/query', methods=['GET','POST'])
+@util.jsonp
+def query(path='Record'):
+    pathparts = path.split('/')
+    subpath = pathparts[0]
+    if subpath.lower() in config['NO_QUERY_VIA_API']:
+        abort(401)
+    klass = getattr(artemis.dao, subpath[0].capitalize() + subpath[1:] )
+    
+    if len(pathparts) > 1 and pathparts[1] == '_mapping':
+        resp = make_response( json.dumps(klass().query(endpoint='_mapping')) )
+    elif len(pathparts) == 2 and pathparts[1] not in ['_mapping','_search']:
+        if request.method == 'POST':
+            abort(401)
+        else:
+            rec = klass().pull(pathparts[1])
+            if rec:
+                resp = make_response( rec.json )
+            else:
+                abort(404)
+    else:
+        if request.method == "POST":
+            if request.json:
+                qs = request.json
+            else:
+                qs = dict(request.form).keys()[-1]
+        elif 'q' in request.values:
+            qs = {'query': {'query_string': { 'query': request.values['q'] }}}
+        elif 'source' in request.values:
+            qs = json.loads(urllib2.unquote(request.values['source']))
+        else: 
+            qs = ''
+        for item in request.values:
+            if item not in ['q','source','callback','_'] and isinstance(qs,dict):
+                qs[item] = request.values[item]
+        resp = make_response( json.dumps(klass().query(q=qs)) )
+    resp.mimetype = "application/json"
     return resp
         
 
@@ -84,14 +127,14 @@ def content(path=''):
 @app.route('/')
 def home():
     try:
-        res = artemis.dao.Record.query(sort={'created_date':{'order':'desc'}})
+        res = artemis.dao.Record.query(sort={'createddate.exact':{'order':'desc'}})
     except:
         res = artemis.dao.Record.query()
     return render_template(
         'home/index.html',
         assemblies = artemis.dao.Record.query(terms={'type':'assembly'})['hits']['total'],
         records = artemis.dao.Record.query(terms={'type':'part'})['hits']['total'],
-        recent = [i['_source'] for i in res['hits']['hits']]
+        recent = [i['_source'] for i in res.get('hits',{}).get('hits',[])]
     )
 
 

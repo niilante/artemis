@@ -5,22 +5,22 @@
 <div class="row-fluid">
 
     <div class="span8">
-    <div class="hero-unit" style="min-height:250px;">
+    <div class="hero-unit recorddisplay" style="min-height:250px;">
         <!-- record info -->
         <h2>{{ record['type'] }} {{ record['id'] }}{% if record['name'] %} - {{ record['name'] }}{% endif %}</h2>
         <table style="font-size:120%;">
         <tr><td><h3>Current location:</td><td><select class="jtedit_value jtedit_location" style="height:33px;">x
         <option></option>
-        {% for item in values['location'] %}
-            <option value="{{item['id']}}"{% if item['id'] == record['location'] %} selected{% endif %}>{{item['id']}}</option>
+        {% for item in curatedfields['location'].split(',') %}
+            <option value="{{item}}"{% if item == record['location'] %} selected="selected"{% endif %}>{{item}}</option>
         {% endfor %}
         </select>
         </h3></td></tr>
         
         <tr><td>Supplier:</td><td><select class="jtedit_value jtedit_supplier" style="height:33px;">
         <option></option>
-        {% for item in values['supplier'] %}
-            <option value="{{item['id']}}"{% if item['id'] == record['supplier'] %} selected{% endif %}>{{item['id']}}</option>
+        {% for item in curatedfields['supplier'].split(',') %}
+            <option value="{{item}}"{% if item == record['supplier'] %} selected="selected"{% endif %}>{{item}}</option>
         {% endfor %}
         </select></td></tr>
         <tr><td>Manufacturer:</td><td><input type="text" class="jtedit_value jtedit_manufacturer" value="{{record['manufacturer']}}" /></td></tr>
@@ -32,7 +32,7 @@
         <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a><br /><a href="#" class="batchremove label label-important">remove from batch</a></p>
         {% endif %}
         {% if edit %}
-            <p><a href="" class="jtedit_saveit btn btn-info">save changes</a> &nbsp;<a href="" class="jtedit_deleteit btn btn-danger">delete record</a></p>
+            <p><a href="" class="savebyjt btn btn-info">save changes</a> &nbsp;<a href="" class="jtedit_deleteit btn btn-danger">delete record</a></p>
         {% endif %}
     </div>
     </div>
@@ -49,18 +49,24 @@
 
     <script type="text/javascript">
     jQuery(document).ready(function() {
+        var savebyjt = function(event) {
+            event ? event.preventDefault() : "";
+            $.fn.jtedit.saveit(true);
+        };
+        $('.savebyjt').bind('click',savebyjt);
         var batchremove = function(event) {
             event.preventDefault()
             var rec = $.parseJSON($('#jtedit_json').val())
             rec['batch'] = ""
             $('#jtedit_json').val(JSON.stringify(rec,"","    "))
-            $('.jtedit_saveit').trigger('click')
+            $('.savebyjt').trigger('click')
         }
         jQuery('.batchremove').bind('click',batchremove)
 
-        jQuery('.actionbox').jtedit({
+        jQuery('.recorddisplay').jtedit({
             "makeform":false,
             "actionbuttons":false,
+            "reloadonsave": false,
             "jsonbutton":false,
             "data":{{recordstring|safe}}
         })
@@ -75,7 +81,7 @@
             if ( note ) {
                 var newnote = {
                     "content": note,
-                    "by": "{{ current_user.id }}",
+                    "by": "{% if current_user %}{{ current_user.id }}{% else %}anonymous{% endif %}",
                     "about": "{{ record['id'] }}"
                 }
                 $.ajax({
@@ -236,7 +242,7 @@
 <!-- show any attachments, offer to upload new -->
 {% if record['attachments'] %}
     {% for item in record['attachments'] %}
-        <p><a href="/record/{{record.id}}/attachments/{{item['filename']}}">{{item['filename']}}</a> - {{item['description']}}</p>
+        <p><a href="/record/{{record.id}}/attachments/{{item['filename']}}">{{item['filename']}}</a>. {{item['test_type']}}. Tested by {{item['tested_by']}}. {{item['description']}}</p>
     {% endfor %}
 {% else %}
     <p>No attachments yet</p>
@@ -256,7 +262,18 @@
         <div style="border:1px solid #ccc;padding:5px;" id="addattachment">
         <p>Choose an attachment: <input type="file" name="upfile" /></p>
         <p><textarea style="width:90%;" name="description" placeholder="provide a short description"></textarea></p>
-        <!-- TODO: add test date and tested by and test type and drawing number -->
+        <p>Test type: <select name="test_type" style="height:33px;">
+            <option></option>
+            {% for item in curatedfields['test_type'].split(',') %}
+                <option value="{{item}}">{{item}}</option>
+            {% endfor %}
+        </select></p>
+        <p>Tested by: <select name="tested_by" style="height:33px;">
+            <option></option>
+            {% for item in values['user'] %}
+                <option value="{{ item['id'] }}">{{ item['id'] }}</option>
+            {% endfor %}
+        </select></p>
         <p><input type="submit" class="btn btn-info" value="upload new attachment" /></p>
         {% if record['type'] == 'assembly' %}
             <p>(Note: this is an assembly. If you upload an attachment to it, it 
@@ -330,7 +347,7 @@ jQuery(document).ready(function() {
         </script>
         <div id="accesshistory">
 <!-- show access history -->
-{% for item in record['access'] %}
+{% for item in record['last_access'] %}
     <p>Viewed by {{ item['user'] }} at {{ item['date'] }}</p>
 {% endfor %}
         </div>
