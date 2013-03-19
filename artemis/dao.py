@@ -87,10 +87,10 @@ class DomainObject(UserDict.IterableUserDict):
             id_ = makeid()
             self.data['id'] = id_
         
-        self.data['lastupdated'] = datetime.now().strftime("%Y-%m-%d %H%M")
+        self.data['updated_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
 
-        if 'createddate' not in self.data:
-            self.data['createddate'] = datetime.now().strftime("%Y-%m-%d %H%M")
+        if 'created_date' not in self.data:
+            self.data['created_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
             
         r = requests.post(self.target() + self.data['id'], data=json.dumps(self.data))
 
@@ -202,25 +202,28 @@ class Record(DomainObject):
             id_ = makeid()
             self.data['id'] = id_
         
-        self.data['lastupdated'] = datetime.now().strftime("%Y-%m-%d %H%M")
+        self.data['updated_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
 
-        if 'createddate' not in self.data:
-            self.data['createddate'] = datetime.now().strftime("%Y-%m-%d %H%M")
-            self.data['history'] = [{'date':self.data['createddate'],'user': get_user(),'current':'record created'}]
+        if 'type' not in self.data:
+            self.data['type'] = 'part'
+
+        if 'created_date' not in self.data:
+            self.data['created_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
+            self.data['history'] = [{'date':self.data['created_date'],'user': get_user(),'current':'record created'}]
         else:
             if 'history' not in self.data:
                 self.data['history'] = []
             previous = Record.get(self.data['id'])
             if previous:
                 for key,val in previous.data.items():
-                    if key not in ['history','last_access','lastupdated']:
+                    if key not in ['history','last_access','updated_date']:
                         if val != self.data[key]:
                             if key == 'attachments':
                                 tocurrent = "attachment list altered"
                             else:
                                 tocurrent = json.dumps(self.data[key],indent=4)
                             self.data['history'].insert(0, {
-                                'date': self.data['lastupdated'],
+                                'date': self.data['updated_date'],
                                 'field': key,
                                 'previous': json.dumps(val,indent=4),
                                 'current': tocurrent,
@@ -233,7 +236,7 @@ class Record(DomainObject):
                         else:
                             tocurrent = json.dumps(self.data[key],indent=4)
                         self.data['history'].insert(0, {
-                            'date': self.data['lastupdated'],
+                            'date': self.data['updated_date'],
                             'field': key,
                             'previous': '',
                             'current': tocurrent,

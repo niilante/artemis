@@ -27,7 +27,7 @@
         </table>
         <p>{% if record['inspecteddate'] %}Inspected on {{ record['inspecteddate'] }}{% endif %}
         {% if record['inspecteddate'] and record['inspectedby'] %} by {% elif not record['inspecteddate'] and record['inspectedby'] %}Inspected by {% endif %}{{ record['inspectedby'] }}</p>
-        <p>Record created on {{ record['createddate'] }}. {% if record['lastupdated'] %}Last updated {{ record['lastupdated'] }}{% endif %}</p>
+        <p>Record created on {{ record['created_date'] }}. {% if record['updated_date'] %}Last updated {{ record['updated_date'] }}{% endif %}</p>
         {% if record['batch'] %}
         <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a><br /><a href="#" class="batchremove label label-important">remove from batch</a></p>
         {% endif %}
@@ -40,7 +40,7 @@
     <h3>Notes <small><a id="addnote" class="btn" href="">add a note</a></small></h3>
     {% if notes|length != 0 %}
         {% for item in notes %}
-            <p>on {{ item['createddate'] }}{% if item['by'] %} by {{ item['by'] }}{% else %} anonymously{% endif %}
+            <p>on {{ item['created_date'] }}{% if item['by'] %} by {{ item['by'] }}{% else %} anonymously{% endif %}
             <a class="deletenote" href="#" data-id="{{ item.id }}" alt="delete this note" title="delete this note"> X </a><br />
             {{ item['content'] }}</p>
         {% endfor %}

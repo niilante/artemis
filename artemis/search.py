@@ -122,7 +122,7 @@ class Search(object):
                 notes = artemis.dao.Note.about(res.id)
                 opts['result_display'][0][1]['pre'] = '<a onclick="doupdate(\''
                 opts['result_display'][0][1]['post'] = '\')" href="javascript: return null;">'
-                if res.data['type'] == "assembly":
+                if res.data.get('type','') == "assembly":
                     opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'part'}}}
                 else:
                     opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'assembly'}}}
@@ -267,7 +267,7 @@ class Search(object):
                         )
             else:
                 res = artemis.dao.Record.get(self.path)
-                resp = make_response( json.dumps(res.data[attachments]) )
+                resp = make_response( json.dumps(res.data['attachments']) )
                 resp.mimetype = "application/json"
                 return resp
         elif request.method == 'POST':
@@ -288,7 +288,7 @@ class Search(object):
                 res.data['attachments'] = []
             res.data['attachments'].insert(0, newatt)
             res.save()
-            if res.data['type'] == 'assembly':
+            if res.data.get('type','') == 'assembly':
                 for kid in res.children:
                     k = artemis.dao.Record.get(kid['id'])
                     if 'attachments' not in k.data:
@@ -331,7 +331,7 @@ class Search(object):
                     acc = artemis.dao.Account.get(info['_id'])
                 else:
                     info['api_key'] = acc.data['api_key']
-                    info['_created'] = acc.data['_created']
+                    info['created_date'] = acc.data['created_date']
                     info['collection'] = acc.data['collection']
                     info['owner'] = acc.data['collection']
             acc.data = info

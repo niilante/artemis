@@ -127,7 +127,7 @@ def content(path=''):
 @app.route('/')
 def home():
     try:
-        res = artemis.dao.Record.query(sort={'createddate.exact':{'order':'desc'}})
+        res = artemis.dao.Record.query(sort={'created_date.exact':{'order':'desc'}})
     except:
         res = artemis.dao.Record.query()
     return render_template(
