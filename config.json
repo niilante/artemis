@@ -8,7 +8,7 @@
 
     # elasticsearch settings
     "ELASTIC_SEARCH_HOST" : "127.0.0.1:9200",
-    "ELASTIC_SEARCH_DB" : "artemis",
+    "ELASTIC_SEARCH_DB" : "artemisv2",
     "NO_QUERY_VIA_API": ["account"],
 
     "CURATED_FIELDS": ["supplier", "location", "test_type"],
