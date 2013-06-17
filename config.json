@@ -31,6 +31,14 @@
             "display":"assembly"
         },
         {
+            "field":"supplier.exact",
+            "display":"supplier"
+        },
+        {
+            "field":"location.exact",
+            "display":"location"
+        },
+        {
             "field":"created_date.exact",
             "size":10,
             "order":"reverse_term",

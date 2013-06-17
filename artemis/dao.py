@@ -193,7 +193,6 @@ class Record(DomainObject):
     
     def update_access_record(self):
         return self.accessed()
-    
 
     def save(self):
         if 'id' in self.data:
@@ -298,13 +297,19 @@ class Curated(DomainObject):
 class Note(DomainObject):
     __type__ = 'note'
 
-    def delete(self):
-        url = str(config['ELASTIC_SEARCH_HOST'])
-        loc = config['ELASTIC_SEARCH_DB'] + "/" + self.__type__ + "/" + self.id
-        conn = httplib.HTTPConnection(url)
-        conn.request('DELETE', loc)
-        resp = conn.getresponse()
-        return ''
+    def save(self):
+        if 'id' in self.data:
+            id_ = self.data['id'].strip()
+        else:
+            id_ = uuid.uuid4().hex
+            self.data['id'] = id_
+        
+        self.data['updated_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
+
+        if 'created_date' not in self.data:
+            self.data['created_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
+            
+        r = requests.post(self.target() + self.data['id'], data=json.dumps(self.data))
 
     @classmethod
     def about(cls, id_):
@@ -328,12 +333,4 @@ class Account(DomainObject, UserMixin):
     def is_super(self):
         return artemis.auth.user.is_super(self)
     
-    def delete(self):
-        url = str(config['ELASTIC_SEARCH_HOST'])
-        loc = config['ELASTIC_SEARCH_DB'] + "/" + self.__type__ + "/" + self.id
-        conn = httplib.HTTPConnection(url)
-        conn.request('DELETE', loc)
-        resp = conn.getresponse()
-        for note in self.notes:
-            note.delete()
 

@@ -8,6 +8,31 @@
     <div class="hero-unit recorddisplay" style="min-height:250px;">
         <!-- record info -->
         <h2>{{ record['type'] }} {{ record['id'] }}{% if record['name'] %} - {{ record['name'] }}{% endif %}</h2>
+
+        <table>
+        {% for key in record %}
+            {% if key not in ['batch','id','type','updated_date','created_date','last_access','history','assembly','assembly_history'] %}
+                <tr>
+                    <td>{{key}}</td>
+                    <td>
+                    {% if key in ['supplier','location'] %}
+                        <select class="jtedit_value jtedit_{{key}}" style="height:33px;">
+                            <option></option>
+                            {% for item in curatedfields[key].split(',') %}
+                                <option value="{{item}}"{% if item == record[key] %} selected="selected"{% endif %}>{{item}}</option>
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <input type="text" class="jtedit_value jtedit_{{key}}" value="{{record[key]}}">
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </table>
+        <p>{% if record['updated_date'] %}Record created on {{ record['created_date'] }}. {% endif %}{% if record['updated_date'] %}Last updated {{ record['updated_date'] }}{% endif %}</p>
+        
+        <!--
         <table style="font-size:120%;">
         <tr><td><h3>Current location:</td><td><select class="jtedit_value jtedit_location" style="height:33px;">x
         <option></option>
@@ -28,6 +53,8 @@
         <p>{% if record['inspecteddate'] %}Inspected on {{ record['inspecteddate'] }}{% endif %}
         {% if record['inspecteddate'] and record['inspectedby'] %} by {% elif not record['inspecteddate'] and record['inspectedby'] %}Inspected by {% endif %}{{ record['inspectedby'] }}</p>
         <p>Record created on {{ record['created_date'] }}. {% if record['updated_date'] %}Last updated {{ record['updated_date'] }}{% endif %}</p>
+        -->
+        
         {% if record['batch'] %}
         <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a><br /><a href="#" class="batchremove label label-important">remove from batch</a></p>
         {% endif %}
