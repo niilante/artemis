@@ -216,7 +216,15 @@ class Record(DomainObject):
             if previous:
                 for key,val in previous.data.items():
                     if key not in ['history','last_access','updated_date']:
-                        if val != self.data[key]:
+                        if key not in self.data.keys():
+                            self.data['history'].insert(0, {
+                                'date': self.data['updated_date'],
+                                'field': key,
+                                'previous': json.dumps(val,indent=4),
+                                'current': "KEY REMOVED",
+                                'user': get_user()
+                            })                        
+                        elif val != self.data[key]:
                             if key == 'attachments':
                                 tocurrent = "attachment list altered"
                             else:

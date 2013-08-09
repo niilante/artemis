@@ -104,15 +104,36 @@ class Search(object):
     def record(self):
         res = artemis.dao.Record.get(self.path)
 
-        if request.method == "POST":
-            res.data.update(request.json)
-            res.save()
-            return ""
-        
-        elif request.method == "DELETE":
+        if request.method == "DELETE" or request.method == 'POST' and request.values.get('submit',False) == 'Delete':
+            flash('record ' + res.id + ' deleted')
             res.delete()
-            return ''
-            
+            return redirect('/')
+
+        elif request.method == "POST":
+            newdata = request.json if request.json else request.values
+            for k, v in newdata.items():
+                if v.startswith("{u'"):
+                    if k in res.data.keys():
+                        del res.data[k]
+                    dd = json.loads(v.replace("u'","'").replace("'",'"'))
+                    for l, m in dd.items():
+                        if len(m) > 0:
+                            res.data[k + '_' + l] = m
+                elif k not in ['submit']:
+                    res.data[k] = v
+            res.save()
+            opts = deepcopy(self.search_options)
+            notes = artemis.dao.Note.about(res.id)
+            return render_template(
+                'record.html', 
+                record=res, 
+                search_options=json.dumps(opts), 
+                notes=notes,
+                recordstring=json.dumps(res.data,indent=4), 
+                edit=True,
+                values=self.values
+            )
+                    
         else:
             if not res:
                 abort(404)

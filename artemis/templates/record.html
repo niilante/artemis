@@ -5,25 +5,26 @@
 <div class="row-fluid">
 
     <div class="span8">
-    <div class="hero-unit recorddisplay" style="min-height:250px;">
+    <form method="POST" action="">
+    <div class="hero-unit" style="min-height:250px;">
         <!-- record info -->
         <h2>{{ record['type'] }} {{ record['id'] }}{% if record['name'] %} - {{ record['name'] }}{% endif %}</h2>
 
         <table>
         {% for key in record %}
-            {% if key not in ['batch','id','type','updated_date','created_date','last_access','history','assembly','assembly_history'] %}
+            {% if key not in ['batch','id','type','updated_date','created_date','last_access','history','assembly','assembly_history','attachments'] %}
                 <tr>
                     <td>{{key}}</td>
                     <td>
                     {% if key in ['supplier','location'] %}
-                        <select class="jtedit_value jtedit_{{key}}" style="height:33px;">
+                        <select name="{{key}}" style="height:33px;">
                             <option></option>
                             {% for item in curatedfields[key].split(',') %}
                                 <option value="{{item}}"{% if item == record[key] %} selected="selected"{% endif %}>{{item}}</option>
                             {% endfor %}
                         </select>
                     {% else %}
-                        <input type="text" class="jtedit_value jtedit_{{key}}" value="{{record[key]}}">
+                        <input name="{{key}}" type="text" value="{{record[key]}}">
                     {% endif %}
                     </td>
                 </tr>
@@ -32,37 +33,17 @@
         </table>
         <p>{% if record['updated_date'] %}Record created on {{ record['created_date'] }}. {% endif %}{% if record['updated_date'] %}Last updated {{ record['updated_date'] }}{% endif %}</p>
         
-        <!--
-        <table style="font-size:120%;">
-        <tr><td><h3>Current location:</td><td><select class="jtedit_value jtedit_location" style="height:33px;">x
-        <option></option>
-        {% for item in curatedfields['location'].split(',') %}
-            <option value="{{item}}"{% if item == record['location'] %} selected="selected"{% endif %}>{{item}}</option>
-        {% endfor %}
-        </select>
-        </h3></td></tr>
-        
-        <tr><td>Supplier:</td><td><select class="jtedit_value jtedit_supplier" style="height:33px;">
-        <option></option>
-        {% for item in curatedfields['supplier'].split(',') %}
-            <option value="{{item}}"{% if item == record['supplier'] %} selected="selected"{% endif %}>{{item}}</option>
-        {% endfor %}
-        </select></td></tr>
-        <tr><td>Manufacturer:</td><td><input type="text" class="jtedit_value jtedit_manufacturer" value="{{record['manufacturer']}}" /></td></tr>
-        </table>
-        <p>{% if record['inspecteddate'] %}Inspected on {{ record['inspecteddate'] }}{% endif %}
-        {% if record['inspecteddate'] and record['inspectedby'] %} by {% elif not record['inspecteddate'] and record['inspectedby'] %}Inspected by {% endif %}{{ record['inspectedby'] }}</p>
-        <p>Record created on {{ record['created_date'] }}. {% if record['updated_date'] %}Last updated {{ record['updated_date'] }}{% endif %}</p>
-        -->
-        
         {% if record['batch'] %}
         <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a><br /><a href="#" class="batchremove label label-important">remove from batch</a></p>
         {% endif %}
+
         {% if edit %}
-            <p><a href="" class="savebyjt btn btn-info">save changes</a> &nbsp;<a href="" class="jtedit_deleteit btn btn-danger">delete record</a></p>
+            <p><input type="submit" name="submit" class="btn btn-info" value="Save"> &nbsp;<input type="submit" name="submit" class="btn btn-danger" value="Delete"></p>
         {% endif %}
     </div>
+    </form>
     </div>
+
     <div class="span4">
     <h3>Notes <small><a id="addnote" class="btn" href="">add a note</a></small></h3>
     {% if notes|length != 0 %}
@@ -76,30 +57,24 @@
 
     <script type="text/javascript">
     jQuery(document).ready(function() {
-        var savebyjt = function(event) {
-            event ? event.preventDefault() : "";
-            $.fn.jtedit.saveit(true);
-        };
-        $('.savebyjt').bind('click',savebyjt);
         var batchremove = function(event) {
             event.preventDefault()
-            var rec = $.parseJSON($('#jtedit_json').val())
-            rec['batch'] = ""
-            $('#jtedit_json').val(JSON.stringify(rec,"","    "))
-            $('.savebyjt').trigger('click')
+            var rec = {"batch":""}
+            $.ajax({
+                type: "POST",
+                url: '',
+                data: JSON.stringify(rec),
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                processData: false,
+                success: savedone
+            })
+
         }
         jQuery('.batchremove').bind('click',batchremove)
 
-        jQuery('.recorddisplay').jtedit({
-            "makeform":false,
-            "actionbuttons":false,
-            "reloadonsave": false,
-            "jsonbutton":false,
-            "data":{{recordstring|safe}}
-        })
-
-        var notesaved = function() {
-            alert('note saved')
+        var savedone = function() {
+            alert('saved')
             window.location = window.location
         }
         var addnote = function(event) {
@@ -118,7 +93,7 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: 'json',
                     processData: false,
-                    success: notesaved
+                    success: savedone
                 })
             }
         }
