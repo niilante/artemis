@@ -227,12 +227,14 @@ class Record(DomainObject):
                         elif val != self.data[key]:
                             if key == 'attachments':
                                 tocurrent = "attachment list altered"
+                                prev = "attachment list altered"
                             else:
                                 tocurrent = json.dumps(self.data[key],indent=4)
+                                prev = json.dumps(val,indent=4)
                             self.data['history'].insert(0, {
                                 'date': self.data['updated_date'],
                                 'field': key,
-                                'previous': json.dumps(val,indent=4),
+                                'previous': prev,
                                 'current': tocurrent,
                                 'user': get_user()
                             })

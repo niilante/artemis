@@ -49,6 +49,12 @@
             "size":10,
             "order":"reverse_term",
             "display":"last updated"
+        },
+        {
+            "field":"history.user.exact",
+            "size":10,
+            "order":"term",
+            "display":"last edited by"
         }
     ],
 

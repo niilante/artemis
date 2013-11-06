@@ -5,7 +5,7 @@ import artemis.dao
 from artemis import auth
 from datetime import datetime
 from copy import deepcopy
-import json, httplib, StringIO
+import json, httplib, StringIO, time
 from artemis.config import config
 import artemis.util as util
 
@@ -170,13 +170,15 @@ class Search(object):
             return render_template('create.html', rectype=self.rectype, batchid=batchid, values=self.values)
 
         elif request.method == "POST":
-            received = request.json
+            received = request.json if request.json else request.values
+            record = {}
+            for key, val in received.items():
+                if key not in ['submit','howmany']:
+                    record[key] = val
             if self.rectype == "batch":
-                create = int(received['create'])
-                record = received['data']         
+                create = int(received['howmany'])
             else:
                 create = 1
-                record = received
             count = 0
             recids = []
             while count < create:
@@ -184,9 +186,14 @@ class Search(object):
                 recobj = artemis.dao.Record(**record)
                 recobj.save()
                 recids.append(recobj.id)
-            resp = make_response( json.dumps({"record":recids}) )
-            resp.mimetype = "application/json"
-            return resp
+
+            time.sleep(1)
+            if self.rectype == "batch":
+                flash('Your batch has been created. The parts in the batch are shown below.')
+                return redirect('/batch/' + record['batch'])
+            else:
+                flash('Your new record has been created')
+                return redirect('/record/' + recids[0])
             
             
     def parent(self):
@@ -271,7 +278,6 @@ class Search(object):
 
 
     def attachments(self):
-        # TODO: move artemis to the test machine then enable attachments on the test index
         if request.method == 'GET':
             if self.pcid:
                 res = artemis.dao.Record.get(self.path)
@@ -300,6 +306,7 @@ class Search(object):
                 "filename": upfile.filename,
                 "description": request.values.get('description',""),
                 "test_type": request.values.get('test_type',""),
+                "test_date": request.values.get('test_date',""),
                 "tested_by": request.values.get("tested_by",""),
                 "user": self.current_user.id,
                 "date": datetime.now().strftime("%Y-%m-%d %H%M")

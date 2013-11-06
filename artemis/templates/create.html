@@ -2,6 +2,7 @@
 
 {% block content %}
 
+<form action="" method="POST">
 <div class="row-fluid">
     <div class="span6">
         <div id="therecord" class="hero-unit" style="min-height:500px;">
@@ -18,12 +19,12 @@
             <table>
 
                 {% if rectype == "part" %}
-                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;"><input class="jtedit_value jtedit_type" type="hidden" value="part">part</td></tr>
-                <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
-                <tr><td>Date delivered:</td><td><input type="text" class="datepicker jtedit_value jtedit_datedelivered" /></td></tr>
-                <tr><td>Bill of materials:</td><td><input type="text" class="jtedit_value jtedit_billofmaterials" /></td></tr>
-                <tr><td>Drawing number:</td><td><input type="text" class="jtedit_value jtedit_drawingnumber" /></td></tr>
-                <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
+                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;"><input name="type" type="hidden" value="part">part</td></tr>
+                <tr><td>Name:</td><td><input type="text" name="name" autofocus="autofocus" /></td></tr>
+                <tr><td>Date delivered:</td><td><input type="text" class="datepicker" name="datedelivered" /></td></tr>
+                <tr><td>Bill of materials:</td><td><input type="text" name="billofmaterials" /></td></tr>
+                <tr><td>Drawing number:</td><td><input type="text" name="drawingnumber" /></td></tr>
+                <tr><td>In assembly:</td><td><select style="height:33px;" name="assembly">
                 <option></option>
                 {% for item in values['assembly'] %}
                     <option value="{{ item['id'] }}">{{ item['id'] }} - {{ item['name'] }}</option>
@@ -31,56 +32,65 @@
                 </select></td></tr>
 
                 {% elif rectype == "assembly" %}
-                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;"><input class="jtedit_value jtedit_type" type="hidden" value="assembly">assembly</td></tr>
-                <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
-                <tr><td>Date delivered:</td><td><input type="text" class="datepicker jtedit_value jtedit_datedelivered" /></td></tr>
-                <tr><td>Bill of materials:</td><td><input type="text" class="jtedit_value jtedit_billofmaterials" /></td></tr>
-                <tr><td>Drawing number:</td><td><input type="text" class="jtedit_value jtedit_drawingnumber" /></td></tr>
-                <tr><td>Assembled by:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembledby">
+                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;"><input name="type" type="hidden" value="assembly">assembly</td></tr>
+                <tr><td>Name:</td><td><input type="text" name="name" autofocus="autofocus" /></td></tr>
+                <tr><td>Date delivered:</td><td><input type="text" class="datepicker" name="datedelivered" /></td></tr>
+                <tr><td>Bill of materials:</td><td><input type="text" name="billofmaterials" /></td></tr>
+                <tr><td>Drawing number:</td><td><input type="text" name="drawingnumber" /></td></tr>
+                <tr><td>Assembled by:</td><td><select style="height:33px;" name="assembledby">
                 <option></option>
                 {% for item in values['user'] %}
                     <option value="{{ item['id'] }}">{{ item['id'] }}</option>
                 {% endfor %}
                 </select></td></tr>
-                <tr><td>Assembled date:</td><td><input type="text" class="datepicker jtedit_value jtedit_assembleddate" /></td></tr>
+                <tr><td>Assembled date:</td><td><input type="text" class="datepicker" name="assembleddate" /></td></tr>
 
                 {% elif rectype == "batch" %}
-                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;"><input class="jtedit_value jtedit_type" type="hidden" value="part">part</td></tr>
-                <tr><td>Name:</td><td><input type="text" class="jtedit_value jtedit_name" autofocus="autofocus" /></td></tr>
-                <tr><td>Date delivered:</td><td><input type="text" class="datepicker jtedit_value jtedit_datedelivered" /></td></tr>
-                <tr><td>Bill of materials:</td><td><input type="text" class="jtedit_value jtedit_billofmaterials" /></td></tr>
-                <tr><td>Drawing number:</td><td><input type="text" class="jtedit_value jtedit_drawingnumber" /></td></tr>
-                <tr><td>In assembly:</td><td><select style="height:33px;" class="jtedit_value jtedit_assembly">
+                <tr><td>Record type:</td><td style="padding:5px;font-size:120%;"><input name="type" type="hidden" value="part">part</td></tr>
+                <tr><td>Name:</td><td><input type="text" name="name" autofocus="autofocus" /></td></tr>
+                <tr><td>Date delivered:</td><td><input type="text" class="datepicker" name="datedelivered" /></td></tr>
+                <tr><td>Bill of materials:</td><td><input type="text" name="billofmaterials" /></td></tr>
+                <tr><td>Drawing number:</td><td><input type="text" name="drawingnumber" /></td></tr>
+                <tr><td>In assembly:</td><td><select style="height:33px;" name="assembly">
                 <option></option>
                 {% for item in values['assembly'] %}
                     <option value="{{ item['id'] }}">{{ item['id'] }} - {{ item['name'] }}</option>
                 {% endfor %}
                 </select></td></tr>
-                <tr><td>In batch:</td><td style="padding:5px;font-size:120%;"><input class="jtedit_value jtedit_batch" type="hidden" value="{{batchid}}">{{ batchid }}</td></tr>
+                <tr><td>In batch:</td><td style="padding:5px;font-size:120%;"><input name="batch" type="hidden" value="{{batchid}}">{{ batchid }}</td></tr>
                 {% endif %}
 
-                <tr><td>Manufacturer:</td><td><input type="text" class="jtedit_value jtedit_manufacturer" /></td></td></tr>
-                <tr><td>Supplier:</td><td><select style="height:33px;" class="jtedit_value jtedit_supplier">
+                <tr><td>Manufacturer:</td><td><input type="text" name="manufacturer" /></td></td></tr>
+
+                <tr><td>Manufacturer serial:</td><td><input type="text" name="manufacturerserial" /></td></td></tr>
+                <tr><td>Manufacturers batch number:</td><td><input type="text" name="manufacturersbatchnumber" /></td></td></tr>
+                <tr><td>Manufacturers batch quantity:</td><td><input type="text" name="manufacturersbatchquantity" /></td></td></tr>
+                <tr><td>Purchase order:</td><td><input type="text" name="purchaseorder" /></td></td></tr>
+
+                <tr><td>Supplier:</td><td><select style="height:33px;" name="supplier">
                 <option></option>
                 {% for item in curatedfields['supplier'].split(',') %}
                     <option value="{{ item }}">{{ item }}</option>
                 {% endfor %}
                 </select></td></td></tr>
-                <tr><td>Inspected by:</td><td><select style="height:33px;" class="jtedit_value jtedit_inspectedby">
+                <tr><td>Inspected by:</td><td><select style="height:33px;" name="inspectedby">
                 <option></option>
                 {% for item in values['user'] %}
                     <option value="{{ item['id'] }}">{{ item['id'] }}</option>
                 {% endfor %}
                 </select></td></td></tr>
-                <tr><td>Inspected date:</td><td><input type="text" class="datepicker jtedit_value jtedit_inspecteddate" /></td></tr>
-                <tr><td>In location:</td><td><select style="height:33px;" class="jtedit_value jtedit_location">
+                <tr><td>Inspected date:</td><td><input type="text" name="inspecteddate" /></td></tr>
+                <tr><td>In location:</td><td><select style="height:33px;" name="location">
                 <option></option>
                 {% for item in curatedfields['location'].split(',') %}
                     <option value="{{ item }}">{{ item }}</option>
                 {% endfor %}
                 </select></td></td></tr>
-                <tr id="newfieldrow"><td></td><td><a id="newfield" href="#">+ add another field</a></td></tr>
-                <tr><td></td><td><br /><a href="" id="savenew" class="btn btn-info">save this {{ rectype }}</a></td></tr>
+                <tr id="newfieldplaceholder"><td></td><td></td></tr>
+                <tr><td></td><td><br>
+                    <a class="btn" id="newfield" href="#">add another field</a>
+                    <input type="submit" name="submit" class="btn btn-info" value="save this {{ rectype }}">
+                </td></tr>
             </table>
         </div>
     </div>
@@ -96,72 +106,22 @@
     </div>
 
 </div>
+</form>
     
 <script type="text/javascript">
 jQuery(document).ready(function() {
-    jQuery('#therecord').jtedit({
-        "makeform":false,
-        "actionbuttons":false,
-        "jsonbutton":false,
-        "data":{}
-    });
+    jQuery('.datepicker').datepicker({'dateFormat':'dd/mm/yy'})
+
     var newfield = function(event) {
         event.preventDefault();
-        var newrow = '<tr><td><input class="newfieldkey" type="text" placeholder="Give your field a name"></td><td class="valueholder"><input class="newfieldvalue" type="text" placeholder="Give your field a value"></td></tr>';
-        $('#newfieldrow').before(newrow);
+        var fieldname = prompt('New field name:',"");
+        if ( fieldname.length != 0 ) {
+            var nf = '<tr><td>' + fieldname + '</td><td><input type="text" name="' + fieldname + '"></td></tr>';
+            $('#newfieldplaceholder').before(nf);
+        }
     }
-    $('#newfield').bind('click',newfield);
-    var saveit = function(event) {
-        event.preventDefault();
-        var thedata = $.parseJSON(jQuery('#jtedit_json').val());
-        $('.newfieldkey').each(function() {
-            var key = $(this).val();
-            var value = $(this).parent().siblings('.valueholder').children('.newfieldvalue').val();
-            if ( key.length && !(key in thedata) ) {
-                thedata[key] = value;
-            }
-        });
-        {% if rectype == 'batch' %}
-        alert("Please click OK then please wait for your batch of parts to be created, then the part IDs will be displayed.")
-        {% endif %}
-        // TODO: add a grab of any new field keys and values
-        $.ajax({
-            {% if rectype == 'batch' %}
-            url: '/record/create/batch'
-            , data: JSON.stringify({"create":$('#howmany').val(),"data":thedata})
-            {% else %}
-            url: '/record/create'
-            , data: JSON.stringify(thedata)
-            {% endif %}
-            , type: 'POST'
-            , contentType: "application/json; charset=utf-8" 
-            , dataType: 'json'
-            , processData: false
-            , success: function(data, statusText, xhr) {
-                {% if rectype == 'batch' %}
-                var msg = 'Your new parts were created. \n\nThe batch ID is {{batchid}}. \n\nThe IDs of your new parts are: \n\n'
-                for ( counter in data.record ) {
-                    msg += data.record[counter] + '\n'
-                }
-                msg += '\nRedirecting to the batcn part list.'
-                alert(msg)
-                window.location = '/batch/{{batchid}}';
-                {% else %}
-                    {% if rectype == "part" %}
-                    alert("New part saved. Redirecting to new part page.")
-                    {% else %}
-                    alert("New assembly saved. Redirecting to new assembly page.")
-                    {% endif %}
-                window.location = '/record/' + data.record[0];
-                {% endif %}
-            }
-            , error: function(xhr, message, error) {
-                alert("Error: " + error + '. Please try again.');
-            }
-        });
-    }
-    jQuery('#savenew').bind('click',saveit);
-    jQuery('.datepicker').datepicker()
+    jQuery('#newfield').bind('click',newfield);
+
 });
 </script>
 
