@@ -30,12 +30,12 @@ class Search(object):
 
         self.values = {}
         self.values['assembly'] = [i['_source'] for i in artemis.dao.Record.query(terms={'type':'assembly'},size=100000).get('hits',{}).get('hits',{})]
-        self.values['user'] = [i['_source'] for i in artemis.dao.Account.query().get('hits',{}).get('hits',{})]
+        self.values['user'] = [i['_source'] for i in artemis.dao.Account.query(q={'query':{'match_all':{}},'size':100000,'sort':[{'id':{'order':'asc'}}]}).get('hits',{}).get('hits',{})]
 
 
     def find(self):
-        if artemis.dao.Account.get(self.parts[0]):
-            if len(self.parts) == 1:
+        if self.parts[0] == 'account' and artemis.dao.Account.get(self.parts[1]):
+            if len(self.parts) == 2:
                 return self.account() # user account
         elif self.parts[0] == 'record':
             self.path = ''
@@ -104,6 +104,11 @@ class Search(object):
     def record(self):
         res = artemis.dao.Record.get(self.path)
 
+        if self.current_user.is_anonymous():
+            edit = False
+        else:
+            edit = True
+
         if request.method == "DELETE" or request.method == 'POST' and request.values.get('submit',False) == 'Delete':
             flash('record ' + res.id + ' deleted')
             res.delete()
@@ -130,7 +135,7 @@ class Search(object):
                 search_options=json.dumps(opts), 
                 notes=notes,
                 recordstring=json.dumps(res.data,indent=4), 
-                edit=True,
+                edit=edit,
                 values=self.values
             )
                     
@@ -155,12 +160,15 @@ class Search(object):
                     search_options=json.dumps(opts), 
                     notes=notes,
                     recordstring=json.dumps(res.data,indent=4), 
-                    edit=True,
+                    edit=edit,
                     values=self.values
                 )
 
     
     def create(self):
+        if self.current_user.is_anonymous():
+            abort(401)
+        
         if request.method == "GET":
             if self.rectype == "batch":
                 idgenerator = util.idgen('batch')
@@ -342,8 +350,8 @@ class Search(object):
 
 
     def account(self):
-        self.search_options['predefined_filters']['owner'+config['FACET_FIELD']] = self.parts[0]
-        acc = artemis.dao.Account.get(self.parts[0])
+        self.search_options['predefined_filters']['owner'+config['FACET_FIELD']] = self.parts[1]
+        acc = artemis.dao.Account.get(self.parts[1])
 
         if request.method == 'DELETE':
             if not auth.user.update(self.current_user,acc):
@@ -353,22 +361,23 @@ class Search(object):
         elif request.method == 'POST':
             if not auth.user.update(self.current_user,acc):
                 abort(401)
-            info = request.json
+            info = request.json if request.json else request.values
             if info.get('_id',False):
-                if info['_id'] != self.parts[0]:
+                if info['_id'] != self.parts[1]:
                     acc = artemis.dao.Account.get(info['_id'])
                 else:
                     info['api_key'] = acc.data['api_key']
                     info['created_date'] = acc.data['created_date']
                     info['collection'] = acc.data['collection']
                     info['owner'] = acc.data['collection']
-            acc.data = info
-            if 'password' in info and not info['password'].startswith('sha1'):
+            for k, v in info.items():
+                if k not in ['submit','password']:
+                    acc.data[k] = v
+            if 'password' in info:
                 acc.set_password(info['password'])
             acc.save()
-            resp = make_response( json.dumps(acc.data, sort_keys=True, indent=4) )
-            resp.mimetype = "application/json"
-            return resp
+            flash('User account updated')
+            return redirect('/account/' + self.parts[1])
         else:
             if util.request_wants_json():
                 if not auth.user.update(self.current_user,acc):

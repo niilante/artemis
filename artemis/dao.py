@@ -284,7 +284,7 @@ class Record(DomainObject):
     def parent(self):
         if 'assembly' in self.data and self.data['assembly']:
             parent = Record.get(self.data['assembly'])
-            if parent:
+            if parent is not None:
                 return parent
             else:
                 return False

@@ -30,7 +30,7 @@ def login():
         if user and user.check_password(password):
             login_user(user, remember=True)
             flash('Welcome back', 'success')
-            return redirect('/'+user.id)
+            return redirect('/account/'+user.id)
         else:
             flash('Incorrect username/password', 'error')
     if request.method == 'POST' and not form.validate():
@@ -74,7 +74,7 @@ def register():
         account.save()
         login_user(account, remember=True)
         flash('Thanks for registering', 'success')
-        return redirect('/'+account.id)
+        return redirect('/account/'+account.id)
     if request.method == 'POST' and not form.validate():
         flash('Please correct the errors', 'error')
     return render_template('account/register.html', form=form)

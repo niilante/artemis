@@ -12,9 +12,11 @@
 
         <div class="span5">
           <div class="hero-unit" style="height:120px;">
+              {% if not current_user.is_anonymous() %}
               <div class="row-fluid"><a class="btn" href="/record/create/part">New part</a>
               <a class="btn" href="/record/create/batch">Batch of new parts</a>
               <a class="btn" href="/record/create/assembly">New assembly</a></div>
+              {% endif %}
               <div class="row-fluid"><br />{% if current_user.is_super %}<a class="btn" href="/admin">Admin tasks</a>{% endif %}
               <a class="btn btn-info" href="/help">Read the help</a></div>
           </div>

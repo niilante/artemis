@@ -5,12 +5,12 @@ setup(
     version = '0.4',
     packages = find_packages(),
     install_requires = [
-        "Flask==0.8",
-        "Flask-Login",
-        "Flask-WTF",
-        "pyes==0.16",
         "chardet",
-        "requests",
+        "werkzeug==0.8.3",
+        "Flask==0.9",
+        "Flask-Login==0.1.3",
+        "Flask-WTF==0.8.3",
+        "requests==1.1.0"
     ],
     url = 'http://cottagelabs.com/',
     author = 'Cottage Labs',

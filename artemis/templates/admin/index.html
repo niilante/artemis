@@ -34,7 +34,7 @@ jQuery(document).ready(function() {
                 <p><div class="curkey" style="width:100px;float:left;">{{ k.replace('_',' ') }}</div><textarea style="width:700px;height:100px;" id="curvals_{{k}}">{{ v }}</textarea> <a id="{{ k }}" class="savecurvals btn" href="#">save</a></p>
             {% endfor %}
                         
-            <p><a class="btn" href="/account/register">Create a new user account</a></p>
+            <p><a class="btn" href="/account/register">Create a new user account</a> <a class="btn" href="/users">View all users</a></p>
         </div>
       </div>
 {% endblock %}

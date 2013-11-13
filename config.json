@@ -1,7 +1,7 @@
 {
     # service and super user account
     "service_name" : "Artemis",
-    "SUPER_USER" : ["test"],
+    "SUPER_USER" : ["test","admin"],
     "host" : "0.0.0.0",
     "debug" : true,
     "port" : 5002,
@@ -11,7 +11,7 @@
     "ELASTIC_SEARCH_DB" : "artemisv2",
     "NO_QUERY_VIA_API": ["account"],
 
-    "CURATED_FIELDS": ["supplier", "location", "test_type"],
+    "CURATED_FIELDS": ["supplier", "location", "test_type","manufacturer"],
     
     # The default fields and settings for which faceting should be made available on
     # these can be nested fields, e.g. links.url

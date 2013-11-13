@@ -60,7 +60,12 @@
                 <tr><td>In batch:</td><td style="padding:5px;font-size:120%;"><input name="batch" type="hidden" value="{{batchid}}">{{ batchid }}</td></tr>
                 {% endif %}
 
-                <tr><td>Manufacturer:</td><td><input type="text" name="manufacturer" /></td></td></tr>
+                <tr><td>Manufacturer:</td><td><select style="height:33px;" name="manufacturer">
+                <option></option>
+                {% for item in curatedfields['manufacturer'].split(',') %}
+                    <option value="{{ item }}">{{ item }}</option>
+                {% endfor %}
+                </select></td></td></tr>
 
                 <tr><td>Manufacturer serial:</td><td><input type="text" name="manufacturerserial" /></td></td></tr>
                 <tr><td>Manufacturers batch number:</td><td><input type="text" name="manufacturersbatchnumber" /></td></td></tr>
@@ -79,7 +84,7 @@
                     <option value="{{ item['id'] }}">{{ item['id'] }}</option>
                 {% endfor %}
                 </select></td></td></tr>
-                <tr><td>Inspected date:</td><td><input type="text" name="inspecteddate" /></td></tr>
+                <tr><td>Inspected date:</td><td><input type="text" name="inspecteddate" class="datepicker" /></td></tr>
                 <tr><td>In location:</td><td><select style="height:33px;" name="location">
                 <option></option>
                 {% for item in curatedfields['location'].split(',') %}
@@ -115,9 +120,13 @@ jQuery(document).ready(function() {
     var newfield = function(event) {
         event.preventDefault();
         var fieldname = prompt('New field name:',"");
-        if ( fieldname.length != 0 ) {
+        if ( fieldname == 'batch' || fieldname == 'id' || fieldname == 'type' || fieldname == 'assembly' || fieldname == 'attachments' || fieldname == 'history' ) {
+            alert('Sorry, you cannot use that field name. Please try a different one. batch, id, type, assembly, attachments, history are not allowed.');
+        } else if ( fieldname.length != 0 ) {
             var nf = '<tr><td>' + fieldname + '</td><td><input type="text" name="' + fieldname + '"></td></tr>';
             $('#newfieldplaceholder').before(nf);
+        } else {
+            alert('Sorry, something seems wrong with your field name. Please try again')
         }
     }
     jQuery('#newfield').bind('click',newfield);

@@ -57,7 +57,17 @@
         {% if 'manufacturer' in record %}
             <tr>
                 <td>Manufacturer</td>
-                <td><input name="manufacturer" type="text" value="{{record['manufacturer']}}"></td>
+                <td>
+                    <select name="manufacturer" style="height:33px;">
+                        <option></option>
+                        {% for item in curatedfields['manufacturer'].split(',') %}
+                            <option value="{{item}}"{% if item == record['manufacturer'] %} selected="selected"{% endif %}>{{item}}</option>
+                        {% endfor %}
+                        {% if record['manufacturer'] not in curatedfields['manufacturer'].split(',') %}
+                            <option value="{{record['manufacturer']}}" selected="selected">{{record['manufacturer']}}</option>
+                        {% endif %}
+                    </select>
+                </td>
             </tr>
         {% endif %}
 
@@ -159,7 +169,7 @@
         <p>{% if record['updated_date'] %}Record created on {{ record['created_date'] }}. {% endif %}{% if record['updated_date'] %}Last updated {{ record['updated_date'] }}{% endif %}</p>
         
         {% if record['batch'] %}
-        <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a><br /><a href="#" class="batchremove label label-important">remove from batch</a></p>
+        <p>This part is in batch <a href="/batch/{{ record['batch'] }}">{{ record['batch'] }}</a><br />{% if edit %}<a href="#" class="batchremove label label-important">remove from batch</a>{% endif %}</p>
         {% endif %}
 
         {% if edit %}
@@ -174,11 +184,11 @@
     </div>
 
     <div class="span4">
-    <h3>Notes <small><a id="addnote" class="btn" href="">add a note</a></small></h3>
+    <h3>Notes {% if edit %}<small><a id="addnote" class="btn" href="">add a note</a></small>{% endif %}</h3>
     {% if notes|length != 0 %}
         {% for item in notes %}
             <p>on {{ item['created_date'] }}{% if item['by'] %} by {{ item['by'] }}{% else %} anonymously{% endif %}
-            <a class="deletenote" href="#" data-id="{{ item.id }}" alt="delete this note" title="delete this note"> X </a><br />
+            {% if edit %}<a class="deletenote" href="#" data-id="{{ item.id }}" alt="delete this note" title="delete this note"> X </a>{% endif %}<br />
             {{ item['content'] }}</p>
         {% endfor %}
     {% endif %}
@@ -267,7 +277,7 @@
             jQuery('#addattachment').hide()
         })
         </script>
-        <p><a id="showaddattachment" class="btn" href="">Add new test / attachment</a></p>
+        <p>{% if edit %}<a id="showaddattachment" class="btn" href="">Add new test / attachment</a>{% endif %}</p>
         <div style="border:1px solid #ccc;padding:5px;" id="addattachment">
         <p>Choose an attachment: <input type="file" name="upfile" /></p>
         <p><textarea style="width:90%;" name="description" placeholder="provide a short description"></textarea></p>
@@ -336,7 +346,7 @@
     {% else %}
         <p>No parts listed in this assembly.</p>
     {% endif %}
-    <p><a href="" id="addparts" class="btn">Add parts to this assembly</a></p>
+    <p>{% if edit %}<a href="" id="addparts" class="btn">Add parts to this assembly</a>{% endif %}</p>
     <script type="text/javascript">
     jQuery(document).ready(function() {
         var showpartsearch = function(event) {
@@ -389,11 +399,11 @@
             jQuery('#removefromassembly').bind('click',removefromassembly)
         })
         </script>
-        <p><br /><a href="" id="removefromassembly" class="btn btn-danger">remove from assembly</a></p>
+        <p><br />{% if edit %}<a href="" id="removefromassembly" class="btn btn-danger">remove from assembly</a>{% endif %}</p>
     </div>
     {% else %}
         <p>This part is not in an assembly.</p>
-        <p><a href="" id="addtoassembly" class="btn">add to an assembly</a></p>
+        <p>{% if edit %}<a href="" id="addtoassembly" class="btn">add to an assembly</a>{% endif %}</p>
         <script type="text/javascript">
         jQuery(document).ready(function() {
             var showassemblysearch = function(event) {
@@ -474,9 +484,13 @@ jQuery(document).ready(function() {
     var newfield = function(event) {
         event.preventDefault();
         var fieldname = prompt('New field name:',"");
-        if ( fieldname.length != 0 ) {
+        if ( fieldname == 'batch' || fieldname == 'id' || fieldname == 'type' || fieldname == 'assembly' || fieldname == 'attachments' || fieldname == 'history' ) {
+            alert('Sorry, you cannot use that field name. Please try a different one. batch, id, type, assembly, attachments, history are not allowed.');
+        } else if ( fieldname.length != 0 ) {
             var nf = '<tr><td>' + fieldname + '</td><td><input type="text" name="' + fieldname + '"></td></tr>';
             $('#newfieldplaceholder').before(nf);
+        } else {
+            alert('Sorry, something seems wrong with your field name. Please try again')
         }
     }
     jQuery('#newfield').bind('click',newfield);
