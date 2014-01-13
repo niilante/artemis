@@ -148,16 +148,16 @@ class Search(object):
                 notes = artemis.dao.Note.about(res.id)
                 opts['result_display'][0][1]['pre'] = '<a onclick="doupdate(\''
                 opts['result_display'][0][1]['post'] = '\')" href="javascript: return null;">'
-                if res.data.get('type','') == "assembly":
-                    opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'part'}}}
-                else:
-                    opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'assembly'}}}
+                opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'part'}}}
+                optsassy = deepcopy(opts)
+                optsassy['predefined_filters'] = {'type.exact':{'term':{'type.exact':'assembly'}}}
                 for att in res.data.get('attachments',[]):
                     att['attachment'] = ''
                 return render_template(
                     'record.html', 
                     record=res, 
                     search_options=json.dumps(opts), 
+                    search_options_assy=json.dumps(optsassy),
                     notes=notes,
                     recordstring=json.dumps(res.data,indent=4), 
                     edit=edit,

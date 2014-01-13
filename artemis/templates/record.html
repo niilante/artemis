@@ -9,48 +9,49 @@
     <div class="hero-unit" style="min-height:250px;">
         <!-- record info -->
         <h2>{{ record['type'] }} {{ record['id'] }}{% if record['name'] %} - {{ record['name'] }}{% endif %}</h2>
+         {% if not edit %}<p>Note you must <a href="/account/login">login</a> if you wish to edit records.</p>{% endif %}
 
         <table>
 
         {% if 'name' in record %}
             <tr>
                 <td>Name</td>
-                <td><input name="name" type="text" value="{{record['name']}}"></td>
+                <td><input name="name" type="text" value="{{record['name']}}" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
         {% if 'datedelivered' in record %}
             <tr>
                 <td>Date delivered</td>
-                <td><input name="datedelivered" type="text" value="{{record['datedelivered']}}" class="datepicker"></td>
+                <td><input name="datedelivered" type="text" value="{{record['datedelivered']}}" class="datepicker" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
         {% if 'billofmaterials' in record %}
             <tr>
                 <td>Bill of materials</td>
-                <td><input name="billofmaterials" type="text" value="{{record['billofmaterials']}}"></td>
+                <td><input name="billofmaterials" type="text" value="{{record['billofmaterials']}}" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
         {% if 'drawingnumber' in record %}
             <tr>
                 <td>Drawing number</td>
-                <td><input name="drawingnumber" type="text" value="{{record['drawingnumber']}}"></td>
+                <td><input name="drawingnumber" type="text" value="{{record['drawingnumber']}}" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
         {% if 'assembledby' in record %}
             <tr>
                 <td>Assembled by</td>
-                <td><input name="assembledby" type="text" value="{{record['assembledby']}}"></td>
+                <td><input name="assembledby" type="text" value="{{record['assembledby']}}" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
         {% if 'assembleddate' in record %}
             <tr>
                 <td>Assembled date</td>
-                <td><input name="assembleddate" type="text" value="{{record['assembleddate']}}" class="datepicker"></td>
+                <td><input name="assembleddate" type="text" value="{{record['assembleddate']}}" class="datepicker" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
@@ -58,7 +59,7 @@
             <tr>
                 <td>Manufacturer</td>
                 <td>
-                    <select name="manufacturer" style="height:33px;">
+                    <select name="manufacturer" style="height:33px;" {% if not edit %}disabled="disabled"{% endif %}>
                         <option></option>
                         {% for item in curatedfields['manufacturer'].split(',') %}
                             <option value="{{item}}"{% if item == record['manufacturer'] %} selected="selected"{% endif %}>{{item}}</option>
@@ -74,28 +75,28 @@
         {% if 'manufacturerserial' in record %}
             <tr>
                 <td>Manufacturer serial</td>
-                <td><input name="manufacturerserial" type="text" value="{{record['manufacturerserial']}}"></td>
+                <td><input name="manufacturerserial" type="text" value="{{record['manufacturerserial']}}" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
         {% if 'manufacturersbatchnumber' in record %}
             <tr>
                 <td>Manufacturers batch number</td>
-                <td><input name="manufacturersbatchnumber" type="text" value="{{record['manufacturersbatchnumber']}}"></td>
+                <td><input name="manufacturersbatchnumber" type="text" value="{{record['manufacturersbatchnumber']}}" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
         {% if 'manufacturersbatchquantity' in record %}
             <tr>
                 <td>Manufacturers batch quantity</td>
-                <td><input name="manufacturersbatchquantity" type="text" value="{{record['manufacturersbatchquantity']}}"></td>
+                <td><input name="manufacturersbatchquantity" type="text" value="{{record['manufacturersbatchquantity']}}" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
         {% if 'purchaseorder' in record %}
             <tr>
                 <td>Purchase order</td>
-                <td><input name="purchaseorder" type="text" value="{{record['purhcaseorder']}}"></td>
+                <td><input name="purchaseorder" type="text" value="{{record['purhcaseorder']}}" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
@@ -103,7 +104,7 @@
             <tr>
                 <td>Supplier</td>
                 <td>
-                    <select name="supplier" style="height:33px;">
+                    <select name="supplier" style="height:33px;" {% if not edit %}disabled="disabled"{% endif %}>
                         <option></option>
                         {% for item in curatedfields['supplier'].split(',') %}
                             <option value="{{item}}"{% if item == record['supplier'] %} selected="selected"{% endif %}>{{item}}</option>
@@ -120,7 +121,7 @@
             <tr>
                 <td>Location</td>
                 <td>
-                    <select name="location" style="height:33px;">
+                    <select name="location" style="height:33px;" {% if not edit %}disabled="disabled"{% endif %}>
                         <option></option>
                         {% for item in curatedfields['location'].split(',') %}
                             <option value="{{item}}"{% if item == record['location'] %} selected="selected"{% endif %}>{{item}}</option>
@@ -137,7 +138,7 @@
             <tr>
                 <td>Inspected by</td>
                 <td>
-                    <select name="inspectedby" style="height:33px;">
+                    <select name="inspectedby" style="height:33px;" {% if not edit %}disabled="disabled"{% endif %}>
                         <option></option>
                         {% for item in values['user'] %}
                             <option value="{{item['id']}}"{% if item['id'] == record['inspectedby'] %} selected="selected"{% endif %}>{{item['id']}}</option>
@@ -150,7 +151,7 @@
         {% if 'inspecteddate' in record %}
             <tr>
                 <td>Inspected date</td>
-                <td><input name="inspecteddate" type="text" value="{{record['inspecteddate']}}" class="datepicker"></td>
+                <td><input name="inspecteddate" type="text" value="{{record['inspecteddate']}}" class="datepicker" {% if not edit %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 
@@ -159,7 +160,7 @@
                 <tr>
                     <td>{{key}}</td>
                     <td>
-                    <input name="{{key}}" type="text" value="{{record[key]}}"{% if 'date' in key %} class="datepicker"{% endif %}>
+                    <input name="{{key}}" type="text" value="{{record[key]}}"{% if 'date' in key %} class="datepicker"{% endif %} {% if not edit %}disabled="disabled"{% endif %}>
                     </td>
                 </tr>
             {% endif %}
@@ -256,8 +257,8 @@
 <div class="row-fluid">
 
 
-    <div class="span8">
-        <h3>Tests / Attachments</h3>
+    <div class="span6">
+        <h3>Procedures / Attachments</h3>
 <!-- show any attachments, offer to upload new -->
 {% if record['attachments'] %}
     {% for item in record['attachments'] %}
@@ -277,18 +278,18 @@
             jQuery('#addattachment').hide()
         })
         </script>
-        <p>{% if edit %}<a id="showaddattachment" class="btn" href="">Add new test / attachment</a>{% endif %}</p>
+        <p>{% if edit %}<a id="showaddattachment" class="btn" href="">Add new procedure / attachment</a>{% endif %}</p>
         <div style="border:1px solid #ccc;padding:5px;" id="addattachment">
         <p>Choose an attachment: <input type="file" name="upfile" /></p>
         <p><textarea style="width:90%;" name="description" placeholder="provide a short description"></textarea></p>
-        <p>Test type: <select name="test_type" style="height:33px;">
+        <p>Procedure type: <select name="test_type" style="height:33px;">
             <option></option>
             {% for item in curatedfields['test_type'].split(',') %}
                 <option value="{{item}}">{{item}}</option>
             {% endfor %}
         </select></p>
-        <p>Test date: <input type="text" name="test_date" class="datepicker"></p>
-        <p>Tested by: <select name="tested_by" style="height:33px;">
+        <p>Procedure date: <input type="text" name="test_date" class="datepicker"></p>
+        <p>Performed by: <select name="tested_by" style="height:33px;">
             <option></option>
             {% for item in values['user'] %}
                 <option value="{{ item['id'] }}">{{ item['id'] }}</option>
@@ -314,7 +315,7 @@
 
 
 
-    <div class="span4">
+    <div class="span6">
         <h3>Assembly information</h3>
 <!-- if an assembly, link the parts it contains; offer option to add / remove parts -->
 {% if record['type'] == 'assembly' %}
@@ -374,12 +375,12 @@
     <div style="border:1px solid #ccc;padding:5px;" id="partsearch">
     <h4>Search for a part and click it to add to this assembly.</h4>
     </div>
+{% endif %}
 
-{% else %}
 <!-- if a part, offer add to assembly; if in one, link it, and offer to remove -->
-    {% if record.parent %}
+{% if record.parent %}
     <div class="span4">
-        <h4><br />This part is in assembly <a href="/record/{{record.parent.id}}">{{record.parent.id}}</a></h4>
+        <h4><br />This {% if record['type'] == 'assembly' %}assembly{% else %}part{% endif %} is in assembly <a href="/record/{{record.parent.id}}">{{record.parent.id}}</a></h4>
         <script type="text/javascript">
         jQuery(document).ready(function() {
             var removefromassembly = function(event) {
@@ -401,8 +402,9 @@
         </script>
         <p><br />{% if edit %}<a href="" id="removefromassembly" class="btn btn-danger">remove from assembly</a>{% endif %}</p>
     </div>
-    {% else %}
-        <p>This part is not in an assembly.</p>
+{% else %}
+        <hr></hr>
+        <p>This {% if record['type'] == 'assembly' %}assembly{% else %}part{% endif %} is not in an assembly.</p>
         <p>{% if edit %}<a href="" id="addtoassembly" class="btn">add to an assembly</a>{% endif %}</p>
         <script type="text/javascript">
         jQuery(document).ready(function() {
@@ -411,7 +413,7 @@
                 jQuery('#assemblysearch').toggle()
             }
             jQuery('#addtoassembly').bind('click',showassemblysearch)
-            jQuery('#assemblysearch').facetview( {{ search_options | safe }} )
+            jQuery('#assemblysearch').facetview( {{ search_options_assy | safe }} )
             jQuery('#assemblysearch').hide()
         })
         var doupdate = function(theid) {
@@ -431,7 +433,6 @@
         <div style="border:1px solid #ccc;padding:5px;" id="assemblysearch">
         <h4>Search for an assembly and click it to add this part to it.</h4>
         </div>
-    {% endif %}
 
 {% endif %}
 
@@ -484,7 +485,33 @@ jQuery(document).ready(function() {
     var newfield = function(event) {
         event.preventDefault();
         var fieldname = prompt('New field name:',"");
-        if ( fieldname == 'batch' || fieldname == 'id' || fieldname == 'type' || fieldname == 'assembly' || fieldname == 'attachments' || fieldname == 'history' ) {
+        var no = [
+            'batch',
+            'id',
+            'type',
+            'assembly',
+            'attachments',
+            'history',
+            'name',
+            'datedelivered',
+            'billofmaterials',
+            'drawingnumber',
+            'assembly',
+            'assembleddate',
+            'assembledby',
+            'manufacturer',
+            'manufacturerserial',
+            'manufacturersbatchnumber',
+            'manufacturersbatchquantity',
+            'purchaseorder',
+            'supplier',
+            'inspectedby',
+            'inspecteddate',
+            'location'
+            
+        ];
+        var lfn = fieldname.toLowerCase();
+        if ( no.indexOf(lfn) > -1 ) {
             alert('Sorry, you cannot use that field name. Please try a different one. batch, id, type, assembly, attachments, history are not allowed.');
         } else if ( fieldname.length != 0 ) {
             var nf = '<tr><td>' + fieldname + '</td><td><input type="text" name="' + fieldname + '"></td></tr>';
