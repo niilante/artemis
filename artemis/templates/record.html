@@ -416,7 +416,7 @@
             jQuery('#assemblysearch').facetview( {{ search_options_assy | safe }} )
             jQuery('#assemblysearch').hide()
         })
-        var doupdate = function(theid) {
+        var doupd = function(theid) {
             jQuery.ajax({
                 url: '/record/{{record.id}}/parent/' + theid
                 , type: 'POST'

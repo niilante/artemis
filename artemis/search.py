@@ -129,10 +129,19 @@ class Search(object):
             res.save()
             opts = deepcopy(self.search_options)
             notes = artemis.dao.Note.about(res.id)
+            opts['result_display'][0][1]['pre'] = '<a onclick="doupdate(\''
+            opts['result_display'][0][1]['post'] = '\')" href="javascript: return null;">'
+            opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'part'}}}
+            optsassy = deepcopy(opts)
+            optsassy['predefined_filters'] = {'type.exact':{'term':{'type.exact':'assembly'}}}
+            optsassy['result_display'][0][1]['pre'] = '<a onclick="doupd(\''
+            for att in res.data.get('attachments',[]):
+                att['attachment'] = ''
             return render_template(
                 'record.html', 
                 record=res, 
                 search_options=json.dumps(opts), 
+                search_options_assy=json.dumps(optsassy),
                 notes=notes,
                 recordstring=json.dumps(res.data,indent=4), 
                 edit=edit,
@@ -151,6 +160,7 @@ class Search(object):
                 opts['predefined_filters'] = {'type.exact':{'term':{'type.exact':'part'}}}
                 optsassy = deepcopy(opts)
                 optsassy['predefined_filters'] = {'type.exact':{'term':{'type.exact':'assembly'}}}
+                optsassy['result_display'][0][1]['pre'] = '<a onclick="doupd(\''
                 for att in res.data.get('attachments',[]):
                     att['attachment'] = ''
                 return render_template(
@@ -218,20 +228,25 @@ class Search(object):
                 res.data['assembly'] = self.pcid
                 res.save()
                 # update the parent assembly too
-                ass = artemis.dao.Record.get(self.pcid)
+                '''ass = artemis.dao.Record.get(self.pcid)
                 if 'children' not in ass.data: ass.data['children'] = []
+                if not isinstance(ass.data['children'],list):
+                    if len(ass.data['children']) > 1:
+                        ass.data['children'] = [ass.data['children']]
+                    else:
+                        ass.data['children'] = []
                 ass.data['children'].append(self.path)
-                ass.save()
+                ass.save()'''
                 return ""
             else:
                 abort(404)
         elif request.method == 'DELETE':
             # update the parent assembly too
-            ass = artemis.dao.Record.get(res.data['assembly'])
+            '''ass = artemis.dao.Record.get(res.data['assembly'])
             if 'children' not in ass.data: ass.data['children'] = []
             if self.path in ass.data['children']:
                 ass.data['children'].remove(self.path)
-            ass.save()
+            ass.save()'''
             res.data['assembly'] = ''
             res.save()
             return ""
@@ -251,10 +266,10 @@ class Search(object):
                 c.data['assembly'] = self.path
                 c.save()
                 # update the parent assembly too
-                ass = artemis.dao.Record.get(self.path)
+                '''ass = artemis.dao.Record.get(self.path)
                 if 'children' not in ass.data: ass.data['children'] = []
                 ass.data['children'].append(self.pcid)
-                ass.save()
+                ass.save()'''
                 return ""
             else:
                 abort(404)
