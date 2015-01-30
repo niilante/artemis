@@ -1,0 +1,690 @@
+{% extends "/base.html" %}
+
+{% block content %}
+
+<script type="text/javascript">
+jQuery(document).ready(function() {                       
+                       
+    var cshowresults = function(data) {
+        var restable = '<table>';
+        for ( var r in data.hits.hits ) {
+            var rec = data.hits.hits[r].fields
+            restable += '<tr><td><p><a onclick="doupdate(\'\')" href="javascript: return null;">' + rec.id + '</a> ' + rec.name + '</p></td></tr>';
+        }
+        restable += '</table>';
+        $('.graphview_panel').html(restable);
+    }
+    var cuitemplate = function() {
+        var options = $.fn.graphview.options;
+        var ui = '<div class="graphview">';
+        ui += '<div class="row graphview_searcharea" style="padding-top:20px;padding-bottom:20px;">';
+        ui += '<div class="col-md-12">';
+        ui += '<div><input type="text" class="form-control query_string" style="width:97%;" data-option="query.bool.must.query_string.query"></div>';
+        ui += '</div>';
+        ui += '</div>'; // closes searcharea
+        ui += '<div class="graphview_panel"></div>';
+        ui += '</div>'; // closes graphview
+        return ui;
+    }
+    $('#partsearch').graphview({
+        "target": "/query/record/_search",
+        "pushstate": false,
+        "defaultquery": {
+            "query": {
+                "bool": {
+                    "must":[
+                        {'term':{'type.exact':'part'}}
+                    ]
+                }
+            },
+            "from":0,
+            "size":20,
+            "fields": ["id","name"]
+        },
+        showresults: cshowresults,
+        uitemplate: cuitemplate
+    });
+
+                       
+                       
+    var asscshowresults = function(data) {
+        var restable = '<table>';
+        for ( var r in data.hits.hits ) {
+            var rec = data.hits.hits[r].fields
+            restable += '<tr><td><p><a onclick="doupd(\'\')" href="javascript: return null;">' + rec.id + '</a> ' + rec.name + '</p></td></tr>';
+        }
+        restable += '</table>';
+        $('.graphview_panel').html(restable);
+    }
+    $('#assemblysearch').graphview({
+        "target": "/query/record/_search",
+        "pushstate": false,
+        "defaultquery": {
+            "query": {
+                "bool": {
+                    "must":[
+                        {'term':{'type.exact':'assembly'}}
+                    ]
+                }
+            },
+            "from":0,
+            "size":20,
+            "fields": ["id","name"]
+        },
+        showresults: asscshowresults,
+        uitemplate: cuitemplate
+    });
+
+                       
+                       
+                       
+                       
+    
+    
+    var batchremove = function(event) {
+        event.preventDefault();
+        var batches = {{ record['batch']|tojson|safe }};
+        var batchtoremove = $(this).attr('href');
+        var position = $.inArray(batchtoremove, batches);
+        if ( ~position ) batches.splice(position, 1);
+        var rec = {"batch":batches};
+        $.ajax({
+            type: "POST",
+            url: '',
+            data: JSON.stringify(rec),
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            processData: false,
+            success: savedone
+        });
+
+    }
+    jQuery('.batchremove').bind('click',batchremove);
+
+    var batchadd = function(event) {
+        event.preventDefault();
+        var batches = {{ record['batch']|tojson|safe }};
+        var batchtoadd = $('#batchtoadd').val();
+        var position = $.inArray(batchtoremove, batches);
+        if ( !~position ) batches.push(batchtoadd);
+        var rec = {"batch":batches};
+        $.ajax({
+            type: "POST",
+            url: '',
+            data: JSON.stringify(rec),
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            processData: false,
+            success: savedone
+        });
+
+    }
+    jQuery('#batchadd').bind('click',batchadd);
+
+    var savedone = function() {
+        alert('saved');
+        window.location = window.location;
+    }
+    var addnote = function(event) {
+        event.preventDefault()
+        var note = prompt("new note:")
+        if ( note ) {
+            var newnote = {
+                "content": note,
+                "by": "{% if current_user %}{{ current_user.id }}{% else %}anonymous{% endif %}",
+                "about": "{{ record['id'] }}"
+            }
+            $.ajax({
+                type: "POST",
+                url: '/note',
+                data: JSON.stringify(newnote),
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                processData: false,
+                success: savedone
+            })
+        }
+    }
+    jQuery('#addnote').bind('click',addnote)
+    var deletenote = function(event) {
+        event.preventDefault()
+        $.ajax({
+            type: "DELETE",
+            url: '/note/'+jQuery(this).attr('data-id')
+        })
+        jQuery(this).parent().hide();
+    }
+    jQuery('.deletenote').bind('click',deletenote)
+
+
+
+    var removefromassembly = function(event) {
+        event.preventDefault()
+        $.ajax({
+            url: '/record/' + jQuery(this).attr('href') + '/parent'
+            , type: 'DELETE'
+            , success: function(data, statusText, xhr) {
+                alert('Part removed from assembly. Reloading page.')
+                window.location = ''
+            }
+            , error: function(xhr, message, error) {
+                alert("Error: " + error + '. Please try again.');
+            }
+        })
+    }
+    jQuery('.removefromassembly').bind('click',removefromassembly)
+
+    
+    var showaddattachment = function(event) {
+        event.preventDefault()
+        jQuery('#addattachment').toggle()
+    }
+    jQuery('#showaddattachment').bind('click',showaddattachment)
+    jQuery('#addattachment').hide()
+
+    
+    
+    var showpartsearch = function(event) {
+        event.preventDefault()
+        jQuery('#partsearch').toggle()
+    }
+    jQuery('#addparts').bind('click',showpartsearch)
+    jQuery('#partsearch').hide()
+
+    
+    var doupdate = function(theid) {
+        jQuery.ajax({
+            url: '/record/{{record.id}}/children/' + theid
+            , type: 'POST'
+            , success: function(data, statusText, xhr) {
+                alert('Assembly updated. Reloading page.')
+                window.location = ""
+            }
+            , error: function(xhr, message, error) {
+                alert("Error: " + error + '. Please try again.');
+            }
+        })
+    }
+
+    
+    
+    var removefromassembly = function(event) {
+        event.preventDefault()
+        $.ajax({
+            url: '/record/{{record.id}}/parent'
+            , type: 'DELETE'
+            , success: function(data, statusText, xhr) {
+                alert('Removed from assembly. Reloading page.')
+                window.location = ''
+            }
+            , error: function(xhr, message, error) {
+                alert("Error: " + error + '. Please try again.');
+            }
+        })
+    }
+    jQuery('#removefromassembly').bind('click',removefromassembly)
+
+    
+    
+    
+    var showassemblysearch = function(event) {
+        event.preventDefault()
+        jQuery('#assemblysearch').toggle()
+    }
+    jQuery('#addtoassembly').bind('click',showassemblysearch)
+    jQuery('#assemblysearch').hide()
+
+    
+    var doupd = function(theid) {
+        jQuery.ajax({
+            url: '/record/{{record.id}}/parent/' + theid
+            , type: 'POST'
+            , success: function(data, statusText, xhr) {
+                alert('Assembly updated. Reloading page.')
+                window.location = ""
+            }
+            , error: function(xhr, message, error) {
+                alert("Error: " + error + '. Please try again.');
+            }
+        })
+    }
+
+    jQuery('#history').tablesorter()
+    jQuery('.datepicker').datepicker({'dateFormat':'dd/mm/yy'});
+
+    var showdets = function(event) {
+        event.preventDefault();
+        $(this).siblings('.detsfold').toggle();
+    }
+    jQuery('.showdets').bind('click',showdets);
+    
+    var newfield = function(event) {
+        event.preventDefault();
+        var fieldname = prompt('New field name:',"");
+        var no = [
+            'obsolete',
+            'batch',
+            'id',
+            'type',
+            'assembly',
+            'attachments',
+            'history',
+            'name',
+            'datedelivered',
+            'billofmaterials',
+            'drawingnumber',
+            'assembly',
+            'assembleddate',
+            'assembledby',
+            'manufacturer',
+            'manufacturerserial',
+            'manufacturersbatchnumber',
+            'manufacturersbatchquantity',
+            'purchaseorder',
+            'supplier',
+            'inspectedby',
+            'inspecteddate',
+            'location',
+            'children'
+            
+        ];
+        var lfn = fieldname.toLowerCase().replace(/ /g,'');
+        if ( no.indexOf(lfn) > -1 ) {
+            alert('Sorry, you cannot use that field name. Please try a different one.');
+        } else if ( fieldname.length != 0 ) {
+            var nf = '<tr><td>' + fieldname + '</td><td><input class="form-control" type="text" name="' + fieldname + '"></td></tr>';
+            $('#newfieldplaceholder').before(nf);
+        } else {
+            alert('Sorry, something seems wrong with your field name. Please try again')
+        }
+    }
+    jQuery('#newfield').bind('click',newfield);
+
+})
+</script>
+
+
+{% if record.obsolete %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron">
+            <h1 style="color:red;">THIS RECORD IS OBSOLETE!</h1>
+            <!-- TODO: maybe there should be a check here for record that supersedes it -->
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+
+    <div class="col-md-6">
+    <form method="POST" action="">
+    <div class="well" style="min-height:250px;background-color:#666;border-color:#666;">
+        <!-- record info -->
+        <h2>{{ record['type'] }} {{ record['id'] }}{% if record['name'] %} - {{ record['name'] }}{% endif %}</h2>
+         {% if current_user.is_anonymous() %}<p>Note you must <a href="/account/login">login</a> if you wish to edit records.</p>{% endif %}
+
+        <table>
+
+        {% if 'name' in record %}
+            <tr>
+                <td>Name</td>
+                <td><input class="form-control" name="name" type="text" value="{{record['name']}}" {% if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'datedelivered' in record %}
+            <tr>
+                <td>Date delivered</td>
+                <td><input name="datedelivered" type="text" value="{{record['datedelivered']}}" class="form-control datepicker" {% if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'billofmaterials' in record %}
+            <tr>
+                <td>Bill of materials</td>
+                <td><input class="form-control" name="billofmaterials" type="text" value="{{record['billofmaterials']}}" {% if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'drawingnumber' in record %}
+            <tr>
+                <td>Drawing / part number</td>
+                <td><input class="form-control" name="drawingnumber" type="text" value="{{record['drawingnumber']}}" {% if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'assembledby' in record %}
+            <tr>
+                <td>Assembled by</td>
+                <td><input class="form-control" name="assembledby" type="text" value="{{record['assembledby']}}" {% if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'assembleddate' in record %}
+            <tr>
+                <td>Assembled date</td>
+                <td><input name="assembleddate" type="text" value="{{record['assembleddate']}}" class="form-control datepicker" {% if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'manufacturer' in record %}
+            <tr>
+                <td>Manufacturer</td>
+                <td>
+                    <select class="form-control" name="manufacturer" {% if current_user.is_anonymous() %}disabled="disabled"{% endif %}>
+                        <option></option>
+                        {% for item in curatedfields['manufacturer'] %}
+                            <option value="{{item}}"{% if item == record['manufacturer'] %} selected="selected"{% endif %}>{{item}}</option>
+                        {% endfor %}
+                        {% if record['manufacturer'] not in curatedfields['manufacturer'] %}
+                            <option value="{{record['manufacturer']}}" selected="selected">{{record['manufacturer']}}</option>
+                        {% endif %}
+                    </select>
+                </td>
+            </tr>
+        {% endif %}
+
+        {% if 'manufacturerserial' in record %}
+            <tr>
+                <td>Manufacturer serial</td>
+                <td><input class="form-control" name="manufacturerserial" type="text" value="{{record['manufacturerserial']}}" {% if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'manufacturersbatchnumber' in record %}
+            <tr>
+                <td>Manufacturers batch number</td>
+                <td><input class="form-control" name="manufacturersbatchnumber" type="text" value="{{record['manufacturersbatchnumber']}}" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'manufacturersbatchquantity' in record %}
+            <tr>
+                <td>Manufacturers batch quantity</td>
+                <td><input class="form-control" name="manufacturersbatchquantity" type="text" value="{{record['manufacturersbatchquantity']}}" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'purchaseorder' in record %}
+            <tr>
+                <td>Purchase order</td>
+                <td><input class="form-control" name="purchaseorder" type="text" value="{{record['purhcaseorder']}}" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% if 'supplier' in record %}
+            <tr>
+                <td>Supplier</td>
+                <td>
+                    <select class="form-control" name="supplier" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}>
+                        <option></option>
+                        {% for item in curatedfields['supplier'] %}
+                            <option value="{{item}}"{% if item == record['supplier'] %} selected="selected"{% endif %}>{{item}}</option>
+                        {% endfor %}
+                        {% if record['supplier'] not in curatedfields['supplier'] %}
+                            <option value="{{record['supplier']}}" selected="selected">{{record['supplier']}}</option>
+                        {% endif %}
+                    </select>
+                </td>
+            </tr>
+        {% endif %}
+
+        {% if 'location' in record %}
+            <tr>
+                <td>Location</td>
+                <td>
+                    <select class="form-control" name="location" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}>
+                        <option></option>
+                        {% for item in curatedfields['location'] %}
+                            <option value="{{item}}"{% if item == record['location'] %} selected="selected"{% endif %}>{{item}}</option>
+                        {% endfor %}
+                        {% if record['location'] not in curatedfields['location'] %}
+                            <option value="{{record['location']}}" selected="selected">{{record['location']}}</option>
+                        {% endif %}
+                    </select>
+                </td>
+            </tr>
+        {% endif %}
+
+        {% if 'inspectedby' in record %}
+            <tr>
+                <td>Inspected by</td>
+                <td>
+                    <select class="form-control" name="inspectedby" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}>
+                        <option></option>
+                        {% for item in curatedfields['user'] %}
+                            <option value="{{item}}"{% if item == record['inspectedby'] %} selected="selected"{% endif %}>{{item}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+        {% endif %}
+
+        {% if 'inspecteddate' in record %}
+            <tr>
+                <td>Inspected date</td>
+                <td><input name="inspecteddate" type="text" value="{{record['inspecteddate']}}" class="form-control datepicker" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+            </tr>
+        {% endif %}
+
+        {% for key in record %}
+            {% if key not in ['batch','id','type','updated_date','created_date','last_access','history','assembly', 'assembly_history','attachments','name','datedelivered','billofmaterials','drawingnumber','assembledby','assembleddate', 'manufacturer','manufacturerserial','manufacturersbatchnumber','manufacturersbatchquantity','purchaseorder', 'supplier','location','inspectedby','inspecteddate','children','children_deprecated','obsolete'] %}
+                <tr>
+                    <td>{{key}}</td>
+                    <td>
+                    <input name="{{key}}" type="text" value="{{record[key]}}" class="form-control{% if 'date' in key %} datepicker{% endif %}" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}>
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+            <tr id="newfieldplaceholder"><td></td><td></td></tr>
+        </table>
+        <p><br>{% if record['updated_date'] %}Record created on {{ record['created_date'] }}. {% endif %}{% if record['updated_date'] %}Last updated {{ record['updated_date'] }}{% endif %}</p>
+        
+        {% if not current_user.is_anonymous() %}
+            <p><br>
+                <a id="newfield" class="btn btn-info" href="#">Add new field</a> &nbsp;
+                <input type="submit" name="submit" class="btn btn-info" value="Save"> &nbsp;
+                <input type="submit" name="submit" class="btn btn-danger" value="Delete">
+            </p>
+        {% endif %}
+    </div>
+    </form>
+    </div>
+
+    <div class="col-md-6">
+        <div class="well" style="min-height:250px;background-color:#666;border-color:#666;">
+            <h3>Assembly information</h3>
+    <!-- if an assembly, link the parts it contains; offer option to add / remove parts -->
+    {% if record['type'] == 'assembly' %}
+        {% if record.children %}
+            <p>Assembly contains:</p>
+            {% for item in record.children %}
+                <p><a href="/record/{{item['id']}}">{{item['id']}}</a> - {{item['name']}} - 
+                    <a href="{{item['id']}}" class="removefromassembly label label-danger">remove</a></p>
+            {% endfor %}
+        {% else %}
+            <p>No parts listed in this assembly.</p>
+        {% endif %}
+        <p>{% if not current_user.is_anonymous %}<a href="" id="addparts" class="btn btn-info">Add parts to this assembly</a>{% endif %}</p>
+        <div style="border:1px solid #ccc;padding:5px;" id="partsearch">
+        <h4>Search for a part and click it to add to this assembly.</h4>
+        </div>
+    {% endif %}
+
+    <!-- if a part, offer add to assembly; if in one, link it, and offer to remove -->
+    {% if record.parent %}
+            <h4><br />This {% if record['type'] == 'assembly' %}assembly{% else %}part{% endif %} is in assembly <a href="/record/{{record.parent.id}}">{{record.parent.id}}</a></h4>
+            <p><br />{% if not current_user.is_anonymous() %}<a href="" id="removefromassembly" class="btn btn-danger">remove from assembly</a>{% endif %}</p>
+    {% else %}
+            <hr></hr>
+            <p>This {% if record['type'] == 'assembly' %}assembly{% else %}part{% endif %} is not in an assembly.</p>
+            <p>{% if not current_user.is_anonymous() %}<a href="" id="addtoassembly" class="btn btn-info">add to an assembly</a>{% endif %}</p>
+            <div style="border:1px solid #ccc;padding:5px;" id="assemblysearch">
+            <h4>Search for an assembly and click it to add this part to it.</h4>
+            </div>
+
+    {% endif %}
+        </div>
+
+
+        <div class="well" style="min-height:250px;background-color:#666;border-color:#666;">
+            <h3>Batch information</h3>
+            <p>
+                Add to batch: 
+                <select class="form-control" id="batchtoadd" style="display:inline;width:180px;margin-left:55px;">
+                    <option></option>
+                    {% for batch in batches %}
+                    <option>{{batch}}</option>
+                    {% endfor %}
+                </select>
+                <a href="#" id="batchadd" class="btn btn-info">Add</a>
+            </p>
+
+            {% if record['batch'] %}
+            <p>This part is in batch(es) <br>
+            {% for batch in record['batch'] %}
+                <a href="/batch/{{ batch }}">{{ batch }}</a> 
+                {% if not current_user.is_anonymous() %}<a href="{{ batch }}" class="batchremove label label-danger">remove from batch</a>{% endif %}
+                <br>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+
+<hr style="embossed" />
+
+<div class="row">
+
+    <div class="col-md-6">
+        <h3>Procedures / Attachments</h3>
+<!-- show any attachments, offer to upload new -->
+{% if record['attachments'] %}
+    {% for item in record['attachments'] %}
+        <p><a href="/record/{{record.id}}/attachments/{{item['filename']}}">{{item['filename']}}</a>. {{item['test_type']}}. Tested by {{item['tested_by']}}{% if 'test_date' in item %} on {{item['test_date']}}{% endif %}. {{item['status']}}. {{item['description']}}</p>
+    {% endfor %}
+{% else %}
+    <p>No attachments yet</p>
+{% endif %}
+    <form action="/record/{{record.id}}/attachments" method="POST" enctype="multipart/form-data">
+        <p>{% if not current_user.is_anonymous() %}<a id="showaddattachment" class="btn btn-info" href="">Add new procedure / attachment</a>{% endif %}</p>
+        <div style="border:1px solid #ccc;padding:5px;" id="addattachment">
+        <p>Choose an attachment: <input class="form-control" type="file" name="upfile" /></p>
+        <p><textarea class="form-control" name="description" placeholder="provide a short description"></textarea></p>
+        <p>Procedure type: <select class="form-control" name="test_type">
+            <option></option>
+            {% for item in curatedfields['test_type'] %}
+                <option value="{{item}}">{{item}}</option>
+            {% endfor %}
+        </select></p>
+        <p>Procedure date: <input type="text" name="test_date" class="form-control datepicker"></p>
+        <p>Procedure status: <select name="test_status" class="form-control datepicker">
+            <option></option>
+            <option>Pass</option>
+            <option>Fail</option>
+        </select></p>
+        <p>Performed by: <select class="form-control" name="tested_by">
+            <option></option>
+            {% for item in curatedfields['user'] %}
+                <option value="{{ item }}">{{ item }}</option>
+            {% endfor %}
+        </select></p>
+        <p><input type="submit" class="btn btn-info" value="upload new attachment" /></p>
+        {% if record['type'] == 'assembly' %}
+            <p>(Note: this is an assembly. If you upload an attachment to it, it 
+            will also be attached to each individual part in this assembly.)</p>
+        {% else %}
+            {% if record.parent %}
+                <p>(Note: this part is in assembly 
+                    <a href="/record/{{record.parent.id}}">{{record.parent.id}}</a>. 
+                    If you wish to upload an attachment to every record in the assembly, 
+                    you should go to the assembly record instead.)
+                </p>
+            {% endif %}
+        {% endif %}
+        </div>
+    </form>
+
+    </div>
+
+
+
+    <div class="col-md-6" style="border-left:1px solid #ccc;">
+        <h3>Notes</h3>
+        <p>{% if not current_user.is_anonymous() %}<a id="addnote" class="btn btn-info" href="">Add a note</a>{% endif %}</p>
+        {% if record.notes|length != 0 %}
+            {% for item in record.notes %}
+                <p>on {{ item['created_date'] }}{% if item['by'] %} by {{ item['by'] }}{% else %} anonymously{% endif %}
+                {% if not current_user.is_anonymous() %}<a class="deletenote" href="#" data-id="{{ item.id }}" alt="delete this note" title="delete this note"> X </a>{% endif %}<br />
+                {{ item['content'] }}</p>
+            {% endfor %}
+        {% endif %}        
+
+    </div>
+
+    
+</div>
+
+<hr style="embossed" />
+
+<div class="row">
+
+    <div class="col-md-8">
+        <h3>Change history</h3>
+
+<!-- show history in sortable table -->
+<table id="history" class="table table-striped table-bordered">
+<thead>
+    <tr>
+        <th>on date</th>
+        <th>user</th>
+        <th>changed</th>
+        <th>from</th>
+        <th>to</th>
+    </tr>
+</thead>
+<tbody>
+{% for item in record['history'] %}
+    <tr>
+        <td style="padding:5px;">{{ item['date'] }}</td>
+        <td style="padding:5px;">{{ item['user'] }}</td>
+        <td style="padding:5px;">{{ item['field'] }}</td>
+        <td style="padding:5px;"><a class="btn btn-info showdets" href="#"> + - </a> <span class="detsfold" style="display:none;">{{ item['previous'] }}</span></td>
+        <td style="padding:5px;"><a class="btn btn-info showdets" href="#"> + - </a> <span class="detsfold" style="display:none;">{{ item['current'] }}</span></td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+
+
+    </div>
+
+    <div class="col-md-4" style="background-color:#333;">
+        <h3>Access history</h3>
+        <p><a id="showaccess" class="btn btn-info" href="">show access history</a></p>
+        <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var showaccess = function(event) {
+                event.preventDefault()
+                jQuery('#accesshistory').toggle()
+            }
+            jQuery('#showaccess').bind('click',showaccess)
+            jQuery('#accesshistory').hide()
+        })
+        </script>
+        <div id="accesshistory">
+<!-- show access history -->
+{% for item in record['last_access'] %}
+    <p>Viewed by {{ item['user'] }} at {{ item['date'] }}</p>
+{% endfor %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+

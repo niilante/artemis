@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script type="text/javascript">
+jQuery(document).ready(function() {
+
+    var newfield = function(event) {
+        event.preventDefault();
+        var fieldname = prompt('New field name:',"");
+        var no = [
+            'type'            
+        ];
+        var lfn = fieldname.toLowerCase();
+        if ( no.indexOf(lfn) > -1 ) {
+            alert('Sorry, you cannot use that field name. Please try a different one.');
+        } else if ( fieldname.length != 0 ) {
+            var nf = '<tr><td>' + fieldname + '</td><td><input class="form-control" type="text" name="' + fieldname + '"></td></tr>';
+            $('#newfieldplaceholder').before(nf);
+        } else {
+            alert('Sorry, something seems wrong with your field name. Please try again')
+        }
+    }
+    $('#newfield').bind('click',newfield);
+    
+    var startmerge = function(event) {
+        event.preventDefault();
+        $('#mergechoice').toggle();
+    }
+    $('#startmerge').bind('click',startmerge);
+
+    var updatecount = function(data) {
+        $('#curatedacount').html(data.hits.total);
+        $('#mergeconfirm').show();
+        $('#replace').value( '{{cur.data['type']}}_' + $('#mergeval').val().replace(/ /g,'') );
+    }
+    var mergeconfirm = function(event) {
+        $('#replace').value("");
+        $('.curateda').html( $('#mergeval').val() );
+        $('#curatedb').html('{{cur.data['value']}}');
+        $.ajax({
+            type: "GET",
+            dataType: "JSON",
+            url: '/query/record/_search?q={{cur.data["type"]}}.exact:"' + $('#mergeval').val() + '"',
+            success: updatecount
+        });        
+    }
+    $('#mergeval').bind('change',mergeconfirm);
+    
+    
+});
+</script>
+
+<div class="row">
+    <div class="col-md-12" style="padding-top:20px;">
+        <form method='POST'>
+            <table>
+                <tr>
+                    <td style="min-width:200px;">Field type:</td>
+                    <td>
+                        <select name="type" class="form-control">
+                            <option></option>
+                            {% for val in app.config['CURATED_FIELDS'] %}
+                            <option{% if val == cur.data['type'] %} selected="selected"{% endif %}>{{val}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                {% for k,v in cur.data.items() %}
+                {% if k not in ['id','type','author','created_date','last_updated'] %}
+                <tr>
+                    <td>{{k}}:</td>
+                    <td><input type="text" name="{{k}}" value="{{v}}" class="form-control"></td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                <tr id="newfieldplaceholder"><td></td><td></td></tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <br>
+                        <a id="newfield" class="btn btn-info" href="#">Add new field</a> &nbsp;
+                        <input type="submit" name="submit" class="btn btn-info" value="Save"> &nbsp;
+                        <input type="submit" name="submit" class="btn btn-danger" value="Delete">
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <br>
+                        <a id="startmerge" class="btn btn-info" href="#">Use this curated record to replace another</a>
+                    </td>
+                </tr>
+                <tr id="mergechoice" style="display:none;">
+                    <td>Select the curated {{cur.data['type']}}<br> record value to replace</td>
+                    <td>
+                        <select id="mergeval" class="form-control">
+                            <option></option>
+                            {% for val in curatedfields[cur.data['type']] %}
+                            {% if val != cur.data['value'] %}
+                            <option>{{val}}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+
+<div class="row" id="mergeconfirm" style="display:none;">
+    <div class="col-md-2"></div>
+    <div class="col-md-8" style="padding-top:20px;">
+        <div class="jumbotron">
+            <p>WARNING: You have chosen to </p>
+            <h3>REPLACE: <span class="curateda"></span></h3>
+            <h3>WITH: <span id="curatedb"></span></h3>
+            <div id="recordtoreplace"></div>
+            <p>This will alter <span id="curatedacount">XXXX</span> records currently using value "<span class="curateda"></span>", and 
+            will remove value "<span class="curateda"></span>" from the relevant dropdown lists in future record creation and editing.</p>
+            <form method="POST">
+            <p>
+                <input type="hidden" name="replace" id="replace" value="">
+                <input type="submit" value="Replace" class="btn btn-info">
+            </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

@@ -1,7 +1,5 @@
 Artemis parts management system.
 
-Based on parts of BibServer and Edjo and FacetView
-
 Install
 =======
 
@@ -20,7 +18,7 @@ Install
 
 3. Install the app::
 
-    cd artemis
+    cd portality
     pip install -e .
 
 4. Make sure lastintid and lastintbatch can be created/written::
@@ -39,7 +37,7 @@ Install
 
 5. Run the webserver::
 
-    python artemis/web.py
+    python portality/app.py
 
 6. If you want to pre-load with legacy data::
 
@@ -61,10 +59,10 @@ Install commands on a clean installation of Ubuntu_11.10::
     ./elasticsearch-0.18.2/bin/elasticsearch start
 
     git clone http://github.com/cottagelabs/artemis
-    cd artemis
+    cd portality
     pip install -e .
     
-    python artemis/web.py
+    python portality/app.py
     
 You will now find your service running at localhost:5004.
 

@@ -1,0 +1,51 @@
+body {
+    padding-top: 40px;
+    background-color:#333;
+    color:#eee;
+}
+
+a {
+    color:orange;
+}
+
+h1, h2, h3, h4, h5, h6{
+    color:#eee;
+}
+
+table.tablesorter tbody td {
+	background-color: #333;
+}
+
+.content {
+  margin-top: 20px;
+}
+
+.jumbotron{
+    background-color:#999;
+    font-size:1.1em;
+}
+
+form{
+    display:inline;
+}
+
+div.alert-messages {
+  margin-top: 15px;
+}
+
+.well > p{
+    color:black;
+}
+
+.table-striped tbody tr:nth-child(odd) td, .table-striped tbody tr:nth-child(odd) td a, .table-striped tbody tr:nth-child(odd) th {
+  background-color: #ccc;
+  color:black;
+}
+.table-striped tbody tr:nth-child(even) td, .table-striped tbody tr:nth-child(even) td a, .table-striped tbody tr:nth-child(odd) th {
+  color:white;
+}
+.table tbody tr:hover td a, .table tbody tr:hover td, .table tbody tr:hover th {
+  background-color: #fff;
+  color:black
+}
+

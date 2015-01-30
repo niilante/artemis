@@ -1,0 +1,177 @@
+{% extends "/base.html" %}
+
+{% block content %}
+
+
+<script>
+jQuery(document).ready(function() {
+
+    function discoveryRecordView(data) {
+        var details = '<div class="col-md-3"><div class="well" style="height:150px;overflow:hidden;">';
+        details += '<h4 style="color:#333;">' + data.type + ' <a href="/record/' + data.id + '">' + data.id + '</a></h4><p>' + data.name + '</p>';
+        details += '</div></div>';
+        return details;
+    }
+        
+    var cshowresults = function(data) {
+        var restable = '<div class="row" id="searchresulttable" style="margin-top:10px;">';
+        for ( var r in data.hits.hits ) {
+            restable += discoveryRecordView(data.hits.hits[r].fields);
+        }
+        restable += '</div>';
+        $('.graphview_panel').html(restable);
+        $('.graphview_total').html(data.hits.total);
+        $('.graphview_loading').html('... LOADING').hide();
+        if ( data.hits.total == 0 ) {
+            $('.graphview_loading').html('NO RESULTS FOUND').show();
+        }
+        var qr = $('#panel').graphview.options.query();
+        qr.fields ? delete qr.fields : false;
+        qr.facets ? delete qr.facets : false;
+        $('#doexport').attr('href','/export?source=' + JSON.stringify(qr));
+    }
+
+    var cuitemplate = function() {
+        var options = $.fn.graphview.options;
+        var ui = '<div class="graphview">';
+        ui += '<div class="row graphview_searcharea" style="padding-top:20px;padding-bottom:20px;">';
+
+        ui += '<div class="col-md-3">';
+        
+        ui += '<select class="graphview_suggest form-control">';
+        ui += '<option style="color:' + options.fill("records") + ';" data-value="records">filter type:</option>';
+        for ( var key in options.defaultquery.facets ) {
+            var obj = options.defaultquery.facets[key];
+            if ( key != "range" && obj.term.suggest ) { // TODO: change this in case it is not a term facet?
+                ui += '<option data-value="' + obj.term.field + '" style="color:' + options.fill(obj.term.field) + ';">' + key + '</option>';
+                ui += ', ';
+            }
+        }
+        ui += '</select>';
+
+        ui += '<div style="height:35px;margin-top:10px;">';
+
+        ui += '<div style="display:inline;">';
+        ui += '<input class="form-control graphview_from" type="text" value="';
+        ui += options.defaultquery.from;
+        ui += '" style="width:40px;margin:-5px 0 0 0;padding:1px 1px 0 0;color:#666;text-align:center;display:inline;">';
+        ui += ' to ';
+        ui += '<input class="form-control graphview_to" type="text" value="';
+        ui += options.defaultquery.size;
+        ui += '" style="width:40px;margin:-5px 0 0 0;padding:1px 1px 0 0;color:#666;text-align:center;display:inline;"> of \
+            <span class="graphview_total" style="font-size:16px;font-weight:bold;color:#999;"></span>';
+        ui += ' <span class="graphview_loading">... LOADING</span>';
+        ui += '</div>';
+        
+        ui += '</div>';
+        
+        ui += '<p><a id="doexport" class="btn btn-default" href="/export">Export results</a></p>';
+        
+        ui += '</div>';
+
+        ui += '<div class="col-md-9">';
+
+        ui += '<div><input type="text" class="form-control query_string" style="width:97%;" data-option="query.bool.must.query_string.query"></div>';
+        
+        {% if not obsolete %}
+        ui += '<p>Filter tests: all pass <input type="radio" name="testfilter" class="tests" id="allpass"> some fail <input type="radio" name="testfilter" class="tests" id="somefail"> last fail <input type="radio" name="testfilter" class="tests" id="lastfail"></p>'
+        {% endif %}
+        
+        ui += '<p>Filter created date: <span id="lowdate"></span> <span id="highdate"></span></p><div id="slider"></div>'
+
+        ui += '</div>';
+        ui += '</div>'; // closes searcharea
+
+        ui += '<div class="graphview_panel"></div>';
+
+        ui += '</div>'; // closes graphview
+
+        return ui;
+    }
+
+    $('#panel').graphview({
+        "target": "/query/record/_search",
+        "pushstate": true,
+        "defaultquery": {
+            "query": {
+                "bool": {
+                    "must":[
+                        {% if obsolete %}
+                        {
+                            "term": {
+                                "obsolete": true
+                            }
+                        }
+                        {% endif %}
+                    ],
+                    {% if not obsolete %}"must_not": [
+                        {
+                            "term": {
+                                "obsolete": true
+                            }
+                        }
+                    ]{% endif %}
+                }
+            },
+            "from":0,
+            "size":20,
+            "fields": [
+                "type",
+                "id",
+                "name"
+            ],
+            "facets":{
+                "Type": {"term":{"field":"type.exact","suggest":true}},
+                "Batch": {"term":{"field":"batch.exact","suggest":true}},
+                "Assembly": {"term":{"field":"assembly.exact","suggest":true}},
+                "Supplier": {"term":{"field":"supplier.exact","suggest":true}},
+                "Location": {"term":{"field":"location.exact","suggest":true}},
+                "Created date": {"term":{"field":"created_date.exact","order":"reverse_term","suggest":true}},
+                "Last updated": {"term":{"field":"updated_date.exact","order":"reverse_term","suggest":true}},
+                "Last edited by": {"term":{"field":"history.user.exact","suggest":true}}
+            }
+        },
+        showresults: cshowresults,
+        uitemplate: cuitemplate
+    });
+    
+    $('.select2-input').focus().trigger('mousedown');
+    
+    var testsquery = function(event) {
+        $('#panel').graphview.options.defaultquery.query.bool.must = [{"term": {"overall_test_status.exact": $(this).attr('id') }}];
+        $('#panel').graphview.options.executequery();
+    }
+    $('.tests').bind('click',testsquery);
+         
+    var datevals = {{datevals|tojson|safe}};
+    $("#slider").slider({
+        range: true,
+        min: 0,
+        max: datevals.length-1,
+        values: [0,datevals.length-1],
+        slide: function( event, ui ) {
+            // TODO: this should insert the range query into the defaultquery first ui.values[0] and ui.values[1] are the range
+            $('#lowdate').html(datevals[ui.values[0]] + ' to ');
+            $('#highdate').html(datevals[ui.values[1]]);
+            $('#panel').graphview.options.executequery();
+        }
+    });
+
+})
+</script>
+
+{% if obsolete %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron">
+            <h2 style="color:red;">YOU ARE SEARCHING OBSOLETE RECORDS</h2>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div id="panel">
+</div>
+
+{% endblock %}
+

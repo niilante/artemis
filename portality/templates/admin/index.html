@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script type="text/javascript">
+jQuery(document).ready(function() {
+
+    function discoveryRecordView(data) {
+        var details = '<tr><td>';
+        details += '<p>' + data.type + ' - <a href="/admin/' + data.id + '">' + data.value + '</a></p>';
+        details += '<p>';
+        var first = true;
+        for ( var k in data ) {
+            if ( k != 'type' && k != 'value' ) {
+                first ? first = false : details += ', ';
+                details += data[k];
+            }
+        }
+        details += '</p>';
+        details += '</td></tr>';
+        return details;
+    }
+        
+    var cshowresults = function(data) {
+        var restable = '<table class="table table-bordered" id="searchresulttable" style="margin-top:10px;">';
+        for ( var r in data.hits.hits ) {
+            restable += discoveryRecordView(data.hits.hits[r]._source);
+        }
+        restable += '</table>';
+        $('.graphview_panel').html(restable);
+        $('.graphview_total').html(data.hits.total);
+        $('.graphview_loading').html('... LOADING').hide();
+        if ( data.hits.total == 0 ) {
+            $('.graphview_loading').html('NO RESULTS FOUND').show();
+        }
+    }
+
+    var cuitemplate = function() {
+        var options = $.fn.graphview.options;
+        var ui = '<div class="graphview">';
+        ui += '<div class="row graphview_searcharea" style="padding-top:20px;padding-bottom:20px;">';
+
+        ui += '<div class="col-md-3">';
+        
+        ui += '<select class="graphview_suggest form-control">';
+        ui += '<option style="color:' + options.fill("records") + ';" data-value="records">filter by:</option>';
+        for ( var key in options.defaultquery.facets ) {
+            var obj = options.defaultquery.facets[key];
+            if ( key != "range" && obj.term.suggest ) { // TODO: change this in case it is not a term facet?
+                ui += '<option data-value="' + obj.term.field + '" style="color:' + options.fill(obj.term.field) + ';">' + key + '</option>';
+                ui += ', ';
+            }
+        }
+        ui += '</select>';
+
+        ui += '<div style="height:35px;margin-top:10px;">';
+
+        ui += '<div style="display:inline;">';
+        ui += '<input class="form-control graphview_from" type="text" value="';
+        ui += options.defaultquery.from;
+        ui += '" style="width:40px;margin:-5px 0 0 0;padding:1px 1px 0 0;color:#666;text-align:center;display:inline;">';
+        ui += ' to ';
+        ui += '<input class="form-control graphview_to" type="text" value="';
+        ui += options.defaultquery.size;
+        ui += '" style="width:40px;margin:-5px 0 0 0;padding:1px 1px 0 0;color:#666;text-align:center;display:inline;"> of \
+            <span class="graphview_total" style="font-size:16px;font-weight:bold;color:#999;"></span>';
+        ui += ' <span class="graphview_loading">... LOADING</span>';
+        ui += '</div>';
+        
+        ui += '</div>';
+        
+        ui += '</div>';
+
+        ui += '<div class="col-md-9">';
+
+        ui += '<div><input type="text" class="form-control query_string" style="width:97%;" data-option="query.bool.must.query_string.query"></div>';
+
+        ui += '</div>';
+        ui += '</div>'; // closes searcharea
+
+        ui += '<div class="graphview_panel"></div>';
+
+        ui += '</div>'; // closes graphview
+
+        return ui;
+    }
+
+    $('#curatedsearch').graphview({
+        "target": "/query/curated/_search",
+        "defaultquery": {
+            "query": {
+                "bool": {
+                    "must":[
+                        {"match_all": {}}
+                    ]
+                }
+            },
+            "from":0,
+            "size":20,
+            "facets":{
+                "Type": {"term":{"field":"type.exact","suggest":true}}
+            }
+        },
+        showresults: cshowresults,
+        uitemplate: cuitemplate
+    });
+    $('.select2-input').focus().trigger('mousedown');
+
+});
+</script>
+
+<div class="row">
+    <div class="col-md-12" style="padding-top:20px;">
+        <p>
+            <a class="btn btn-info" href="/admin/create">Create new curated value</a> 
+            <a class="btn btn-info" href="/account/register">Create a new user account</a> 
+            <a class="btn btn-info" href="/account">View all users</a>
+            <a class="btn btn-info" href="/search/obsolete">Search obsolete records</a>
+        </p>
+        <div id="curatedsearch"></div>
+    </div>
+</div>
+{% endblock %}

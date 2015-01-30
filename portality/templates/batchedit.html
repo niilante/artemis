@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+{% if not bid %}
+
+<form action="" method="POST">
+<div class="row">
+    <div class="col-md-12 well" style="background-color:#999;border:none;">
+        <p>Which batch do you want to edit? 
+            <select class="form-control" id="choosebatch" style="width:200px;display:inline;">
+                <option></option><option>test</option>
+                {% for batch in batches %}
+                <option>{{batch}}</option>
+                {% endfor %}
+            </select>
+        </p>
+        <p>You can also choose a batch to edit via the search interface or from a record that is in a batch.</p>
+    </div>
+</div>
+</form>
+    
+{% else %}
+
+<form action="" method="POST">
+<div class="row">
+    <div class="col-md-8">
+        <div id="therecord" class="well" style="min-height:500px;background-color:#666;color:white;border-color:#333;">
+            <table>
+                {% for key in keys.keys() %}
+                <tr>
+                    <td>{{key}}</td>
+                    <td>
+                        {% if key in app.config['CURATED_FIELDS'] %}
+                        <select name="{{key}}" id="{{key}}" class="form-control">
+                            <option></option>
+                            <optgroup>
+                            {% for val in curatedfields[key] %}
+                            {% if val in keys[key] %}<option>{{val}}</option>{% endif %}
+                            {% endfor %}
+                            </optgroup>
+                            <optgroup label="________________">
+                            {% for val in curatedfields[key] %}
+                            {% if val not in keys[key] %}<option>{{val}}</option>{% endif %}
+                            {% endfor %}
+                            </optgroup>
+                        </select>
+                        {% else %}
+                        <input type="text" id="{{key}}" name="{{key}}" class="autos form-control">
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr id="newfieldplaceholder"><td></td><td></td></tr>
+                <tr><td></td><td>
+                    <br><a class="btn btn-info" id="newfield" href="#">add another field</a> or 
+                    <input type="submit" name="submit" class="btn btn-info" value="save the changes">
+                </td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="well" style="min-height:500px;background-color:#666;color:white;border-color:#333;">
+            <p style="color:white;font-size:1.1em;">This is a list of every field in the {{batchsize}} records of batch {{bid}}.</p>
+            <p style="color:white;font-size:1.1em;">The input box next to each field will show all
+            the values entered into those fields across the various records in the batch. Any one of these values can be chosen, 
+            or a new value can be entered. In the case of curated fields, a selection box will show the values already used in 
+            the batch records at the top, and will also offer the other values available for that curated field below the break line.</p>
+            <p style="color:white;font-size:1.1em;">If you choose to save your changes, then EVERY record in the batch will be altered to 
+            show the SAME value chosen here for the related field. Fields that are left blank here will not be edited. If you choose 
+            to add another field, you can provide any value for that new field that you wish. The new field and corresponding value 
+            will then be added to every record in the batch.</p>
+        </div>
+    </div>
+
+</div>
+</form>
+
+{% endif %}
+
+    
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    
+    var keys = {{keys|tojson|safe}};
+    $('.autos').each(function() {
+        $(this).autocomplete({
+            minLength:0, 
+            delay:0,
+            source: keys[$(this).attr('id')]
+        });
+    });
+    $('.autos').bind('focus',function() { $(this).autocomplete("search",""); });
+
+    
+    var newfield = function(event) {
+        // provide a dropdown box on the page where all field names available in the batch can be selected
+        // user selects a field name or provides a new field name
+        // if field name is selected then in the new value box show select2 choice options of all values in that field from records in the batch
+        // compile a list of special fields, e.g. ones that are curated or that require date inputs, and make sure if they are chosen that 
+        // the input field provided is of the correct type
+        event.preventDefault();
+        var fieldname = prompt('New field name:',"");
+        var no = [
+            'obsolete',
+            'batch',
+            'id',
+            'type',
+            'assembly',
+            'attachments',
+            'history',
+            'name',
+            'datedelivered',
+            'billofmaterials',
+            'drawingnumber',
+            'assembly',
+            'assembleddate',
+            'assembledby',
+            'manufacturer',
+            'manufacturerserial',
+            'manufacturersbatchnumber',
+            'manufacturersbatchquantity',
+            'purchaseorder',
+            'supplier',
+            'inspectedby',
+            'inspecteddate',
+            'location'
+            
+        ];
+        var lfn = fieldname.toLowerCase();
+        if ( no.indexOf(lfn) > -1 ) {
+            alert('Sorry, you cannot use that field name. Please try a different one. ' + no + ' are not allowed.');
+        } else if ( fieldname.length != 0 ) {
+            var nf = '<tr><td>' + fieldname + '</td><td><input class="form-control" type="text" name="' + fieldname + '"></td></tr>';
+            $('#newfieldplaceholder').before(nf);
+        } else {
+            alert('Sorry, something seems wrong with your field name. Please try again')
+        }
+    }
+    jQuery('#newfield').bind('click',newfield);
+
+    var editfield = function(fieldname) {
+        if ( !fieldname ) {
+        }
+        // find the values already in this field from the index - can probably stream to select2
+        var nf = '<tr><td>' + fieldname + '</td><td><input class="form-control" type="text" name="' + fieldname + '"></td></tr>';
+        $('#newfieldplaceholder').before(nf);
+    }
+    jQuery('#editfield').bind('click',editfield);
+        
+    var choosebatch = function() {
+        var bid = $('#choosebatch').val();
+        window.location = '/record/edit/batch/' + bid;
+    }
+    jQuery('#choosebatch').bind('change',choosebatch);
+    
+});
+</script>
+
+{% endblock %}
+

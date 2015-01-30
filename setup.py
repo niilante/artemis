@@ -1,30 +1,31 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = 'artemis',
-    version = '0.4',
+    name = 'portality',
+    version = '0.1.1',
     packages = find_packages(),
     install_requires = [
         "chardet",
-        "werkzeug==0.8.3",
-        "Flask==0.9",
-        "Flask-Login==0.1.3",
-        "Flask-WTF==0.8.3",
-        "requests==1.1.0"
+        "Flask==0.10.1",
+        "Flask-Login==0.2.7",
+        "Flask-WTF==0.9.3",
+        "Markdown==2.3.1",
+        "WTForms==1.0.5",
+        "Werkzeug==0.9.6",
+        "requests==2.1.0"
     ],
-    url = 'http://cottagelabs.com/',
+    url = 'http://cottagelabs.com',
     author = 'Cottage Labs',
     author_email = 'us@cottagelabs.com',
-    description = 'Artemis parts tracking system.',
-    license = 'AGPL',
+    description = 'Artemis Parts Tracking System',
+    license = 'Copyheart',
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
+        'License :: Copyheart',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
 )
-

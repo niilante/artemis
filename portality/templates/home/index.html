@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+      <div class="row">
+        <div class="col-md-7">
+          <div class="jumbotron" style="height:250px;background-color:#eee;color:black;">
+            <p><img src="/static/logo.png" /></p>
+            <p><br>Parts tracking database</p>
+          </div>
+        </div>
+
+        <div class="col-md-5">
+          <div class="jumbotron" style="height:250px;">
+              {% if not current_user.is_anonymous() %}
+              <div class="row">
+                  <a class="btn btn-default" href="/record/create/part">New part</a>
+                  <a class="btn btn-default" href="/record/create/batch">Batch of new parts</a>
+                  <a class="btn btn-default" href="/record/create/assembly">New assembly</a>
+              </div>
+              {% endif %}
+              <div class="row"><br />
+                  <a class="btn btn-default" href="/record/edit/batch">Batch edit</a>
+                  <a class="btn btn-info" href="/help">Read the help</a>
+                  {% if current_user.is_super %}<a class="btn btn-default" href="/admin">Admin tasks</a>{% endif %}
+              </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="jumbotron" style="height:350px;">
+            <h2>Overview</h2>
+            <h3><br>There are <a class="label label-info" style="font-size:20px;" href="/type/part">{{records}}</a> parts 
+            <br><br>and <a class="label label-info" style="font-size:20px;" href="/type/assembly">{{assemblies}}</a> assemblies</h3>
+            <p><br><a class="btn btn-info" href="/search">search everything</a></p>
+          </div>
+        </div>
+
+        <div class="col-md-8">
+          <div class="jumbotron" style="min-height:350px;">
+            {% if recenttype == 'user' %}
+            <h2>Your recent record edits</h2>
+            {% else %}
+            <h2>Records recently changed</h2>
+            {% endif %}
+            {% for row in recent %}
+                <h4 style="margin-bottom:7px;">{{row['type']}} <a href="/record/{{row['id']}}">{{row['id']}}</a> {% if row['name'] %} - {{row['name']}}{% endif %}{% if row['batch'] %} (in batch <a href="/batch/{{row['batch']}}">{{row['batch']}}</a>){% endif %}</h4>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+{% endblock %}
