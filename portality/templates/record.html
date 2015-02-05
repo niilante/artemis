@@ -83,7 +83,7 @@ jQuery(document).ready(function() {
     
     var batchremove = function(event) {
         event.preventDefault();
-        var batches = {{ record['batch']|tojson|safe }};
+        var batches = {% if batch in record %}{{ record['batch']|tojson|safe }}{% else %}[]{% endif %};
         var batchtoremove = $(this).attr('href');
         var position = $.inArray(batchtoremove, batches);
         if ( ~position ) batches.splice(position, 1);
@@ -103,7 +103,7 @@ jQuery(document).ready(function() {
 
     var batchadd = function(event) {
         event.preventDefault();
-        var batches = {{ record['batch']|tojson|safe }};
+        var batches = {% if batch in record %}{{ record['batch']|tojson|safe }}{% else %}[]{% endif %};
         var batchtoadd = $('#batchtoadd').val();
         var position = $.inArray(batchtoremove, batches);
         if ( !~position ) batches.push(batchtoadd);

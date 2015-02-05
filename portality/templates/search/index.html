@@ -23,7 +23,7 @@ jQuery(document).ready(function() {
         $('.graphview_total').html(data.hits.total);
         $('.graphview_loading').html('... LOADING').hide();
         if ( data.hits.total == 0 ) {
-            $('.graphview_loading').html('NO RESULTS FOUND').show();
+            $('.graphview_loading').html('').show();
         }
         var qr = $('#panel').graphview.options.query();
         qr.fields ? delete qr.fields : false;
@@ -74,7 +74,7 @@ jQuery(document).ready(function() {
         ui += '<div><input type="text" class="form-control query_string" style="width:97%;" data-option="query.bool.must.query_string.query"></div>';
         
         {% if not obsolete %}
-        ui += '<p>Filter tests: all pass <input type="radio" name="testfilter" class="tests" id="allpass"> some fail <input type="radio" name="testfilter" class="tests" id="somefail"> last fail <input type="radio" name="testfilter" class="tests" id="lastfail"></p>'
+        ui += '<p>Filter tests: all pass <input type="checkbox" name="testfilter" class="tests" id="allpass"> some fail <input type="checkbox" name="testfilter" class="tests" id="somefail"> last fail <input type="checkbox" name="testfilter" class="tests" id="lastfail"></p>'
         {% endif %}
         
         ui += '<p>Filter created date: <span id="lowdate"></span> <span id="highdate"></span></p><div id="slider"></div>'
@@ -138,7 +138,13 @@ jQuery(document).ready(function() {
     $('.select2-input').focus().trigger('mousedown');
     
     var testsquery = function(event) {
-        $('#panel').graphview.options.defaultquery.query.bool.must = [{"term": {"overall_test_status.exact": $(this).attr('id') }}];
+        var whichtest = $(this).attr('id');
+        $('.tests').each(function() {
+            if ( $(this).attr('id') != whichtest ) {
+                $(this).attr('checked',false);
+            }
+        });
+        $('#panel').graphview.options.defaultquery.query.bool.must = [{"term": {"overall_test_status.exact": whichtest }}];
         $('#panel').graphview.options.executequery();
     }
     $('.tests').bind('click',testsquery);
