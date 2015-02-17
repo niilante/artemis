@@ -37,7 +37,7 @@ def set_current_context():
     f = [i['_source'] for i in models.Curated.query(size=10000).get('hits',{}).get('hits',{})]
     for rec in f:
         if rec['type'] not in fields.keys(): fields[rec['type']] = []
-        if rec['value'] not in fields[rec['type']]: fields[rec['type']].append(rec['value'])
+        if rec.get('value','') not in fields[rec['type']]: fields[rec['type']].append(rec['value'])
     if 'user' in fields:
         accs = models.Account.query(q='*',size=1000000)
         for i in accs.get('hits',{}).get('hits',[]):
