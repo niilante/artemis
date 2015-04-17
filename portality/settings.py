@@ -33,7 +33,7 @@ PUBLIC_REGISTER = False
 # can anonymous users get raw JSON records via the query endpoint?
 PUBLIC_ACCESSIBLE_JSON = True 
 
-CURATED_FIELDS = ["supplier", "location", "test_type","manufacturer","user"]
+CURATED_FIELDS = ["supplier", "location", "test_type","manufacturer","staff"]
 
 
 # ========================

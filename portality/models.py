@@ -1,5 +1,5 @@
 
-import requests, json
+import requests, json, uuid
 from datetime import datetime
 from portality.core import app
 from portality.dao import DomainObject as DomainObject
@@ -222,7 +222,7 @@ class Record(DomainObject):
     @property
     def notes(self):
         res = Note.query(terms={
-            'owner': [self.id]
+            'about.exact': self.id
         })
         allnotes = [ Note(**item['_source']) for item in res['hits']['hits'] ]
         return allnotes

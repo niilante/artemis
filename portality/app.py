@@ -3,7 +3,7 @@ from flask import Flask, request, abort, render_template, make_response, redirec
 from flask.views import View
 from flask.ext.login import login_user, current_user
 
-import json
+import json, time
 
 import portality.models as models
 import portality.util as util
@@ -107,7 +107,8 @@ def home():
 
 @app.route('/search')
 @app.route('/search/obsolete')
-def search():
+@app.route('/search/<batch>')
+def search(batch=False):
     if 'obsolete' in request.path:
         obsolete = True
     else:
@@ -117,7 +118,7 @@ def search():
     for d in dates:
         dp = d.split(' ')[0]
         if dp not in datevals: datevals.append(dp)
-    return render_template('search/index.html', obsolete=obsolete, datevals=datevals)
+    return render_template('search/index.html', obsolete=obsolete, datevals=datevals, batch=batch)
 
     
 # set the route for receiving new notes
@@ -128,15 +129,16 @@ def note(nid=''):
         newnote = models.Note()
         newnote.data = request.json
         newnote.save()
+        time.sleep(1)
         return redirect('/note/' + newnote.id)
 
     elif request.method == 'DELETE':
-        note = models.Note.get(nid)
+        note = models.Note.pull(nid)
         note.delete()
         return ""
 
     else:
-        thenote = models.Note.get(nid)
+        thenote = models.Note.pull(nid)
         if thenote:
             resp = make_response( json.dumps(thenote.data, sort_keys=True, indent=4) )
             resp.mimetype = "application/json"

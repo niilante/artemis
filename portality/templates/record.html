@@ -4,7 +4,21 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function() {                       
-                       
+
+    var doupdate = function(theid) {
+        jQuery.ajax({
+            url: '/record/{{record.id}}/children/' + theid
+            , type: 'POST'
+            , success: function(data, statusText, xhr) {
+                alert('Assembly updated. Reloading page.')
+                window.location = ""
+            }
+            , error: function(xhr, message, error) {
+                alert("Error: " + error + '. Please try again.');
+            }
+        })
+    }
+
     var cshowresults = function(data) {
         var restable = '<table>';
         for ( var r in data.hits.hits ) {
@@ -46,12 +60,25 @@ jQuery(document).ready(function() {
     });
 
                        
-                       
+    doupd = function(theid) {
+        jQuery.ajax({
+            url: '/record/{{record.id}}/parent/' + theid
+            , type: 'POST'
+            , success: function(data, statusText, xhr) {
+                alert('Assembly updated. Reloading page.')
+                window.location = ""
+            }
+            , error: function(xhr, message, error) {
+                alert("Error: " + error + '. Please try again.');
+            }
+        })
+    }
+
     var asscshowresults = function(data) {
         var restable = '<table>';
         for ( var r in data.hits.hits ) {
             var rec = data.hits.hits[r].fields
-            restable += '<tr><td><p><a onclick="doupd(\'\')" href="javascript: return null;">' + rec.id + '</a> ' + rec.name + '</p></td></tr>';
+            restable += '<tr><td><p><a onclick="doupd(\'' + rec.id + '\')" href="javascript: return null;">' + rec.id + '</a> ' + rec.name + '</p></td></tr>';
         }
         restable += '</table>';
         $('.graphview_panel').html(restable);
@@ -80,10 +107,14 @@ jQuery(document).ready(function() {
                        
                        
     
+    var savedone = function() {
+        window.location = window.location;
+    }
+
     
     var batchremove = function(event) {
         event.preventDefault();
-        var batches = {% if batch in record %}{{ record['batch']|tojson|safe }}{% else %}[]{% endif %};
+        var batches = {% if 'batch' in record %}{{ record['batch']|tojson|safe }}{% else %}[]{% endif %};
         var batchtoremove = $(this).attr('href');
         var position = $.inArray(batchtoremove, batches);
         if ( ~position ) batches.splice(position, 1);
@@ -95,7 +126,8 @@ jQuery(document).ready(function() {
             contentType: "application/json; charset=utf-8",
             dataType: 'json',
             processData: false,
-            success: savedone
+            success: savedone,
+            error: savedone
         });
 
     }
@@ -103,9 +135,9 @@ jQuery(document).ready(function() {
 
     var batchadd = function(event) {
         event.preventDefault();
-        var batches = {% if batch in record %}{{ record['batch']|tojson|safe }}{% else %}[]{% endif %};
+        var batches = {% if 'batch' in record %}{{ record['batch']|tojson|safe }}{% else %}[]{% endif %};
         var batchtoadd = $('#batchtoadd').val();
-        var position = $.inArray(batchtoremove, batches);
+        var position = $.inArray(batchtoadd, batches);
         if ( !~position ) batches.push(batchtoadd);
         var rec = {"batch":batches};
         $.ajax({
@@ -115,16 +147,15 @@ jQuery(document).ready(function() {
             contentType: "application/json; charset=utf-8",
             dataType: 'json',
             processData: false,
-            success: savedone
+            success: savedone,
+            error: savedone
         });
 
     }
     jQuery('#batchadd').bind('click',batchadd);
 
-    var savedone = function() {
-        alert('saved');
-        window.location = window.location;
-    }
+                                                                                  
+                                                                                  
     var addnote = function(event) {
         event.preventDefault()
         var note = prompt("new note:")
@@ -192,19 +223,6 @@ jQuery(document).ready(function() {
     jQuery('#partsearch').hide()
 
     
-    var doupdate = function(theid) {
-        jQuery.ajax({
-            url: '/record/{{record.id}}/children/' + theid
-            , type: 'POST'
-            , success: function(data, statusText, xhr) {
-                alert('Assembly updated. Reloading page.')
-                window.location = ""
-            }
-            , error: function(xhr, message, error) {
-                alert("Error: " + error + '. Please try again.');
-            }
-        })
-    }
 
     
     
@@ -235,19 +253,6 @@ jQuery(document).ready(function() {
     jQuery('#assemblysearch').hide()
 
     
-    var doupd = function(theid) {
-        jQuery.ajax({
-            url: '/record/{{record.id}}/parent/' + theid
-            , type: 'POST'
-            , success: function(data, statusText, xhr) {
-                alert('Assembly updated. Reloading page.')
-                window.location = ""
-            }
-            , error: function(xhr, message, error) {
-                alert("Error: " + error + '. Please try again.');
-            }
-        })
-    }
 
     jQuery('#history').tablesorter()
     jQuery('.datepicker').datepicker({'dateFormat':'dd/mm/yy'});
@@ -321,7 +326,7 @@ jQuery(document).ready(function() {
     <form method="POST" action="">
     <div class="well" style="min-height:250px;background-color:#666;border-color:#666;">
         <!-- record info -->
-        <h2>{{ record['type'] }} {{ record['id'] }}{% if record['name'] %} - {{ record['name'] }}{% endif %}</h2>
+        <h2>Serial No. {{ record['id'] }}{% if record['name'] %} - {{ record['name'] }}{% endif %}</h2>
          {% if current_user.is_anonymous() %}<p>Note you must <a href="/account/login">login</a> if you wish to edit records.</p>{% endif %}
 
         <table>
@@ -614,7 +619,7 @@ jQuery(document).ready(function() {
 
 
     <div class="col-md-6" style="border-left:1px solid #ccc;">
-        <h3>Notes</h3>
+        <h3>Notes {{record.notes|length}}</h3>
         <p>{% if not current_user.is_anonymous() %}<a id="addnote" class="btn btn-info" href="">Add a note</a>{% endif %}</p>
         {% if record.notes|length != 0 %}
             {% for item in record.notes %}

@@ -98,7 +98,8 @@ jQuery(document).ready(function() {
             "from":0,
             "size":20,
             "facets":{
-                "Type": {"term":{"field":"type.exact","suggest":true}}
+                "Type": {"term":{"field":"type.exact","suggest":true}},
+                "Value": {"term":{"field":"value.exact","suggest":true}}
             }
         },
         showresults: cshowresults,

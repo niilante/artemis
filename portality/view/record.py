@@ -40,7 +40,7 @@ def create(rectype):
         for key, val in received.items():
             if key not in ['submit','howmany']:
                 record[key] = val
-        if self.rectype == "batch":
+        if rectype == "batch":
             create = int(received['howmany'])
         else:
             create = 1
@@ -53,9 +53,9 @@ def create(rectype):
             recids.append(recobj.id)
 
         time.sleep(1)
-        if self.rectype == "batch":
+        if rectype == "batch":
             flash('Your batch has been created. The parts in the batch are shown below.')
-            return redirect('/batch/' + record['batch'])
+            return redirect('/search/' + record['batch'])
         else:
             flash('Your new record has been created')
             return redirect('/record/' + recids[0])
@@ -131,14 +131,7 @@ def rec(rid):
         if current_user.is_anonymous(): abort(401)
         newdata = request.json if request.json else request.values
         for k, v in newdata.items():
-            if v.startswith("{u'"):
-                if k in res.data.keys():
-                    del res.data[k]
-                dd = json.loads(v.replace("u'","'").replace("'",'"'))
-                for l, m in dd.items():
-                    if len(m) > 0:
-                        res.data[k + '_' + l] = m
-            elif k not in ['submit']:
+            if k not in ['submit']:
                 res.data[k] = v
         res.save()
 

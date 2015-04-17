@@ -8,7 +8,7 @@ jQuery(document).ready(function() {
 
     function discoveryRecordView(data) {
         var details = '<div class="col-md-3"><div class="well" style="height:150px;overflow:hidden;">';
-        details += '<h4 style="color:#333;">' + data.type + ' <a href="/record/' + data.id + '">' + data.id + '</a></h4><p>' + data.name + '</p>';
+        details += '<h4 style="color:#333;">Serial No. <a href="/record/' + data.id + '">' + data.id + '</a></h4><p>' + data.name + '</p>';
         details += '</div></div>';
         return details;
     }
@@ -96,6 +96,13 @@ jQuery(document).ready(function() {
             "query": {
                 "bool": {
                     "must":[
+                        {% if batch %}
+                        {
+                            "term": {
+                                "batch.exact": "{{batch}}"
+                            }
+                        }
+                        {% endif %}
                         {% if obsolete %}
                         {
                             "term": {
@@ -104,13 +111,13 @@ jQuery(document).ready(function() {
                         }
                         {% endif %}
                     ],
-                    {% if not obsolete %}"must_not": [
+                    {% if not obsolete %}/*"must_not": [
                         {
                             "term": {
                                 "obsolete": true
                             }
                         }
-                    ]{% endif %}
+                    ]*/{% endif %}
                 }
             },
             "from":0,
@@ -135,16 +142,32 @@ jQuery(document).ready(function() {
         uitemplate: cuitemplate
     });
     
-    $('.select2-input').focus().trigger('mousedown');
+    //$('.select2-input').focus().trigger('mousedown');
     
     var testsquery = function(event) {
         var whichtest = $(this).attr('id');
+        var unchecked = false;
+        if ( !$(this).is(':checked') ) {
+            unchecked = true;
+            alert('unchecked');
+        }
         $('.tests').each(function() {
             if ( $(this).attr('id') != whichtest ) {
                 $(this).attr('checked',false);
             }
         });
-        $('#panel').graphview.options.defaultquery.query.bool.must = [{"term": {"overall_test_status.exact": whichtest }}];
+        if ( unchecked ) {
+            var which = 0;
+            for ( var i in $('#panel').graphview.options.defaultquery.query.bool.must ) {
+                var t = $('#panel').graphview.options.defaultquery.query.bool.must[i].term;
+                if ( 'overall_test_status.exact' in t ) {
+                    which = i;
+                }
+            }
+            delete $('#panel').graphview.options.defaultquery.query.bool.must[which];
+        } else {
+            $('#panel').graphview.options.defaultquery.query.bool.must = [{"term": {"overall_test_status.exact": whichtest }}];
+        }
         $('#panel').graphview.options.executequery();
     }
     $('.tests').bind('click',testsquery);
@@ -170,7 +193,7 @@ jQuery(document).ready(function() {
 <div class="row">
     <div class="col-md-12">
         <div class="jumbotron">
-            <h2 style="color:red;">YOU ARE SEARCHING OBSOLETE RECORDS</h2>
+            <h2 style="color:red;">YOU ARE SEARCHING ONLY OBSOLETE RECORDS</h2>
         </div>
     </div>
 </div>

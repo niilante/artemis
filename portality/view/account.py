@@ -138,7 +138,7 @@ def login():
         else:
             flash('Incorrect username/password', 'error')
     if request.method == 'POST' and not form.validate():
-        flash('Invalid form', 'error')
+        flash('Sorry there was an error with your form inputs. Please try again.', 'error')
     return render_template('account/login.html', form=form)
 
 @blueprint.route('/forgot', methods=['GET', 'POST'])
@@ -222,12 +222,9 @@ def register():
         account.set_password(form.s.data)
         account.save()
         time.sleep(1)
-        user = models.Account.pull(account.id)
-        login_user(user, remember=True)
-        session.permanent = True
-        flash('Welcome to your account', 'success')
-        return redirect('/account/' + account.id)
+        flash('New user account created for ' + account.id, 'success')
+        return redirect('/account')
     if request.method == 'POST' and not form.validate():
         flash('Please correct the errors', 'error')
-    return render_template('index.html', form=form)
+    return render_template('account/register.html', form=form)
 
