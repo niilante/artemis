@@ -458,7 +458,7 @@ jQuery(document).ready(function() {
                 <td>
                     <select class="form-control" name="inspectedby" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}>
                         <option></option>
-                        {% for item in curatedfields['user'] %}
+                        {% for item in curatedfields['staff'] %}
                             <option value="{{item}}"{% if item == record['inspectedby'] %} selected="selected"{% endif %}>{{item}}</option>
                         {% endfor %}
                     </select>
@@ -594,7 +594,7 @@ jQuery(document).ready(function() {
         </select></p>
         <p>Performed by: <select class="form-control" name="tested_by">
             <option></option>
-            {% for item in curatedfields['user'] %}
+            {% for item in curatedfields['staff'] %}
                 <option value="{{ item }}">{{ item }}</option>
             {% endfor %}
         </select></p>

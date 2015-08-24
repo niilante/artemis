@@ -104,12 +104,12 @@ def batchedit(bid=None):
             rid = rc['_source']['id']
             rec = models.Record.pull(rid)
             for key, val in received.items():
-                if key not in ['submit']:
+                if key not in ['submit'] and len(val) > 0:
                     rec.data[key] = val
             rec.save()
             updated += 1
 
-        time.sleep(1)
+        time.sleep(2)
         flash(str(updated) + ' records in this batch have been updated. The parts in the batch are shown below.')
         return redirect('/batch/' + bid)
 

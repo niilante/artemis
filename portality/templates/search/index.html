@@ -103,6 +103,13 @@ jQuery(document).ready(function() {
                             }
                         }
                         {% endif %}
+                        {% if type %}
+                        {
+                            "term": {
+                                "type.exact": "{{type}}"
+                            }
+                        }
+                        {% endif %}
                         {% if obsolete %}
                         {
                             "term": {

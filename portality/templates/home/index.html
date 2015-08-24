@@ -47,7 +47,7 @@
             <h2>Records recently changed</h2>
             {% endif %}
             {% for row in recent %}
-                <h4 style="margin-bottom:7px;">{{row['type']}} <a href="/record/{{row['id']}}">{{row['id']}}</a> {% if row['name'] %} - {{row['name']}}{% endif %}{% if row['batch'] %} (in batch <a href="/batch/{{row['batch']}}">{{row['batch']}}</a>){% endif %}</h4>
+                <h4 style="margin-bottom:7px;">{{row['type']}} <a href="/record/{{row['id']}}">{{row['id']}}</a> {% if row['name'] %} - {{row['name']}}{% endif %}{% if row['batch'] %} (in batch {% for b in row['batch'] %}<a href="/batch/{{b}}">{{b}}</a> {% endfor %}){% endif %}</h4>
             {% endfor %}
           </div>
         </div>

@@ -16,6 +16,7 @@ from portality.view.stream import blueprint as stream
 from portality.view.account import blueprint as account
 from portality.view.record import blueprint as record
 from portality.view.export import blueprint as export
+from portality.view.imports import blueprint as imports
 
 
 app.register_blueprint(query, url_prefix='/query')
@@ -23,6 +24,7 @@ app.register_blueprint(stream, url_prefix='/stream')
 app.register_blueprint(account, url_prefix='/account')
 app.register_blueprint(record, url_prefix='/record')
 app.register_blueprint(export, url_prefix='/export')
+app.register_blueprint(imports, url_prefix='/import')
 
 
 @login_manager.user_loader
@@ -38,12 +40,12 @@ def set_current_context():
     for rec in f:
         if rec['type'] not in fields.keys(): fields[rec['type']] = []
         if rec.get('value','') not in fields[rec['type']]: fields[rec['type']].append(rec['value'])
-    if 'user' in fields:
-        accs = models.Account.query(q='*',size=1000000)
-        for i in accs.get('hits',{}).get('hits',[]):
-            if i['_source']['id'] not in fields['user']:
-                fields['user'].append(i['_source']['id'])
-        fields['user'].sort()
+    if 'staff' not in fields: fields['staff'] = []
+    accs = models.Account.query(q='*',size=1000000)
+    for i in accs.get('hits',{}).get('hits',[]):
+        if i['_source']['id'] not in fields['staff']:
+            fields['staff'].append(i['_source']['id'])
+    fields['staff'].sort()
     return dict(current_user=current_user, app=app, curatedfields=fields)
 
 @app.before_request
@@ -108,6 +110,9 @@ def home():
 @app.route('/search')
 @app.route('/search/obsolete')
 @app.route('/search/<batch>')
+@app.route('/batch/<batch>')
+@app.route('/type/part')
+@app.route('/type/assembly')
 def search(batch=False):
     if 'obsolete' in request.path:
         obsolete = True
@@ -118,7 +123,13 @@ def search(batch=False):
     for d in dates:
         dp = d.split(' ')[0]
         if dp not in datevals: datevals.append(dp)
-    return render_template('search/index.html', obsolete=obsolete, datevals=datevals, batch=batch)
+    if 'part' in request.path:
+        tp = 'part'
+    elif 'assembly' in request.path:
+        tp = 'assembly'
+    else:
+        tp = False
+    return render_template('search/index.html', obsolete=obsolete, datevals=datevals, batch=batch, type=tp)
 
     
 # set the route for receiving new notes

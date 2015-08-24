@@ -94,7 +94,7 @@ jQuery(document).ready(function() {
                     <td></td>
                     <td>
                         <br>
-                        <a id="startmerge" class="btn btn-info" href="#"{% if cur.data['type'] == 'staff' %} style="display:none;"{% endif %}>Use this curated record to replace another</a>
+                        <a id="startmerge" class="btn btn-info" href="#"{% if cur.data['type'] == 'staff' or 'type' not in cur.data %} style="display:none;"{% endif %}>Use this curated record to replace another</a>
                     </td>
                 </tr>
                 <tr id="mergechoice" style="display:none;">

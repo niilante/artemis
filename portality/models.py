@@ -1,7 +1,7 @@
 
 import requests, json, uuid
 from datetime import datetime
-from portality.core import app
+from portality.core import app, current_user
 from portality.dao import DomainObject as DomainObject
 
 '''

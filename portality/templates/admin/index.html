@@ -107,6 +107,11 @@ jQuery(document).ready(function() {
     });
     $('.select2-input').focus().trigger('mousedown');
 
+    var startimport = function(event) {
+        event.preventDefault();
+        $('#importarea').toggle();
+    }
+    $('#startimport').bind('click',startimport);
 });
 </script>
 
@@ -117,7 +122,11 @@ jQuery(document).ready(function() {
             <a class="btn btn-info" href="/account/register">Create a new user account</a> 
             <a class="btn btn-info" href="/account">View all users</a>
             <a class="btn btn-info" href="/search/obsolete">Search obsolete records</a>
+            <a class="btn btn-info" id="startimport" href="#">Import records</a>
         </p>
+        <form id="importarea" style="display:none;" action="/import/" method="POST" enctype="multipart/form-data">
+            <input class="form-control" style="width:300px;display:inline;" type="file" name="upfile" id="upfile"> <input class="btn btn-danger" type="submit" name="submit" value="Import">
+        </form>
         <div id="curatedsearch"></div>
     </div>
 </div>

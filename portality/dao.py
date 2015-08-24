@@ -75,9 +75,9 @@ class DomainObject(UserDict.IterableUserDict):
         self.save()
 
     @classmethod
-    def bulk(cls, bibjson_list, idkey='id', refresh=False):
+    def bulk(cls, recs, idkey='id', refresh=False):
         data = ''
-        for r in bibjson_list:
+        for r in recs:
             data += json.dumps( {'index':{'_id':r[idkey]}} ) + '\n'
             data += json.dumps( r ) + '\n'
         r = requests.post(cls.target() + '_bulk', data=data)
