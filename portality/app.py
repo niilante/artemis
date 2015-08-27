@@ -185,9 +185,9 @@ def admin(cid=False):
         newval = cur.data['value']
         valtype = cur.data['type']
         # do a query here for all records with this value in the relevant curated field slot, and switch the value
-        res = models.Record.query(q=valtype+".exact:'" + oldval + "'", fields=[], size=10000)
+        res = models.Record.query(q=valtype+".exact:'" + oldval + "'", fields='id', size=10000)
         counter = 0
-        for rid in [i['id'] for i in res.get('hits',{}).get('hits',[])]:
+        for rid in [i['fields']['id'] for i in res.get('hits',{}).get('hits',[])]:
             rec = models.Record.pull(rid)
             rec.data[valtype] = newval
             rec.save()

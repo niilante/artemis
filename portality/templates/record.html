@@ -414,7 +414,7 @@ jQuery(document).ready(function() {
         {% if 'purchaseorder' in record %}
             <tr>
                 <td>Purchase order</td>
-                <td><input class="form-control" name="purchaseorder" type="text" value="{{record['purhcaseorder']}}" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
+                <td><input class="form-control" name="purchaseorder" type="text" value="{{record['purchaseorder']}}" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}></td>
             </tr>
         {% endif %}
 

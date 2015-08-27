@@ -57,7 +57,7 @@ jQuery(document).ready(function() {
             <table>
                 <tr>
                     <td style="min-width:200px;">Field type:</td>
-                    <td>
+                    <td style="min-width:350px;">
                         <select name="type" class="form-control">
                             <option></option>
                             {% for val in app.config['CURATED_FIELDS'] %}
@@ -87,7 +87,7 @@ jQuery(document).ready(function() {
                         <br>
                         <a id="newfield" class="btn btn-info" href="#">Add new field</a> &nbsp;
                         <input type="submit" name="submit" class="btn btn-info" value="Save"> &nbsp;
-                        <input type="submit" name="submit" class="btn btn-danger" value="Delete">
+                        {% if not request.path.endswith('create') %}<input type="submit" name="submit" class="btn btn-danger" value="Delete">{% endif %}
                     </td>
                 </tr>
                 <tr>

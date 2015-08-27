@@ -52,6 +52,7 @@ def index(model=None, deleteall=False):
                 for rec in records[pos:to]:
                     if 'id' in rec:
                         old = models.Record().pull(rec['id'])
+                        if old is None: old = models.Record()
                         for k in rec.keys():
                             old.data[k] = rec[k]
                         recs.append(old.data)
