@@ -37,7 +37,7 @@
                 <tr><td>Drawing number:</td><td><input class="form-control" type="text" name="drawingnumber" /></td></tr>
                 <tr><td>Assembled by:</td><td><select class="form-control" style="height:33px;" name="assembledby">
                 <option></option>
-                {% for item in curatedfields['user'] %}
+                {% for item in curatedfields['staff'] %}
                     <option value="{{ item }}">{{ item }}</option>
                 {% endfor %}
                 </select></td></tr>
@@ -75,13 +75,13 @@
                     <option value="{{ item }}">{{ item }}</option>
                 {% endfor %}
                 </select></td></td></tr>
-                <tr><td>Received by:</td><td><select class="form-control" style="height:33px;" name="inspectedby">
+                <tr><td>Received by:</td><td><select class="form-control" style="height:33px;" name="receivedby">
                 <option></option>
-                {% for item in curatedfields['user'] %}
+                {% for item in curatedfields['staff'] %}
                     <option value="{{ item }}">{{ item }}</option>
                 {% endfor %}
                 </select></td></td></tr>
-                <tr><td>Received date:</td><td><input type="text" name="inspecteddate" class="form-control datepicker" /></td></tr>
+                <tr><td>Received date:</td><td><input type="text" name="receiveddate" class="form-control datepicker" /></td></tr>
                 <tr><td>In location:</td><td><select class="form-control" style="height:33px;" name="location">
                 <option></option>
                 {% for item in curatedfields['location'] %}

@@ -452,6 +452,20 @@ jQuery(document).ready(function() {
             </tr>
         {% endif %}
 
+        {% if 'receivedby' in record %}
+            <tr>
+                <td>Received by</td>
+                <td>
+                    <select class="form-control" name="receivedby" {%  if current_user.is_anonymous() %}disabled="disabled"{% endif %}>
+                        <option></option>
+                        {% for item in curatedfields['staff'] %}
+                            <option value="{{item}}"{% if item == record['receivedby'] %} selected="selected"{% endif %}>{{item}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+        {% endif %}
+
         {% if 'inspectedby' in record %}
             <tr>
                 <td>Inspected by</td>
