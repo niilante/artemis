@@ -50,13 +50,16 @@ def index(model=None, deleteall=False):
                     to = total - 1
                 recs = []
                 for rec in records[pos:to]:
-                    if 'id' in rec:
+                    if 'id' in rec and len(rec['id']) > 1:
                         old = models.Record().pull(rec['id'])
                         if old is None: old = models.Record()
                         for k in rec.keys():
                             old.data[k] = rec[k]
                         recs.append(old.data)
                     else:
+                        rid = models.Record.makeid()
+                        print "rid ", rid
+                        rec['id'] = rid
                         recs.append(rec)
                 klass().bulk(recs)
                 pos += chunk

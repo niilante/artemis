@@ -1,3 +1,5 @@
+// CUSTOMISED FOR ARTEMIS!!!!
+
 /*
  * jquery.graphview.js
  *
@@ -571,15 +573,15 @@ if (!Array.prototype.indexOf) {
                 qry.query.bool.must.push({"match_all":{}});
             }
             // check for any ranged values to add to the bool
-            if ( $('#lowdate', obj).html() || $('#highdate', obj).html() ) {
+            if ( $('#lowdate', obj).val() || $('#highdate', obj).val() ) {
                 var ranged = {
                     'range': {
                         'created_date': {
                         }
                     }
                 };
-                $('#lowdate',obj).html().length ? ranged.range.created_date.from = $('#lowdate', obj).html().replace(' to ','') : false;
-                $('#highdate',obj).html().length ? ranged.range.created_date.to = $('#highdate', obj).html() : false;
+                $('#lowdate',obj).val().length ? ranged.range.created_date.from = $('#lowdate', obj).val() : false;
+                $('#highdate',obj).val().length ? ranged.range.created_date.to = $('#highdate', obj).val() : false;
                 ranged.range.created_date.from || ranged.range.created_date.to ? qry.query.bool.must.push(ranged) : false;
             };
             
@@ -630,11 +632,10 @@ if (!Array.prototype.indexOf) {
                 // remove numbers from choices and set their colors to match their types
                 $('.select2-search-choice', obj).each(function(i) {
                     var kv = selectdata[i]['id'].split('__________');
-                    if ( kv.length > 1 ) {
-                        $(this).css({"color":options.fill(kv[0])});
+                    if ( kv.length > 1 && $(this).children('div').text().indexOf(':') === -1 ) {
+                        var txt = kv[0].replace('.exact','') + ': ' + $(this).children('div').text().replace(/ \([0-9]*\)/,'');
+                        $(this).children('div').text(txt);
                     }
-                    var nonumber = $(this).children('div').text().replace(/ \([0-9]*\)/,'');
-                    $(this).children('div').text(kv[0].replace('.exact','').replace(nonumber,'') + ': ' + nonumber);
                 });
                 // put the current query state into the URL if set
                 options.pushstate ? window.history.pushState("", "search", '?source=' + JSON.stringify(options.query())): false;
@@ -950,6 +951,7 @@ if (!Array.prototype.indexOf) {
         return this.each(function() {
             obj = $(this);
             obj.append(options.uitemplate());
+            $('.datepicker', obj).datepicker({'dateFormat':'yy-mm-dd'});
             options.uibindings();            
             options.searchonload ? options.executequery() : false;
 
