@@ -22,6 +22,7 @@ PORT = 5002
 # elasticsearch settings
 ELASTIC_SEARCH_HOST = "http://127.0.0.1:9200" # remember the http:// or https://
 ELASTIC_SEARCH_DB = "artemisv2"
+INDEX_VERSION = 0 # 0 for ES versions below 1, 1 for versions above 1
 INITIALISE_INDEX = True # whether or not to try creating the index and required index types on startup
 
 # list of superuser account names
@@ -44,8 +45,45 @@ FACET_FIELD = ".exact"
 MAPPINGS = {
     "record" : {
         "record" : {
+            "properties": {
+                "created_date": {
+                    "type": "date",
+                    "format" : "yyyy-MM-dd mmss||date_optional_time"
+                },
+                "updated_date": {
+                    "type": "date",
+                    "format" : "yyyy-MM-dd mmss||date_optional_time"
+                },
+                "attachments.attachment":{
+                    "type": "attachment"
+                }
+            },
             "date_detection" : False,
             "dynamic_templates" : [
+                {
+                    "dates" : {
+                        "path_match" : "date.*",
+                        "mapping" : {
+                            "type" : "multi_field",
+                            "fields" : {
+                                "{name}" : {"type" : "date"},
+                                "format" : "yyyy-MM-dd mmss||date_optional_time"
+                            }
+                        }
+                    }
+                },
+                {
+                    "postdates" : {
+                        "path_match" : ".*date",
+                        "mapping" : {
+                            "type" : "multi_field",
+                            "fields" : {
+                                "{name}" : {"type" : "date"},
+                                "format" : "yyyy-MM-dd mmss||date_optional_time"
+                            }
+                        }
+                    }
+                },
                 {
                     "default" : {
                         "match" : "*",
@@ -59,18 +97,47 @@ MAPPINGS = {
                         }
                     }
                 }
-            ],
-            "properties":{
-                "attachments.attachment":{
-                    "type": "attachment"
-                }
-            }
+            ]
         }
     },
     "collection" : {
         "collection" : {
+            "properties": {
+                "created_date": {
+                    "type": "date",
+                    "format" : "yyyy-MM-dd mmss||date_optional_time"
+                },
+                "updated_date": {
+                    "type": "date",
+                    "format" : "yyyy-MM-dd mmss||date_optional_time"
+                }
+            },
             "date_detection" : False,
             "dynamic_templates" : [
+                {
+                    "dates" : {
+                        "path_match" : "date.*",
+                        "mapping" : {
+                            "type" : "multi_field",
+                            "fields" : {
+                                "{name}" : {"type" : "date"},
+                                "format" : "yyyy-MM-dd mmss||date_optional_time"
+                            }
+                        }
+                    }
+                },
+                {
+                    "postdates" : {
+                        "path_match" : ".*date",
+                        "mapping" : {
+                            "type" : "multi_field",
+                            "fields" : {
+                                "{name}" : {"type" : "date"},
+                                "format" : "yyyy-MM-dd mmss||date_optional_time"
+                            }
+                        }
+                    }
+                },
                 {
                     "default" : {
                         "match" : "*",
