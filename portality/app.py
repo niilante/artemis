@@ -3,7 +3,7 @@ from flask import Flask, request, abort, render_template, make_response, redirec
 from flask.views import View
 from flask.ext.login import login_user, current_user
 
-import json, time
+import json, time, datetime, math
 
 import portality.models as models
 import portality.util as util
@@ -121,7 +121,8 @@ def search(batch=False):
     dates = rawstream(key='created_date',size=10000,raw=True)
     datevals = []
     for d in dates:
-        dp = d.split(' ')[0]
+        dd = math.floor(d/1000)
+        dp = datetime.datetime.fromtimestamp(dd).strftime('%Y-%m-%d')
         if dp not in datevals: datevals.append(dp)
     if 'part' in request.path:
         tp = 'part'

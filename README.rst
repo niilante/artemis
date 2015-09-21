@@ -8,8 +8,8 @@ Install
    * Python and pip
    * Git
    * Java
-   * Elasticsearch (> 0.17 series)
-   * (see http://www.elasticsearch.org/download/ and http://www.elasticsearch.org/guide/reference/setup/installation.html)
+   * Elasticsearch (1.4.4 series)
+   * (see http://www.elasticsearch.org)
    * Elasticsearch mapper pluging (https://github.com/elasticsearch/elasticsearch-mapper-attachments)
 
 2. Get the source::
@@ -18,30 +18,24 @@ Install
 
 3. Install the app::
 
-    cd portality
+    cd artemis
     pip install -e .
 
-4. Make sure lastintid and lastintbatch can be created/written::
+4. Make sure lastintid can be created/written::
 
     # either check that the privileges for the user that will run the artemis 
     # software allow it to create files in the artemis directory, or create 
-    # the following files and change their owner to the same user that will 
+    # the following file and change its owner to the same user that will 
     # run the artemis software
     
     touch lastintid
     cat '0' > lastintid
-    touch lastintbatch
-    cat '0' > lastintbatch
     chown USER:USER lastintid
-    chown USER:USER lastintbatch
 
 5. Run the webserver::
 
     python portality/app.py
 
-6. If you want to pre-load with legacy data::
-
-    python extra/import.py
 
 Install example
 ===============
@@ -53,13 +47,13 @@ Install commands on a clean installation of Ubuntu_11.10::
     sudo pip install --upgrade virtualenv 
     sudo apt-get install git
 
-    wget https://github.com/downloads/elasticsearch/elasticsearch/elasticsearch-0.18.2.tar.gz
-    tar -xzvf elasticsearch-0.18.2.tar.gz
-    ./elasticsearch-0.18.2/bin/plugin -install elasticsearch/elasticsearch-mapper-attachments/1.0.0
-    ./elasticsearch-0.18.2/bin/elasticsearch start
+    wget https://github.com/downloads/elasticsearch/elasticsearch/elasticsearch-1.4.4.tar.gz
+    tar -xzvf elasticsearch-1.4.4.tar.gz
+    ./elasticsearch-1.4.4/bin/plugin -install elasticsearch/elasticsearch-mapper-attachments/2.4.3
+    ./elasticsearch-1.4.4/bin/elasticsearch start
 
     git clone http://github.com/cottagelabs/artemis
-    cd portality
+    cd artemis
     pip install -e .
     
     python portality/app.py
@@ -75,18 +69,11 @@ starts when the machine starts up, and also that the Artemis service starts
 when the machine starts up.
 
 Elasticsearch can be auto-started by using the service plugin. This is explained on 
-the elasticsearch installation page at::
-
-    http://www.elasticsearch.org/guide/reference/setup/installation.html
-
-The location for the service wrapper code, and install instuctions, are here::
-
-    https://github.com/elasticsearch/elasticsearch-servicewrapper.git
+the elasticsearch site.
 
 Once elasticsearch is up and running as a service, you need to ensure that the 
-artemis service will come up after machine restart. There is no specific way to 
-do this, other than on a linux machine creating a startup script and placing it 
-in your /etc/init.d/ folder.
+artemis service will come up after machine restart. There are various ways to do this, 
+for example supervisord is easy to install and configure on a linux machine.
 
 
 Backups

@@ -169,8 +169,8 @@ jQuery(document).ready(function() {
                 "Assembly": {"term":{"field":"assembly.exact","suggest":true}},
                 "Supplier": {"term":{"field":"supplier.exact","suggest":true}},
                 "Location": {"term":{"field":"location.exact","suggest":true}},
-                "Created date": {"term":{"field":"created_date.exact","order":"reverse_term","suggest":true}},
-                "Last updated": {"term":{"field":"updated_date.exact","order":"reverse_term","suggest":true}},
+                "Created date": {"term":{"field":"created_date","order":"reverse_term","suggest":true}},
+                "Last updated": {"term":{"field":"updated_date","order":"reverse_term","suggest":true}},
                 "Last edited by": {"term":{"field":"history.user.exact","suggest":true}}
             }
         },
@@ -185,7 +185,6 @@ jQuery(document).ready(function() {
         var unchecked = false;
         if ( !$(this).is(':checked') ) {
             unchecked = true;
-            alert('unchecked');
         }
         $('.tests').each(function() {
             if ( $(this).attr('id') != whichtest ) {

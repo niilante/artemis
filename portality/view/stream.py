@@ -43,20 +43,23 @@ def stream(index='record',key='tags',size=1000,raw=False):
         'facets':{}
     }
     for ky in keys:
-        qry['facets'][ky] = {"terms":{"field":ky+app.config['FACET_FIELD'],"order":request.values.get('order','term'), "size":request.values.get('size',size)}}
+        kyf = ky
+        if 'date' not in ky: kyf += app.config['FACET_FIELD']
+        qry['facets'][ky] = {"terms":{"field":kyf,"order":request.values.get('order','term'), "size":request.values.get('size',size)}}
     
     klass = getattr(models, index[0].capitalize() + index[1:] )
     r = klass().query(q=qry)
 
     res = []
-    try:
+    if 1==1:
+        print r['facets'].keys()
         if request.values.get('counts',False):
             for k in keys:
                 res = res + [[i['term'],i['count']] for i in r['facets'][k]["terms"]]
         else:
             for k in keys:
                 res = res + [i['term'] for i in r['facets'][k]["terms"]]
-    except:
+    else:
         pass
 
     if raw:

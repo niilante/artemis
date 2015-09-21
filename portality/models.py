@@ -3,6 +3,7 @@ import requests, json, uuid
 from datetime import datetime
 from portality.core import app, current_user
 from portality.dao import DomainObject as DomainObject
+import portality.util
 
 '''
 Define models in here. They should all inherit from the DomainObject.
@@ -95,6 +96,15 @@ class Everything(DomainObject):
 
 class Record(DomainObject):
     __type__ = 'record'
+
+    @classmethod
+    def makeid(cls):
+        '''Create a new id for data object based on the idgen utility'''
+        idgenerator = portality.util.idgen()
+        id_ = idgenerator.next()
+        while cls.pull(id_):
+            id_ = idgenerator.next()
+        return id_
 
     @classmethod
     def pull(cls, id_):

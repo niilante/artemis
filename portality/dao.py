@@ -1,6 +1,5 @@
 import os, json, UserDict, requests, uuid
 from datetime import datetime
-import portality.util
 from portality.core import app, current_user
 
 '''
@@ -28,12 +27,7 @@ class DomainObject(UserDict.IterableUserDict):
     
     @classmethod
     def makeid(cls):
-        '''Create a new id for data object based on the idgen utility'''
-        idgenerator = portality.util.idgen()
-        id_ = idgenerator.next()
-        while cls.pull(id_):
-            id_ = idgenerator.next()
-        return id_
+        return uuid.uuid4().hex
 
     @property
     def id(self):

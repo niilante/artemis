@@ -80,7 +80,7 @@ def batchedit(bid=None):
             keys = {}
             for rec in [i['_source'] for i in recs.get('hits',{}).get('hits',[])]:
                 for key in rec.keys():
-                    if key not in ['notes','attachments','created_date','batch','updated_date','last_access','id','history','type']:
+                    if key not in ['notes','attachments','created_date','batch','updated_date','last_access','id','history','type','children']:
                         if key not in keys.keys():
                             keys[key] = []
                         if not isinstance(rec[key],list):rec[key] = [rec[key]]

@@ -27,17 +27,23 @@ def initialise_index(app):
     i = str(app.config['ELASTIC_SEARCH_HOST']).rstrip('/')
     i += '/' + app.config['ELASTIC_SEARCH_DB']
     for key, mapping in mappings.iteritems():
-        if app.config.get('INDEX_VERSION',0) == 0:
-            im = i + '/' + key + '/_mapping' # checks ES < v1
-            exists = requests.get(im)
-        else:
-            im = i + "/_mapping/" + key # checks ES > v1
+        if app.config['INDEX_VERSION_GTONE']:
+            print "checking ES > v1 mappings"
+            im = i + "/_mapping/" + key
             typeurl = i + "/" + key
             exists = requests.head(typeurl)
-        if exists.status_code != 200:
-            ri = requests.post(i)
-            r = requests.put(im, json.dumps(mapping))
-            print key, r.status_code
+            if exists.status_code != 200:
+                ri = requests.post(i)
+                r = requests.put(im, json.dumps(mapping))
+                print key, r.status_code
+        else:
+            print "checking ES < v1 mappings"
+            im = i + '/' + key + '/_mapping' # checks ES < v1
+            exists = requests.get(im)
+            if exists.status_code != 200:
+                ri = requests.post(i)
+                r = requests.put(im, json.dumps(mapping))
+                print key, r.status_code
 
 def setup_error_email(app):
     ADMINS = app.config.get('ADMINS', '')

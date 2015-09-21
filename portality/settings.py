@@ -22,7 +22,7 @@ PORT = 5002
 # elasticsearch settings
 ELASTIC_SEARCH_HOST = "http://127.0.0.1:9200" # remember the http:// or https://
 ELASTIC_SEARCH_DB = "artemisv2"
-INDEX_VERSION = 0 # 0 for ES versions below 1, 1 for versions above 1
+INDEX_VERSION_GTONE = True # False for ES versions below 1, True for versions above 1
 INITIALISE_INDEX = True # whether or not to try creating the index and required index types on startup
 
 # list of superuser account names
@@ -54,62 +54,12 @@ MAPPINGS = {
                     "type": "date",
                     "format" : "yyyy-MM-dd mmss||date_optional_time"
                 },
-                "attachments.attachment":{
-                    "type": "attachment"
-                }
-            },
-            "date_detection" : False,
-            "dynamic_templates" : [
-                {
-                    "dates" : {
-                        "path_match" : "date.*",
-                        "mapping" : {
-                            "type" : "multi_field",
-                            "fields" : {
-                                "{name}" : {"type" : "date"},
-                                "format" : "yyyy-MM-dd mmss||date_optional_time"
-                            }
+                "attachments":{
+                    "properties": {
+                        "attachment": {
+                            "type": "attachment"
                         }
                     }
-                },
-                {
-                    "postdates" : {
-                        "path_match" : ".*date",
-                        "mapping" : {
-                            "type" : "multi_field",
-                            "fields" : {
-                                "{name}" : {"type" : "date"},
-                                "format" : "yyyy-MM-dd mmss||date_optional_time"
-                            }
-                        }
-                    }
-                },
-                {
-                    "default" : {
-                        "match" : "*",
-                        "match_mapping_type": "string",
-                        "mapping" : {
-                            "type" : "multi_field",
-                            "fields" : {
-                                "{name}" : {"type" : "{dynamic_type}", "index" : "analyzed", "store" : "no"},
-                                "exact" : {"type" : "{dynamic_type}", "index" : "not_analyzed", "store" : "yes"}
-                            }
-                        }
-                    }
-                }
-            ]
-        }
-    },
-    "collection" : {
-        "collection" : {
-            "properties": {
-                "created_date": {
-                    "type": "date",
-                    "format" : "yyyy-MM-dd mmss||date_optional_time"
-                },
-                "updated_date": {
-                    "type": "date",
-                    "format" : "yyyy-MM-dd mmss||date_optional_time"
                 }
             },
             "date_detection" : False,
@@ -155,9 +105,9 @@ MAPPINGS = {
         }
     }
 }
-MAPPINGS['account'] = {"account": MAPPINGS["collection"]["collection"]}
-MAPPINGS['curated'] = {"curated": MAPPINGS["collection"]["collection"]}
-MAPPINGS['note'] = {"note": MAPPINGS["collection"]["collection"]}
+MAPPINGS['account'] = {"account": MAPPINGS["record"]["record"]}
+MAPPINGS['curated'] = {"curated": MAPPINGS["record"]["record"]}
+MAPPINGS['note'] = {"note": MAPPINGS["record"]["record"]}
 
 
 
