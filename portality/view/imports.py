@@ -45,9 +45,9 @@ def index(model=None, deleteall=False):
             pos = 0
             while pos < total:
                 if pos + chunk < total:
-                    to = pos + chunk - 1
+                    to = pos + chunk
                 else:
-                    to = total - 1
+                    to = total
                 recs = []
                 for rec in records[pos:to]:
                     if 'id' in rec and len(rec['id']) > 1:

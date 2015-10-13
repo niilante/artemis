@@ -289,6 +289,8 @@ jQuery(document).ready(function() {
             'supplier',
             'inspectedby',
             'inspecteddate',
+            'receivedby',
+            'receiveddate',
             'location',
             'children'
             
@@ -488,7 +490,7 @@ jQuery(document).ready(function() {
         {% endif %}
 
         {% for key in record %}
-            {% if key not in ['batch','id','type','updated_date','created_date','last_access','history','assembly', 'assembly_history','attachments','name','datedelivered','billofmaterials','drawingnumber','assembledby','assembleddate', 'manufacturer','manufacturerserial','manufacturersbatchnumber','manufacturersbatchquantity','purchaseorder', 'supplier','location','inspectedby','inspecteddate','children','children_deprecated','obsolete'] %}
+            {% if key not in ['batch','id','type','updated_date','created_date','last_access','history','assembly', 'assembly_history','attachments','name','datedelivered','billofmaterials','drawingnumber','assembledby','assembleddate', 'manufacturer','manufacturerserial','manufacturersbatchnumber','manufacturersbatchquantity','purchaseorder', 'supplier','location','inspectedby','inspecteddate','receivedby','receiveddate','children','children_deprecated','obsolete'] %}
                 <tr>
                     <td>{{key}}</td>
                     <td>

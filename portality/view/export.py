@@ -79,6 +79,7 @@ def download_csv(recordlist,keys):
                     tidykey = "OBJECT CANNOT BE EXPORTED"
                 else:
                     tidykey = fixify(record[key].replace('"',"'"))
+                    if key == 'id': print record[key], tidykey
                 csvdata.write('"' + tidykey + '"')
             else:
                 csvdata.write('""')
