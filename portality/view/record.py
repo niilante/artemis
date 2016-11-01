@@ -24,6 +24,10 @@ def create(rectype):
         if rectype == 'batch':
             idgenerator = util.idgen('batch')
             batchid = idgenerator.next()
+            print models.Record.query(terms={'batch.exact':batchid},size=0).get('hits',{}).get('total',0)
+            print models.Record.pull(batchid)
+            while models.Record.query(terms={'batch.exact':batchid},size=0).get('hits',{}).get('total',0) != 0 or models.Record.pull(batchid) is not None:
+                batchid = idgenerator.next()
         else:
             batchid = None
         return render_template(
@@ -60,7 +64,58 @@ def create(rectype):
             flash('Your new record has been created')
             return redirect('/record/' + recids[0])
 
+@blueprint.route('/edit/assembly')
+@blueprint.route('/edit/assembly/<aid>', methods=['GET','POST'])
+def assemblyedit(aid=None):
+    if current_user.is_anonymous(): abort(401)
         
+    if request.method == "GET":
+        if aid is None:
+            return render_template(
+                'batchedit.html', 
+                batches=stream(key='batch',raw=True,size=1000000),
+                assemblies=stream(key='assembly',raw=True,size=1000000),
+                keys={}
+            )
+
+        else:
+            recs = models.Record.query(q='assembly.exact:"'+str(aid)+'"',size=1000000)
+            keys = {}
+            for rec in [i['_source'] for i in recs.get('hits',{}).get('hits',[])]:
+                for key in rec.keys():
+                    if key not in ['notes','attachments','created_date','batch','assembly','updated_date','last_access','id','history','type','children','assembly_history']:
+                        if key not in keys.keys():
+                            keys[key] = []
+                        if not isinstance(rec[key],list):rec[key] = [rec[key]]
+                        for val in rec[key]:
+                            if val not in keys[key] and len(val) > 0:
+                                keys[key].append(val)
+                
+            return render_template(
+                'batchedit.html', 
+                aid=aid,
+                batchsize=recs.get('hits',{}).get('total',0),
+                batches=[],
+                keys=keys
+            )
+
+    elif request.method == "POST":
+        received = request.json if request.json else request.values
+        recs = models.Record.query(q='assembly.exact:"' + aid + '"', size=1000000)
+        updated = 0
+        for rc in recs.get('hits',{}).get('hits',[]):
+            rid = rc['_source']['id']
+            rec = models.Record.pull(rid)
+            for key, val in received.items():
+                if key not in ['submit'] and len(val) > 0:
+                    rec.data[key] = val
+            rec.save()
+            updated += 1
+
+        time.sleep(2)
+        flash(str(updated) + ' records in this assembly have been updated. The parts in the assembly are shown below.')
+        return redirect('/assembly/' + aid)
+
 @blueprint.route('/edit/batch')
 @blueprint.route('/edit/batch/<bid>', methods=['GET','POST'])
 def batchedit(bid=None):
@@ -70,8 +125,8 @@ def batchedit(bid=None):
         if bid is None:
             return render_template(
                 'batchedit.html', 
-                bid=bid,
                 batches=stream(key='batch',raw=True,size=1000000),
+                assemblies=stream(key='assembly',raw=True,size=1000000),
                 keys={}
             )
 
@@ -80,12 +135,12 @@ def batchedit(bid=None):
             keys = {}
             for rec in [i['_source'] for i in recs.get('hits',{}).get('hits',[])]:
                 for key in rec.keys():
-                    if key not in ['notes','attachments','created_date','batch','updated_date','last_access','id','history','type','children']:
+                    if key not in ['notes','attachments','created_date','batch','updated_date','last_access','id','history','type','children','assembly_history']:
                         if key not in keys.keys():
                             keys[key] = []
                         if not isinstance(rec[key],list):rec[key] = [rec[key]]
                         for val in rec[key]:
-                            if val not in keys[key]:
+                            if val not in keys[key] and len(val) > 0:
                                 keys[key].append(val)
                 
             return render_template(
@@ -141,28 +196,59 @@ def rec(rid):
     return render_template(
         'record.html', 
         batches=stream(key='batch',raw=True,size=1000000),
+        assemblies=stream(key='assembly',raw=True,size=1000000),
         record=res
     )
 
 
-@blueprint.route('/<rid>/parent', methods=['GET','DELETE'])
-@blueprint.route('/<rid>/parent/<pid>', methods=['GET','POST','DELETE'])
-def parent(rid, pid=False):
+#@blueprint.route('/<rid>/parent', methods=['GET','DELETE'])
+#@blueprint.route('/<rid>/parent/<pid>', methods=['GET','POST','DELETE'])
+#def parent(rid, pid=False):
+#    res = models.Record.pull(rid)
+#    if res is None:
+#        abort(404)
+#    elif request.method == 'GET':
+#        resp = make_response( res.parent.json )
+#        resp.mimetype = "application/json"
+#        return resp
+#    elif request.method == 'POST' and pid:
+#        if current_user.is_anonymous(): abort(401)
+#        res.data['assembly'] = pid
+#        res.save()
+#        return ""
+#    elif request.method == 'DELETE':
+#        if current_user.is_anonymous(): abort(401)
+#        res.data['assembly'] = ''
+#        res.save()
+#        return ""
+
+
+@blueprint.route('/<rid>/parents', methods=['GET','DELETE'])
+@blueprint.route('/<rid>/parents/<pid>', methods=['GET','POST','DELETE'])
+def parents(rid, pid=False):
     res = models.Record.pull(rid)
     if res is None:
         abort(404)
     elif request.method == 'GET':
-        resp = make_response( res.parent.json )
+        resp = make_response( res.parents.json )
         resp.mimetype = "application/json"
         return resp
     elif request.method == 'POST' and pid:
         if current_user.is_anonymous(): abort(401)
-        res.data['assembly'] = pid
+        if 'assembly' not in res.data: res.data['assembly'] = []
+        if res.data['assembly'] == '': res.data['assembly'] = []
+        if not isinstance(res.data['assembly'],list):
+            res.data['assembly'] = [res.data['assembly']]
+        res.data['assembly'].append(pid)
         res.save()
         return ""
     elif request.method == 'DELETE':
         if current_user.is_anonymous(): abort(401)
-        res.data['assembly'] = ''
+        if 'assembly' not in res.data: res.data['assembly'] = []
+        if res.data['assembly'] == '': res.data['assembly'] = []
+        if not isinstance(res.data['assembly'],list):
+            res.data['assembly'] = [res.data['assembly']]
+        res.data['assembly'].remove(pid)
         res.save()
         return ""
 
@@ -181,7 +267,9 @@ def children(rid,cid=False):
     elif request.method == 'POST':
         if current_user.is_anonymous(): abort(401)
         c = models.Record.pull(cid)
-        c.data['assembly'] = rid
+        if 'assembly' not in c.data: c.data['assembly'] = []
+        if c.data['assembly'] == '': c.data['assembly'] = []
+        c.data['assembly'].append(rid)
         c.save()
         return ""
     elif request.method == 'DELETE':
@@ -193,7 +281,9 @@ def children(rid,cid=False):
                 children_ids = [i['id'] for i in res.children]
             for kid in children_ids:
                 c = models.Record.pull(kid)
-                c.data['assembly'] = ''
+                if 'assembly' not in c.data: c.data['assembly'] = []
+                if c.data['assembly'] == '': c.data['assembly'] = []
+                if rid in c.data['assembly']: c.data['assembly'].remove(rid)
                 c.save()
             return ""
         except:

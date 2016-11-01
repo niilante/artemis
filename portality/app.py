@@ -3,10 +3,9 @@ from flask import Flask, request, abort, render_template, make_response, redirec
 from flask.views import View
 from flask.ext.login import login_user, current_user
 
-import json, time, datetime, math
+import json, time, datetime, math, uuid
 
 import portality.models as models
-import portality.util as util
 from portality.core import app, login_manager
 
 from portality.view.stream import stream as rawstream
@@ -38,8 +37,8 @@ def set_current_context():
     fields = {}
     f = [i['_source'] for i in models.Curated.query(size=10000).get('hits',{}).get('hits',{})]
     for rec in f:
-        if rec['type'] not in fields.keys(): fields[rec['type']] = []
-        if rec.get('value','') not in fields[rec['type']]: fields[rec['type']].append(rec['value'])
+        if rec.get('type',False) and rec['type'] not in fields.keys(): fields[rec['type']] = []
+        if rec.get('type',False) and rec.get('value',False) and rec['value'] not in fields[rec['type']]: fields[rec['type']].append(rec['value'])
     if 'staff' not in fields: fields['staff'] = []
     accs = models.Account.query(q='*',size=1000000)
     for i in accs.get('hits',{}).get('hits',[]):
@@ -111,9 +110,10 @@ def home():
 @app.route('/search/obsolete')
 @app.route('/search/<batch>')
 @app.route('/batch/<batch>')
+@app.route('/assembly/<assembly>')
 @app.route('/type/part')
 @app.route('/type/assembly')
-def search(batch=False):
+def search(batch=False,assembly=False):
     if 'obsolete' in request.path:
         obsolete = True
     else:
@@ -124,13 +124,13 @@ def search(batch=False):
         dd = math.floor(d/1000)
         dp = datetime.datetime.fromtimestamp(dd).strftime('%Y-%m-%d')
         if dp not in datevals: datevals.append(dp)
-    if 'part' in request.path:
+    if 'type' in request.path and 'part' in request.path:
         tp = 'part'
-    elif 'assembly' in request.path:
+    elif 'type' in request.path and 'assembly' in request.path:
         tp = 'assembly'
     else:
         tp = False
-    return render_template('search/index.html', obsolete=obsolete, datevals=datevals, batch=batch, type=tp)
+    return render_template('search/index.html', obsolete=obsolete, datevals=datevals, batch=batch, assembly=assembly, type=tp)
 
     
 # set the route for receiving new notes
@@ -138,11 +138,33 @@ def search(batch=False):
 @app.route('/note/<nid>', methods=['GET','POST','DELETE'])
 def note(nid=''):
     if request.method == 'POST':
-        newnote = models.Note()
-        newnote.data = request.json
-        newnote.save()
+        if 'batch' in request.json:
+            res = models.Record.query(terms={"batch.exact":request.json['batch']},size=10000)
+            for rec in [i['_source'] for i in res['hits']['hits']]:
+                newnote = models.Note()
+                newnote.data = request.json
+                newnote.data['about'] = rec['id']
+                newnote.data['id'] = uuid.uuid4().hex
+                newnote.save()
+        elif 'assembly' in request.json:
+            newnote = models.Note()
+            newnote.data = request.json
+            newnote.data['id'] = uuid.uuid4().hex
+            newnote.save()
+            rec = models.Record.pull(request.json['about'])
+            for rec in rec.children:
+                newnote = models.Note()
+                newnote.data = request.json
+                newnote.data['about'] = rec['id']
+                newnote.data['id'] = uuid.uuid4().hex
+                newnote.save()
+        else:
+            newnote = models.Note()
+            newnote.data = request.json
+            newnote.data['id'] = uuid.uuid4().hex
+            newnote.save()
         time.sleep(1)
-        return redirect('/note/' + newnote.id)
+        return ""
 
     elif request.method == 'DELETE':
         note = models.Note.pull(nid)

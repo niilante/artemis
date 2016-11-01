@@ -1,3 +1,4 @@
+app.cfg
 *.pyc
 store/*
 *.egg-info/*

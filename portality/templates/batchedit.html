@@ -3,7 +3,7 @@
 {% block content %}
 
 
-{% if not bid %}
+{% if not bid and not aid %}
 
 <form action="" method="POST">
 <div class="row">
@@ -16,12 +16,45 @@
                 {% endfor %}
             </select>
         </p>
-        <p>You can also choose a batch to edit via the search interface or from a record that is in a batch.</p>
+        <p>OR which assembly do you want to edit? 
+            <select class="form-control" id="chooseassembly" style="width:200px;display:inline;">
+                <option></option>
+                {% for assembly in assemblies %}
+                <option>{{assembly}}</option>
+                {% endfor %}
+            </select>
+        </p>
     </div>
 </div>
 </form>
-    
+
 {% else %}
+
+{% if aid %}
+<p>
+  NOTE: this page allows you to edit every record that is IN assembly {{aid}}. However if you want to edit 
+  the assembly record itself, or to add notes or procedures/attachments to it, you should go to the assembly 
+  record itself. From the assembly record it is possible to choose to add notes to all records in the assembly as well. Procedures/attachments added to the assembly record are automatically added to all records in the assembly. To remove individual part records from an assembly, you should go to the assembly record 
+  which lists the parts it contains on the right, then click the part name to go to the record for that part, 
+  and then you can add/remove that part to particular assemblies.
+</p>
+<p>
+  <a href="/record/{{aid}}" class="btn btn-info btn-block">Click here to open the assembly record for assembly {{aid}}</a>
+  <br>
+</p>
+
+{% elif bid %}
+
+<p>
+  On this page you can edit every record in batch {{bid}} at once. Or you can open each 
+  record individually to edit them directly.
+</p>
+<p>
+  <a href="/batch/{{bid}}" class="btn btn-info btn-block">Click here to search on every record in batch {{bid}}</a>
+  <br>
+</p>
+
+{% endif %}
 
 <form action="" method="POST">
 <div class="row">
@@ -57,17 +90,24 @@
                     <br><a class="btn btn-info" id="newfield" href="#">add another field</a> or 
                     <input type="submit" name="submit" class="btn btn-info" value="save the changes">
                 </td></tr>
+                {% if bid %}
+                <tr><td></td><td>
+                    <br><br><p><a id="addnote" href="#" class="btn btn-info">Add a note to every record in the batch</a></p>
+                </td></tr>
+                {% endif %}
+
             </table>
         </div>
     </div>
     <div class="col-md-4">
         <div class="well" style="min-height:500px;background-color:#666;color:white;border-color:#333;">
-            <p style="color:white;font-size:1.1em;">This is a list of every field in the {{batchsize}} records of batch {{bid}}.</p>
+            <p style="color:white;font-size:1.1em;">This is a list of every field in the {{batchsize}} records of 
+            {% if bid %}batch {{bid}}{% else %}assembly {{aid}}{% endif %}.</p>
             <p style="color:white;font-size:1.1em;">The input box next to each field will show all
-            the values entered into those fields across the various records in the batch. Any one of these values can be chosen, 
+            the values entered into those fields across the various records in the {% if bid %}batch{% else %}assembly{% endif %}. Any one of these values can be chosen, 
             or a new value can be entered. In the case of curated fields, a selection box will show the values already used in 
-            the batch records at the top, and will also offer the other values available for that curated field below the break line.</p>
-            <p style="color:white;font-size:1.1em;">If you choose to save your changes, then EVERY record in the batch will be altered to 
+            the records at the top, and will also offer the other values available for that curated field below the break line.</p>
+            <p style="color:white;font-size:1.1em;">If you choose to save your changes, then EVERY record in the {% if bid %}batch{% else %}assembly{% endif %} will be altered to 
             show the SAME value chosen here for the related field. Fields that are left blank here will not be edited. If you choose 
             to add another field, you can provide any value for that new field that you wish. The new field and corresponding value 
             will then be added to every record in the batch.</p>
@@ -154,9 +194,40 @@ jQuery(document).ready(function() {
         window.location = '/record/edit/batch/' + bid;
     }
     jQuery('#choosebatch').bind('change',choosebatch);
-    
-});
-</script>
 
+    var chooseassembly = function() {
+        var bid = $('#chooseassembly').val();
+        window.location = '/record/edit/assembly/' + bid;
+    }
+    jQuery('#chooseassembly').bind('change',chooseassembly);
+
+
+    {% if bid %}  
+    var addnote = function(event) {
+        event.preventDefault()
+        var note = prompt("new note:")
+        if ( note ) {
+            var newnote = {
+                "content": note,
+                "by": "{% if current_user %}{{ current_user.id }}{% else %}anonymous{% endif %}",
+                "batch": "{{ bid }}"
+            }
+            $.ajax({
+                type: "POST",
+                url: '/note',
+                data: JSON.stringify(newnote),
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                processData: false,
+                success: function() { alert('The note has been added to all records in this batch.'); }
+            })
+        }
+    }
+    jQuery('#addnote').bind('click',addnote);
+    {% endif %}
+
+
+})
+</script>
 {% endblock %}
 

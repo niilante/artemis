@@ -48,11 +48,11 @@ MAPPINGS = {
             "properties": {
                 "created_date": {
                     "type": "date",
-                    "format" : "yyyy-MM-dd mmss||date_optional_time"
+                    "format" : "yyyy-MM-dd mm:ss||yyyy-MM-dd mmss||date_optional_time"
                 },
                 "updated_date": {
                     "type": "date",
-                    "format" : "yyyy-MM-dd mmss||date_optional_time"
+                    "format" : "yyyy-MM-dd mm:ss||yyyy-MM-dd mmss||date_optional_time"
                 },
                 "attachments":{
                     "properties": {
@@ -71,7 +71,7 @@ MAPPINGS = {
                             "type" : "multi_field",
                             "fields" : {
                                 "{name}" : {"type" : "date"},
-                                "format" : "yyyy-MM-dd mmss||date_optional_time"
+                                "format" : "yyyy-MM-dd mm:ss||yyyy-MM-dd mmss||date_optional_time"
                             }
                         }
                     }
@@ -83,7 +83,7 @@ MAPPINGS = {
                             "type" : "multi_field",
                             "fields" : {
                                 "{name}" : {"type" : "date"},
-                                "format" : "yyyy-MM-dd mmss||date_optional_time"
+                                "format" : "yyyy-MM-dd mm:ss||yyyy-MM-dd mmss||date_optional_time"
                             }
                         }
                     }

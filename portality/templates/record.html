@@ -4,107 +4,46 @@
 
 <script type="text/javascript">
 jQuery(document).ready(function() {                       
-
-    var doupdate = function(theid) {
-        jQuery.ajax({
-            url: '/record/{{record.id}}/children/' + theid
-            , type: 'POST'
+                       
+    var assemblyadd = function(theid) {
+        var assemblies = {% if 'assembly' in record %}{{ record['assembly']|tojson|safe }}{% else %}[]{% endif %};
+        var assemblytoadd = $('#assemblytoadd').val();
+        var qty = {% if 'manufacturersbatchquantity' in record and record['manufacturersbatchquantity']|length %}{{ record['manufacturersbatchquantity']|safe }}{% else %}1{% endif %};
+        if (true) { //assemblies.length < qty) {
+            jQuery.ajax({
+                url: '/record/{{record.id}}/parents/' +  assemblytoadd
+                , type: 'POST'
+                , success: function(data, statusText, xhr) {
+                    alert('Assembly updated. Reloading page.')
+                    window.location = ""
+                }
+                , error: function(xhr, message, error) {
+                    alert("Error: " + error + '. Please try again.');
+                }
+            })
+        } else {
+            alert('Sorry, parts can only be in as many assemblies as equals manufacturers batch quantity, or one.');
+        }
+    }
+    jQuery('#assemblyadd').bind('click',assemblyadd)
+                       
+    var assemblyremove = function(event) {
+        event.preventDefault()
+        $.ajax({
+            url: '/record/{{record.id}}/parents/' + jQuery(this).attr('href')
+            , type: 'DELETE'
             , success: function(data, statusText, xhr) {
-                alert('Assembly updated. Reloading page.')
-                window.location = ""
+                alert('Part removed from assembly. Reloading page.')
+                window.location = ''
             }
             , error: function(xhr, message, error) {
                 alert("Error: " + error + '. Please try again.');
             }
         })
     }
+    jQuery('.assemblyremove').bind('click',assemblyremove)
 
-    var cshowresults = function(data) {
-        var restable = '<table>';
-        for ( var r in data.hits.hits ) {
-            var rec = data.hits.hits[r].fields
-            restable += '<tr><td><p><a onclick="doupdate(\'\')" href="javascript: return null;">' + rec.id + '</a> ' + rec.name + '</p></td></tr>';
-        }
-        restable += '</table>';
-        $('.graphview_panel').html(restable);
-    }
-    var cuitemplate = function() {
-        var options = $.fn.graphview.options;
-        var ui = '<div class="graphview">';
-        ui += '<div class="row graphview_searcharea" style="padding-top:20px;padding-bottom:20px;">';
-        ui += '<div class="col-md-12">';
-        ui += '<div><input type="text" class="form-control query_string" style="width:97%;" data-option="query.bool.must.query_string.query"></div>';
-        ui += '</div>';
-        ui += '</div>'; // closes searcharea
-        ui += '<div class="graphview_panel"></div>';
-        ui += '</div>'; // closes graphview
-        return ui;
-    }
-    $('#partsearch').graphview({
-        "target": "/query/record/_search",
-        "pushstate": false,
-        "defaultquery": {
-            "query": {
-                "bool": {
-                    "must":[
-                        {'term':{'type.exact':'part'}}
-                    ]
-                }
-            },
-            "from":0,
-            "size":20,
-            "fields": ["id","name"]
-        },
-        showresults: cshowresults,
-        uitemplate: cuitemplate
-    });
 
-                       
-    doupd = function(theid) {
-        jQuery.ajax({
-            url: '/record/{{record.id}}/parent/' + theid
-            , type: 'POST'
-            , success: function(data, statusText, xhr) {
-                alert('Assembly updated. Reloading page.')
-                window.location = ""
-            }
-            , error: function(xhr, message, error) {
-                alert("Error: " + error + '. Please try again.');
-            }
-        })
-    }
-
-    var asscshowresults = function(data) {
-        var restable = '<table>';
-        for ( var r in data.hits.hits ) {
-            var rec = data.hits.hits[r].fields
-            restable += '<tr><td><p><a onclick="doupd(\'' + rec.id + '\')" href="javascript: return null;">' + rec.id + '</a> ' + rec.name + '</p></td></tr>';
-        }
-        restable += '</table>';
-        $('.graphview_panel').html(restable);
-    }
-    $('#assemblysearch').graphview({
-        "target": "/query/record/_search",
-        "pushstate": false,
-        "defaultquery": {
-            "query": {
-                "bool": {
-                    "must":[
-                        {'term':{'type.exact':'assembly'}}
-                    ]
-                }
-            },
-            "from":0,
-            "size":20,
-            "fields": ["id","name"]
-        },
-        showresults: asscshowresults,
-        uitemplate: cuitemplate
-    });
-
-                       
-                       
-                       
                        
     
     var savedone = function() {
@@ -162,8 +101,18 @@ jQuery(document).ready(function() {
         if ( note ) {
             var newnote = {
                 "content": note,
-                "by": "{% if current_user %}{{ current_user.id }}{% else %}anonymous{% endif %}",
-                "about": "{{ record['id'] }}"
+                "by": "{% if current_user %}{{ current_user.id }}{% else %}anonymous{% endif %}"
+            }
+            console.log($(this).attr('href'))
+            if ($(this).attr('href')) {
+              if ($(this).attr('href') == 'assembly') {
+                newnote.assembly = true;
+                newnote.about = "{{ record['id'] }}";
+              } else {
+                newnote.batch = $(this).attr('href');
+              }
+            } else {
+              newnote.about = "{{ record['id'] }}";
             }
             $.ajax({
                 type: "POST",
@@ -172,11 +121,12 @@ jQuery(document).ready(function() {
                 contentType: "application/json; charset=utf-8",
                 dataType: 'json',
                 processData: false,
-                success: savedone
+                success: savedone,
+                error: savedone
             })
         }
     }
-    jQuery('#addnote').bind('click',addnote)
+    jQuery('.addnote').bind('click',addnote)
     var deletenote = function(event) {
         event.preventDefault()
         $.ajax({
@@ -189,68 +139,12 @@ jQuery(document).ready(function() {
 
 
 
-    var removefromassembly = function(event) {
-        event.preventDefault()
-        $.ajax({
-            url: '/record/' + jQuery(this).attr('href') + '/parent'
-            , type: 'DELETE'
-            , success: function(data, statusText, xhr) {
-                alert('Part removed from assembly. Reloading page.')
-                window.location = ''
-            }
-            , error: function(xhr, message, error) {
-                alert("Error: " + error + '. Please try again.');
-            }
-        })
-    }
-    jQuery('.removefromassembly').bind('click',removefromassembly)
-
-    
     var showaddattachment = function(event) {
         event.preventDefault()
         jQuery('#addattachment').toggle()
     }
     jQuery('#showaddattachment').bind('click',showaddattachment)
     jQuery('#addattachment').hide()
-
-    
-    
-    var showpartsearch = function(event) {
-        event.preventDefault()
-        jQuery('#partsearch').toggle()
-    }
-    jQuery('#addparts').bind('click',showpartsearch)
-    jQuery('#partsearch').hide()
-
-    
-
-    
-    
-    var removefromassembly = function(event) {
-        event.preventDefault()
-        $.ajax({
-            url: '/record/{{record.id}}/parent'
-            , type: 'DELETE'
-            , success: function(data, statusText, xhr) {
-                alert('Removed from assembly. Reloading page.')
-                window.location = ''
-            }
-            , error: function(xhr, message, error) {
-                alert("Error: " + error + '. Please try again.');
-            }
-        })
-    }
-    jQuery('#removefromassembly').bind('click',removefromassembly)
-
-    
-    
-    
-    var showassemblysearch = function(event) {
-        event.preventDefault()
-        jQuery('#assemblysearch').toggle()
-    }
-    jQuery('#addtoassembly').bind('click',showassemblysearch)
-    jQuery('#assemblysearch').hide()
 
     
 
@@ -515,43 +409,46 @@ jQuery(document).ready(function() {
     </div>
 
     <div class="col-md-6">
-        <div class="well" style="min-height:250px;background-color:#666;border-color:#666;">
-            <h3>Assembly information</h3>
-    <!-- if an assembly, link the parts it contains; offer option to add / remove parts -->
-    {% if record['type'] == 'assembly' %}
-        {% if record.children %}
-            <p>Assembly contains:</p>
-            {% for item in record.children %}
-                <p><a href="/record/{{item['id']}}">{{item['id']}}</a> - {{item['name']}} - 
-                    <a href="{{item['id']}}" class="removefromassembly label label-danger">remove</a></p>
-            {% endfor %}
-        {% else %}
-            <p>No parts listed in this assembly.</p>
+  
+        {% if record['type'] == 'assembly' %}
+        <div class="well" style="min-height:150px;background-color:#666;border-color:#666;">
+            <h3>
+              This is an assembly{% if record.children %} containing {{record.children|length}} parts{% endif %}
+            </h3>
+            <p><a href="/assembly/{{ record.id }}" class="btn btn-info btn-block">Click to list all parts in the assembly</a></p>
+            <p><a href="/record/edit/assembly/{{record.id}}" class="btn btn-info btn-block">Click to batch edit all records in this assembly as a group</a></p>
+        </div>
         {% endif %}
-        <p>{% if not current_user.is_anonymous %}<a href="" id="addparts" class="btn btn-info">Add parts to this assembly</a>{% endif %}</p>
-        <div style="border:1px solid #ccc;padding:5px;" id="partsearch">
-        <h4>Search for a part and click it to add to this assembly.</h4>
+        
+        <div class="well" style="min-height:150px;background-color:#666;border-color:#666;">
+            <h3>Assembly membership</h3>
+            <p>
+                Add to assembly: 
+                <select class="form-control" id="assemblytoadd" style="display:inline;width:180px;margin-left:55px;">
+                    <option></option>
+                    {% for assembly in assemblies %}
+                    <option>{{assembly}}</option>
+                    {% endfor %}
+                </select>
+                <a href="#" id="assemblyadd" class="btn btn-info">Add</a>
+            </p>
+
+            {% if record['assembly'] %}
+            <p>This part is in assemblies <br>
+            {% for assembly in record['assembly'] %}
+                <a href="/assembly/{{ assembly }}" class="label label-info">{{ assembly }} (view assembly)</a> 
+                {% if not current_user.is_anonymous() %}
+                <a href="{{ assembly }}" class="assemblyremove label label-danger">remove from assembly</a>
+                {% endif %}
+                <br>
+            {% endfor %}
+            {% endif %}
         </div>
-    {% endif %}
 
-    <!-- if a part, offer add to assembly; if in one, link it, and offer to remove -->
-    {% if record.parent %}
-            <h4><br />This {% if record['type'] == 'assembly' %}assembly{% else %}part{% endif %} is in assembly <a href="/record/{{record.parent.id}}">{{record.parent.id}}</a></h4>
-            <p><br />{% if not current_user.is_anonymous() %}<a href="" id="removefromassembly" class="btn btn-danger">remove from assembly</a>{% endif %}</p>
-    {% else %}
-            <hr></hr>
-            <p>This {% if record['type'] == 'assembly' %}assembly{% else %}part{% endif %} is not in an assembly.</p>
-            <p>{% if not current_user.is_anonymous() %}<a href="" id="addtoassembly" class="btn btn-info">add to an assembly</a>{% endif %}</p>
-            <div style="border:1px solid #ccc;padding:5px;" id="assemblysearch">
-            <h4>Search for an assembly and click it to add this part to it.</h4>
-            </div>
-
-    {% endif %}
-        </div>
-
-
-        <div class="well" style="min-height:250px;background-color:#666;border-color:#666;">
-            <h3>Batch information</h3>
+  
+  
+        <div class="well" style="min-height:150px;background-color:#666;border-color:#666;">
+            <h3>Batch membership</h3>
             <p>
                 Add to batch: 
                 <select class="form-control" id="batchtoadd" style="display:inline;width:180px;margin-left:55px;">
@@ -566,8 +463,10 @@ jQuery(document).ready(function() {
             {% if record['batch'] %}
             <p>This part is in batch(es) <br>
             {% for batch in record['batch'] %}
-                <a href="/batch/{{ batch }}">{{ batch }}</a> 
-                {% if not current_user.is_anonymous() %}<a href="{{ batch }}" class="batchremove label label-danger">remove from batch</a>{% endif %}
+                <a href="/batch/{{ batch }}" class="label label-info">{{ batch }} (view batch)</a> 
+                {% if not current_user.is_anonymous() %}
+                <a href="{{ batch }}" class="batchremove label label-danger">remove from batch</a>
+                {% endif %}
                 <br>
             {% endfor %}
             {% endif %}
@@ -614,9 +513,9 @@ jQuery(document).ready(function() {
                 <option value="{{ item }}">{{ item }}</option>
             {% endfor %}
         </select></p>
-        <p><input type="submit" class="btn btn-info" value="upload new attachment" /></p>
+        <p><input type="submit" class="btn btn-info" value="Add new procedure/attachment" /></p>
         {% if record['type'] == 'assembly' %}
-            <p>(Note: this is an assembly. If you upload an attachment to it, it 
+            <p>(Note: this is an assembly. If you add a new procedure/attachment to it, it 
             will also be attached to each individual part in this assembly.)</p>
         {% else %}
             {% if record.parent %}
@@ -636,7 +535,17 @@ jQuery(document).ready(function() {
 
     <div class="col-md-6" style="border-left:1px solid #ccc;">
         <h3>Notes {{record.notes|length}}</h3>
-        <p>{% if not current_user.is_anonymous() %}<a id="addnote" class="btn btn-info" href="">Add a note</a>{% endif %}</p>
+        <p>{% if not current_user.is_anonymous() %}
+          <a class="addnote btn btn-info" href="">Add to this record</a>
+          {% if record.batch %}
+          {% for batch in record.batch %}
+          <a class="addnote btn btn-info" href="{{batch}}">Add to every record in batch {{batch}}</a>
+          {% endfor %}
+          {% endif %}
+          {% if record.type == 'assembly' %}
+          <a class="addnote btn btn-info" href="assembly">Add to this assembly record and every record in the assmebly</a>
+          {% endif %}
+        {% endif %}</p>
         {% if record.notes|length != 0 %}
             {% for item in record.notes %}
                 <p>on {{ item['created_date'] }}{% if item['by'] %} by {{ item['by'] }}{% else %} anonymously{% endif %}

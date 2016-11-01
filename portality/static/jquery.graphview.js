@@ -528,7 +528,8 @@ if (!Array.prototype.indexOf) {
                 var rqs = querystr;
                 if ( options.query_string_fuzzify !== undefined ) {
                     if ( options.query_string_fuzzify == "*" || options.query_string_fuzzify == "~" ) {
-                        if ( querystr.indexOf('*') == -1 && querystr.indexOf('~') == -1 && querystr.indexOf(':') == -1 ) {
+                        //if ( querystr.indexOf('*') == -1 && querystr.indexOf('~') == -1 && querystr.indexOf(':') == -1 ) {
+                      if ( !/[^a-zA-Z0-9]/.test( querystr )  ) {
                             var optparts = querystr.split(' ');
                             pq = "";
                             for ( var oi = 0; oi < optparts.length; oi++ ) {
@@ -571,6 +572,14 @@ if (!Array.prototype.indexOf) {
                 }
             } else {
                 qry.query.bool.must.push({"match_all":{}});
+            }
+            if ( $('#graphview_sort', obj).val() && $('#graphview_sort', obj).val().length > 0 ) {
+              var s = $('#graphview_sort', obj).val().split(' ');
+              var sf = s[0].toLowerCase();
+              if (sf.indexOf('_date') === -1) sf += '.exact';
+              var so = s[1].replace('ending','');
+              qry.sort = [{}];
+              qry.sort[0][sf] = {"order":so};
             }
             // check for any ranged values to add to the bool
             if ( $('#lowdate', obj).val() || $('#highdate', obj).val() ) {
@@ -924,6 +933,7 @@ if (!Array.prototype.indexOf) {
                 to > options.response.hits.total ? to = options.response.hits.total : false;
                 $('.graphview_to', obj).val(to).trigger('change');            
             });
+            $('#graphview_sort', obj).bind('change',options.executequery);
             $('.graphview_suggest', obj).bind('change', function(event) {
                 options.suggest = $('option:selected',this).attr('data-value');
                 $('.select2-input', obj).focus().trigger('mousedown');

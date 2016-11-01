@@ -60,27 +60,25 @@ class Curated(DomainObject):
 class Note(DomainObject):
     __type__ = 'note'
 
-    def save(self):
-        if 'id' in self.data:
-            id_ = self.data['id'].strip()
-        else:
-            id_ = uuid.uuid4().hex
-            self.data['id'] = id_
-        
-        self.data['updated_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
+    #def save(self):
+    #    if 'id' not in self.data:
+    #        self.data['id'] = uuid.uuid4().hex
+    #    
+    #    self.data['updated_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
+    #
+    #    if 'created_date' not in self.data:
+    #        self.data['created_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
+    #        
+    #    r = requests.post(self.target() + self.data['id'], data=json.dumps(self.data))
+    #    print r
 
-        if 'created_date' not in self.data:
-            self.data['created_date'] = datetime.now().strftime("%Y-%m-%d %H%M")
-            
-        r = requests.post(self.target() + self.data['id'], data=json.dumps(self.data))
-
-    @classmethod
-    def about(cls, id_):
-        '''Retrieve notes by id of record they are about'''
-        if id_ is None:
-            return None
-        res = Note.query(q="about:"+id_)
-        return [i['_source'] for i in res['hits']['hits']]
+    #@classmethod
+    #def about(cls, id_):
+    #    '''Retrieve notes by id of record they are about'''
+    #    if id_ is None:
+    #        return None
+    #    res = Note.query(q="about:"+id_,size=10000)
+    #    return [i['_source'] for i in res['hits']['hits']]
     
     
 # a special object that allows a search onto all index types - FAILS TO CREATE INSTANCES
@@ -122,7 +120,14 @@ class Record(DomainObject):
                 if 'batch' in data.get('_source',{}):
                     if not isinstance(data['_source']['batch'],list):
                         data['_source']['batch'] = [data['_source']['batch']]
-                    update = True
+                        update = True
+                if 'assembly' in data.get('_source',{}):
+                    if data['_source']['assembly'] == '':
+                        data['_source']['assembly'] = []
+                        update = True
+                    elif not isinstance(data['_source']['assembly'],list):
+                        data['_source']['assembly'] = [data['_source']['assembly']]
+                        update = True
                 if 'children' in data.get('_source',{}):
                     data['_source']['children_deprecated'] = data['_source']['children']
                     del data['_source']['children']
@@ -202,9 +207,11 @@ class Record(DomainObject):
     def delete(self):
         for kid in self.children:
             k = Record.pull(kid['id'])
-            k.data['assembly'] = ''
+            if not isinstance(k.data['assembly'],list):
+                k.data['assembly'] = [k.data['assembly']]
+            k.data['assembly'] = k.data['assembly'].remove(self.id)
             k.save()
-        if 'assembly' in self.data: del self.data['assembly']
+        self.data['assembly'] = []
         self.data['obsolete'] = True
         self.save()
         return ''
@@ -218,12 +225,31 @@ class Record(DomainObject):
                 kids = [i['_source'] for i in res['hits']['hits']]            
         return kids
 
+    #@property
+    #def parent(self):
+    #    if 'assembly' in self.data and self.data['assembly']:
+    #        parent = Record.pull(self.data['assembly'])
+    #        if parent is not None:
+    #            return parent
+    #        else:
+    #            return False
+    #    else:
+    #        return False
+
     @property
-    def parent(self):
+    def parents(self):
         if 'assembly' in self.data and self.data['assembly']:
-            parent = Record.pull(self.data['assembly'])
-            if parent is not None:
-                return parent
+            parents = []
+            if 'assembly' not in self.data: self.data['assembly'] = []
+            if self.data['assembly'] == '': self.data['assembly'] = []
+            if not isinstance(self.data['assembly'],list):
+                self.data['assembly'] = [self.data['assembly']]
+            for parent in self.data['assembly']:
+                rec = Record.pull(parent)
+                if rec is not None:
+                    parents.append(rec)
+            if len(parents) != 0:
+                return parents
             else:
                 return False
         else:

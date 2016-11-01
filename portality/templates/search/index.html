@@ -1,3 +1,4 @@
+
 {% extends "/base.html" %}
 
 {% block content %}
@@ -106,7 +107,10 @@ jQuery(document).ready(function() {
         ui += '<p>Filter tests: all pass <input type="checkbox" name="testfilter" class="tests" id="allpass"> some fail <input type="checkbox" name="testfilter" class="tests" id="somefail"> last fail <input type="checkbox" name="testfilter" class="tests" id="lastfail"></p>'
         {% endif %}
         
-        ui += '<p>Filter created date: <input type="text" id="lowdate" class="datepicker" placeholder="start"> to <input type="text" id="highdate" class="datepicker" placeholder="end"></p><div id="slider"></div>';
+        ui += '<p>Filter created date: <input type="text" id="lowdate" class="datepicker" placeholder="start"> to <input type="text" id="highdate" class="datepicker" placeholder="end"> ';
+        ui += 'Sort: <select id="graphview_sort" class="form-control" style="width:180px;height:28px;display:inline;">';
+        ui += '<option></option><option>created_date ascending</option><option>created_date descending</option><option>name ascending</option><option>name descending</option><option>ID ascending</option><option>ID descending</option>';
+        ui += '</select></p><div id="slider"></div>';
 
         ui += '</div>';
         ui += '</div>'; // closes searcharea
@@ -129,6 +133,13 @@ jQuery(document).ready(function() {
                         {
                             "term": {
                                 "batch.exact": "{{batch}}"
+                            }
+                        }
+                        {% endif %}
+                        {% if assembly %}
+                        {
+                            "term": {
+                                "assembly.exact": "{{assembly}}"
                             }
                         }
                         {% endif %}
@@ -238,6 +249,26 @@ jQuery(document).ready(function() {
         </div>
     </div>
 </div>
+{% endif %}
+
+{% if current_user and batch %}
+<div class="row">
+    <div class="col-md-12">
+        <h3>Records in batch {{batch}}</h3>
+        <p><a href="/record/edit/batch/{{batch}}" class="btn btn-info btn-block">Click to batch edit all records in this batch as a group</a></p>
+    </div>
+</div>
+{% endif %}
+
+{% if current_user and assembly %}
+<div class="row">
+    <div class="col-md-12">
+        <h3>Records in assembly {{assembly}}</h3>
+        <p><a href="/record/{{assembly}}" class="btn btn-info btn-block">Click to view and edit the parent assembly record for this assembly</a></p>
+        <p><a href="/record/edit/assembly/{{assembly}}" class="btn btn-info btn-block">Click to batch edit all records in this assembly as a group</a></p>
+    </div>
+</div>
+
 {% endif %}
 
 <div id="panel">
