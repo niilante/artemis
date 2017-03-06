@@ -262,3 +262,35 @@ class Record(DomainObject):
         })
         allnotes = [ Note(**item['_source']) for item in res['hits']['hits'] ]
         return allnotes
+
+    def addnote(self,note,cascade):
+        newnote = Note()
+        newnote.data = note
+        newnote.data['about'] = self.data['id']
+        newnote.data['id'] = uuid.uuid4().hex
+        newnote.save()
+            
+        if cascade:
+            for r in self.children:
+                rec = Record.pull(r['id'])
+                rec.addnote(note,cascade)
+
+    def addattachment(self,att,singular):
+        if 'attachments' not in self.data: self.data['attachments'] = []
+        self.data['attachments'].insert(0, att)
+        if att['test_status'] == 'Pass':
+            if 'overall_test_status' not in self.data:
+                self.data['overall_test_status'] = 'allpass'
+            elif self.data['overall_test_status'] == 'lastfail':
+                self.data['overall_test_status'] = 'somefail'
+        else:
+            self.data['overall_test_status'] = 'lastfail'
+            
+        self.save()
+        if not singular:
+            for r in self.children:
+                rec = Record.pull(r['id'])
+                rec.addattachment(att,singular)
+
+        
+        

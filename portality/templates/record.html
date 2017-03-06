@@ -3,7 +3,7 @@
 {% block content %}
 
 <script type="text/javascript">
-jQuery(document).ready(function() {                       
+jQuery(document).ready(function() {
                        
     var assemblyadd = function(theid) {
         var assemblies = {% if 'assembly' in record %}{{ record['assembly']|tojson|safe }}{% else %}[]{% endif %};
@@ -137,10 +137,10 @@ jQuery(document).ready(function() {
     }
     jQuery('.deletenote').bind('click',deletenote)
 
-
-
+    
     var showaddattachment = function(event) {
         event.preventDefault()
+        jQuery('#showaddattachment').hide();
         jQuery('#addattachment').toggle()
     }
     jQuery('#showaddattachment').bind('click',showaddattachment)
@@ -186,8 +186,8 @@ jQuery(document).ready(function() {
             'receivedby',
             'receiveddate',
             'location',
-            'children'
-            
+            'children',
+            'overall_test_status'          
         ];
         var lfn = fieldname.toLowerCase().replace(/ /g,'');
         if ( no.indexOf(lfn) > -1 ) {
@@ -200,6 +200,8 @@ jQuery(document).ready(function() {
         }
     }
     jQuery('#newfield').bind('click',newfield);
+                                                                                  
+    jQuery('#obsolete').bind('click',function(e) { var c = confirm('Are you sure you want to obsolete this record? This cannot be undone.'); if (!c) e.preventDefault(); });
 
 })
 </script>
@@ -384,7 +386,7 @@ jQuery(document).ready(function() {
         {% endif %}
 
         {% for key in record %}
-            {% if key not in ['batch','id','type','updated_date','created_date','last_access','history','assembly', 'assembly_history','attachments','name','datedelivered','billofmaterials','drawingnumber','assembledby','assembleddate', 'manufacturer','manufacturerserial','manufacturersbatchnumber','manufacturersbatchquantity','purchaseorder', 'supplier','location','inspectedby','inspecteddate','receivedby','receiveddate','children','children_deprecated','obsolete'] %}
+            {% if key not in ['batch','id','type','updated_date','created_date','last_access','history','assembly', 'assembly_history','attachments','name','datedelivered','billofmaterials','drawingnumber','assembledby','assembleddate', 'manufacturer','manufacturerserial','manufacturersbatchnumber','manufacturersbatchquantity','purchaseorder', 'supplier','location','inspectedby','inspecteddate','receivedby','receiveddate','children','children_deprecated','obsolete','overall_test_status'] %}
                 <tr>
                     <td>{{key}}</td>
                     <td>
@@ -401,7 +403,7 @@ jQuery(document).ready(function() {
             <p><br>
                 <a id="newfield" class="btn btn-info" href="#">Add new field</a> &nbsp;
                 <input type="submit" name="submit" class="btn btn-info" value="Save"> &nbsp;
-                <input type="submit" name="submit" class="btn btn-danger" value="Delete">
+                {% if not record.obsolete %}<input type="submit" name="submit" class="btn btn-danger" style="float:right;" id="obsolete" value="Make obsolete">{% endif %}
             </p>
         {% endif %}
     </div>
@@ -416,7 +418,7 @@ jQuery(document).ready(function() {
               This is an assembly{% if record.children %} containing {{record.children|length}} parts{% endif %}
             </h3>
             <p><a href="/assembly/{{ record.id }}" class="btn btn-info btn-block">Click to list all parts in the assembly</a></p>
-            <p><a href="/record/edit/assembly/{{record.id}}" class="btn btn-info btn-block">Click to batch edit all records in this assembly as a group</a></p>
+            <p><a href="/record/edit/assembly/{{record.id}}" class="btn btn-info btn-block">Click to edit all records in this assembly as a group</a></p>
         </div>
         {% endif %}
         
@@ -513,18 +515,21 @@ jQuery(document).ready(function() {
                 <option value="{{ item }}">{{ item }}</option>
             {% endfor %}
         </select></p>
-        <p><input type="submit" class="btn btn-info" value="Add new procedure/attachment" /></p>
-        {% if record['type'] == 'assembly' %}
-            <p>(Note: this is an assembly. If you add a new procedure/attachment to it, it 
-            will also be attached to each individual part in this assembly.)</p>
-        {% else %}
-            {% if record.parent %}
-                <p>(Note: this part is in assembly 
-                    <a href="/record/{{record.parent.id}}">{{record.parent.id}}</a>. 
-                    If you wish to upload an attachment to every record in the assembly, 
-                    you should go to the assembly record instead.)
-                </p>
-            {% endif %}
+        <p>            
+        <input style="margin-top:3px;" type="submit" name="singular" class="btn btn-info" value="Add to this record" />
+        {% if record.batch %}
+        {% for batch in record.batch %}
+        <input style="margin-top:3px;" type="submit" name="submit" class="btn btn-info" value="Add to every record in batch {{batch}}" />
+        {% endfor %}
+        {% endif %}
+        <input style="margin-top:3px;" type="submit" class="btn btn-info" value="Add to this assembly record and every record in the assembly" />
+        </p>
+        {% if record.parent %}
+            <p>(Note: this part is in assembly 
+                <a href="/record/{{record.parent.id}}">{{record.parent.id}}</a>. 
+                If you wish to upload an attachment to every record in the assembly, 
+                you should go to the assembly record instead.)
+            </p>
         {% endif %}
         </div>
     </form>
@@ -535,24 +540,24 @@ jQuery(document).ready(function() {
 
     <div class="col-md-6" style="border-left:1px solid #ccc;">
         <h3>Notes {{record.notes|length}}</h3>
-        <p>{% if not current_user.is_anonymous() %}
-          <a class="addnote btn btn-info" href="">Add to this record</a>
-          {% if record.batch %}
-          {% for batch in record.batch %}
-          <a class="addnote btn btn-info" href="{{batch}}">Add to every record in batch {{batch}}</a>
-          {% endfor %}
-          {% endif %}
-          {% if record.type == 'assembly' %}
-          <a class="addnote btn btn-info" href="assembly">Add to this assembly record and every record in the assmebly</a>
-          {% endif %}
-        {% endif %}</p>
         {% if record.notes|length != 0 %}
             {% for item in record.notes %}
                 <p>on {{ item['created_date'] }}{% if item['by'] %} by {{ item['by'] }}{% else %} anonymously{% endif %}
-                {% if not current_user.is_anonymous() %}<a class="deletenote" href="#" data-id="{{ item.id }}" alt="delete this note" title="delete this note"> X </a>{% endif %}<br />
+                {% if not current_user.is_anonymous() %}<!--<a class="deletenote" href="#" data-id="{{ item.id }}" alt="delete this note" title="delete this note"> X </a>-->{% endif %}<br />
                 {{ item['content'] }}</p>
             {% endfor %}
         {% endif %}        
+        <p>{% if not current_user.is_anonymous() %}
+          <a style="margin-top:3px;" class="addnote btn btn-info" href="">Add to this record</a>
+          {% if record.batch %}
+          {% for batch in record.batch %}
+          <a style="margin-top:3px;" class="addnote btn btn-info" href="{{batch}}">Add to every record in batch {{batch}}</a>
+          {% endfor %}
+          {% endif %}
+          {% if record.type == 'assembly' %}
+          <a style="margin-top:3px;" class="addnote btn btn-info" href="assembly">Add to this assembly record and every record in the assmebly</a>
+          {% endif %}
+        {% endif %}</p>
 
     </div>
 

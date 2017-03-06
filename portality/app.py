@@ -134,35 +134,22 @@ def search(batch=False,assembly=False):
 
     
 # set the route for receiving new notes
+# TODO update this so that notes cascade into sub batches and assemblies, and subsub batches etc, when chosen to apply to more than just the current record
 @app.route('/note', methods=['GET','POST'])
 @app.route('/note/<nid>', methods=['GET','POST','DELETE'])
 def note(nid=''):
     if request.method == 'POST':
+        cascade = False;
+        if 'assembly' in request.json: cascade = True
         if 'batch' in request.json:
             res = models.Record.query(terms={"batch.exact":request.json['batch']},size=10000)
-            for rec in [i['_source'] for i in res['hits']['hits']]:
-                newnote = models.Note()
-                newnote.data = request.json
-                newnote.data['about'] = rec['id']
-                newnote.data['id'] = uuid.uuid4().hex
-                newnote.save()
-        elif 'assembly' in request.json:
-            newnote = models.Note()
-            newnote.data = request.json
-            newnote.data['id'] = uuid.uuid4().hex
-            newnote.save()
-            rec = models.Record.pull(request.json['about'])
-            for rec in rec.children:
-                newnote = models.Note()
-                newnote.data = request.json
-                newnote.data['about'] = rec['id']
-                newnote.data['id'] = uuid.uuid4().hex
-                newnote.save()
+            for r in [i['_source'] for i in res['hits']['hits']]:
+                rec = models.Record.pull(r['id'])
+                rec.addnote(request.json,cascade)
         else:
-            newnote = models.Note()
-            newnote.data = request.json
-            newnote.data['id'] = uuid.uuid4().hex
-            newnote.save()
+            rec = models.Record.pull(request.json['about'])
+            rec.addnote(request.json,cascade)
+
         time.sleep(1)
         return ""
 

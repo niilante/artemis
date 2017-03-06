@@ -175,7 +175,7 @@ def rec(rid):
 
     if res is None:
         abort(404)
-    elif request.method == "DELETE" or request.method == 'POST' and request.values.get('submit',False) == 'Delete':
+    elif request.method == "DELETE" or request.method == 'POST' and request.values.get('submit',False) == 'Make obsolete':
         if current_user.is_anonymous():
             abort(401)
         flash('record ' + res.id + ' obsolete')
@@ -293,7 +293,7 @@ def children(rid,cid=False):
     resp.mimetype = "application/json"
     return resp
 
-
+# TODO update this so that all attachments cascade to sub batches, sub assemblies, etc, when chosen to apply to more than just the current record
 @blueprint.route('/<rid>/attachments', methods=['GET','POST'])
 @blueprint.route('/<rid>/attachments/<aid>', methods=['GET','POST'])
 def attachments(rid,aid=False):
@@ -317,6 +317,7 @@ def attachments(rid,aid=False):
             resp = make_response( json.dumps(res.data['attachments']) )
             resp.mimetype = "application/json"
             return resp
+          
     elif request.method == 'POST':
         if current_user.is_anonymous(): abort(401)
         upfile = request.files.get('upfile')
@@ -333,25 +334,20 @@ def attachments(rid,aid=False):
             "user": current_user.id,
             "date": datetime.now().strftime("%Y-%m-%d %H%M")
         }
-        if 'attachments' not in res.data: res.data['attachments'] = []
-        res.data['attachments'].insert(0, newatt)
-        if newatt['test_status'] == 'Pass':
-            if 'overall_test_status' not in res.data:
-                res.data['overall_test_status'] = 'allpass'
-            elif res.data['overall_test_status'] == 'lastfail':
-                res.data['overall_test_status'] = 'somefail'
+        
+        if request.values.get('singular',False):
+            res.addattachment(newatt,True)
+        elif request.values.get('submit',False):
+            batch = request.values['submit'].split(' ')[-1]
+            rb = models.Record.query(terms={"batch.exact":batch},size=10000)
+            for r in [i['_source'] for i in rb['hits']['hits']]:
+                rec = models.Record.pull(r['id'])
+                rec.addattachment(newatt,False)
         else:
-            res.data['overall_test_status'] = 'lastfail'
-            
-        res.save()
-        if res.data.get('type','') == 'assembly':
-            for kid in res.children:
-                k = models.Record.pull(kid['id'])
-                if 'attachments' not in k.data:
-                    k.data['attachments'] = []
-                k.data['attachments'].insert(0, newatt)
-                k.save()
+            res.addattachment(newatt,False)
+        
         return redirect('/record/' + res.id)
+      
     elif request.method == 'DELETE':
         if current_user.is_anonymous(): abort(401)
         try:
